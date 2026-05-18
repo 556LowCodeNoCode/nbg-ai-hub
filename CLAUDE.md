@@ -24,21 +24,35 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 ├── SECRETS.md                 ← operator setup checklist
 ├── Issues - Pending Items.md  ← per global rules
 ├── config/
-│   └── rss-sources.json       ← data-driven feed list (5 seed feeds)
+│   └── rss-sources.json       ← data-driven feed list (currently 5: 2 Reddit + HN + Wired + Verge)
 ├── news/
 │   ├── incoming/              ← Action writes triaged items here, PR opens for review
 │   └── published/             ← editor moves approved items here (permanent archive)
+├── glossary/                  ← 5 seeded terms (claudemd, mcp, skill, plugin, agent)
+├── skills/                    ← .gitkeep — catalog content TBD
+├── tips/                      ← .gitkeep — content TBD
+├── journeys/                  ← day-1.md placeholder (6-step content TBD)
 ├── pipeline/                  ← TypeScript workspace for the RSS Action
 │   ├── package.json           ← Node 22, ESM, vitest 4.x, @rowanmanning/feed-parser
 │   ├── src/                   ← 15 modules: env, azure-client, fetch, parse, dedup,
 │   │                            triage, slug, frontmatter, write, pr, etc.
-│   └── tests/                 ← 14 test files, 88 tests, vitest
+│   └── tests/                 ← 14 test files, 93 tests (after editor_confidence tightening)
+├── site/                      ← Astro 6 + Starlight 0.39 web UI workspace
+│   ├── package.json           ← Node 22, ESM, astro ^6, @astrojs/starlight ^0.39
+│   ├── astro.config.mjs       ← sidebar 9 entries, dev port 4321
+│   ├── src/content.config.ts  ← 5 content collections via Astro 5 glob() loader
+│   ├── src/components/        ← 7 .astro components (Hero, NewsPanel, NewsList,
+│   │                            AudienceBadge, SkillCard, AudienceFilter, ConfidenceChip)
+│   ├── src/pages/             ← /news, /skills, /tips, /glossary, /reference,
+│   │                            /contribute, /start-here/day-1, /start-here/week-1
+│   └── src/content/docs/      ← index.mdx (homepage, template:splash)
 ├── .github/workflows/
 │   └── rss-triage.yml         ← daily cron 05:00 UTC = 08:00 Athens (DST) + workflow_dispatch
 └── docs/
-    ├── design/                ← project-design.md, plan-001-rss-pipeline.md, etc.
-    ├── reference/             ← code-review, dep-validation, integration-verification
-    └── refined-requests/      ← refined specs (rss-pipeline.md is the seed)
+    ├── design/                ← project-design.md (§1-S.12), plan-001 (RSS), plan-002 (site)
+    ├── reference/             ← code-review, dep-validation, integration-verification (RSS + site),
+    │                            codebase-scans, investigations
+    └── refined-requests/      ← refined specs (rss-pipeline.md, astro-starlight-site.md)
 ```
 
 ## Working rules for this project
@@ -54,5 +68,5 @@ Final name: **NbgAiHub**. Repo: `github.com/chomovazuzana/NbgAiHub`.
 
 ## Ports
 
-- Astro Starlight dev server (when added): **4321** (fallback band 4322–4329 per global port rules).
+- **Astro Starlight dev server: `4321`** (in use — `cd site && npm run dev`). Fallback band 4322–4329 per global port rules.
 - No other dev servers planned for MVP.

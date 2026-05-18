@@ -388,3 +388,27 @@ The REJECT list was extended in the same edit to keep the categories tight: now 
 - Subsequent runs will only triage *new* items since 2026-05-18 (dedup walks `/news/incoming/` and `/news/published/`).
 
 **Status:** accepted; operational.
+
+---
+
+## 2026-05-18 — Astro Starlight site verified operational locally
+
+**Decision:** The web UI workstream is acknowledged **OPERATIONAL (local dev)** following the first successful end-to-end build + serve on 2026-05-18. AC1–AC20 all MET per `docs/reference/integration-verification-astro-site.md`. Production hosting remains open in SCOPE.md.
+
+**Why this entry exists:** Mirror of the RSS pipeline operational marker — distinguishes "site coded" from "site working." Phase 10 verifier produced a per-AC verdict table from build/check/audit output; the subsequent `npm run dev` smoke test confirmed live serving on `http://localhost:4321` with the homepage, sidebar (9 entries), audience filter, dark theme, and Pagefind search all working.
+
+**Evidence:**
+- `npx astro check` → 0 errors, 0 warnings, 4 cosmetic Zod-4 hints (deferred to a cosmetic refactor).
+- `npm run build` → exit 0, 10 pages emitted to `dist/`, Pagefind index built.
+- `npm audit --omit=dev` → 0 vulnerabilities.
+- `npm run dev` → `HTTP 200 OK` on `localhost:4321`; `<h1>NbgAiHub</h1>` + tagline + CTAs rendered; sidebar entries Home/Start Here/Day 1/Week 1/News/Skills/Tips/Glossary/Reference/Contribute all served; expected empty-state warnings logged for empty `news/published/`, `skills/`, `tips/` (graceful fallback per F9).
+- Astro v6.3.5 + Starlight v0.39.2 (per A1/A2 supersession).
+- Bonus `ConfidenceChip.astro` component added beyond the design's 6 components — additive design refinement to surface the `editor_confidence` frontmatter field on news cards.
+
+**Implications going forward:**
+- The site rebuilds live whenever any markdown in `news/published/`, `skills/`, `tips/`, `glossary/`, `journeys/` changes (HMR caveat: cross-folder watching may not always fire — manual reload may be needed).
+- 5 of 10 planned glossary terms seeded (claudemd, mcp, skill, plugin, agent).
+- Day 1 journey page rendered with placeholder content; 6-step content TBD (separate scope item).
+- Production hosting decision (Pro Pages vs Vercel/Netlify/Cloudflare vs defer) remains open in SCOPE.md.
+
+**Status:** accepted; operational locally. Production deploy = follow-up workstream.
