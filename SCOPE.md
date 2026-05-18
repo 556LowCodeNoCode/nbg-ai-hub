@@ -1,6 +1,6 @@
 # NbgAiHub — Scope
 
-**Last updated:** 2026-05-18 (post first successful E2E pipeline run)
+**Last updated:** 2026-05-18 (feed list pivot + confidence-prompt tuning)
 
 ## Vision
 
@@ -84,12 +84,15 @@ For full RSS pipeline context, see refined request: `docs/refined-requests/rss-p
 - **Hosting:** GitHub Pages via Pro, Vercel/Netlify/Cloudflare free tier, or defer hosting until MVP content exists?
 - **Proof-of-life user:** which specific newcomer joining in the next 4–8 weeks anchors the MVP deadline?
 - **Skill distribution:** standalone marketplace at `chomovazuzana/NbgAiHub` or also list in `556LowCodeNoCode/Skills`?
-- **RSS source list — currently live in production with 5 seed feeds** (revisable in `config/rss-sources.json` without code change):
-  1. Anthropic news — `https://www.anthropic.com/rss.xml`
-  2. Claude Code GitHub releases — `https://github.com/anthropics/claude-code/releases.atom`
-  3. Simon Willison's blog — `https://simonwillison.net/atom/everything/`
-  4. r/ClaudeAI — `https://www.reddit.com/r/ClaudeAI/.rss` *(may 429-throttle on some runs; per-feed-non-fatal absorbs)*
-  5. Hacker News filtered — `https://hnrss.org/frontpage?q=Claude+OR+%22Claude+Code%22+OR+Anthropic`
+- **RSS source list — live in production with 5 feeds, two source groups** (revisable in `config/rss-sources.json` without code change). Source-group routing in `pipeline/src/triage.ts` SYSTEM_PROMPT:
+  - **Reddit group** (strict — 4 ACCEPT categories: tips/tricks, field reports, platform news, professional/enterprise):
+    1. r/ClaudeAI — `https://www.reddit.com/r/ClaudeAI/.rss`
+    2. r/ClaudeCode — `https://www.reddit.com/r/ClaudeCode/.rss`
+  - **Major tech/AI news group** (professional news + breakthrough AI only):
+    3. Hacker News frontpage — `https://hnrss.org/frontpage` *(unfiltered; replaced earlier Claude-keyword variant on 2026-05-18)*
+    4. Wired AI — `https://www.wired.com/feed/tag/ai/latest/rss`
+    5. The Verge — `https://www.theverge.com/rss/index.xml` *(full firehose; LLM filters the non-AI noise)*
+  - **Dropped feeds** (2026-05-18, by user direction): Anthropic news (RSS feed deleted by Anthropic — returned 404), Claude Code GitHub releases (`releases.atom`), Simon Willison's blog. The latter two are easy to re-add if signal loss is felt.
 - **Editorial cadence:** daily Action + ad-hoc PR review (current)? Weekly summary PR? Twice-weekly?
 - **News storage model:** per-item permanent (current — files accumulate forever) vs rolling N-day window vs hybrid (storage permanent + UI filters)? Currently per-item permanent; UI is unbuilt.
 - **News item hero image:** add `hero_image` frontmatter field, extracted from RSS thumbnail + og:image fallback? Deferred but small to implement.

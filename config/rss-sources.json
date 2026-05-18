@@ -1,27 +1,27 @@
 [
   {
-    "name": "Anthropic news",
-    "url": "https://www.anthropic.com/rss.xml",
-    "enabled": true
-  },
-  {
-    "name": "Claude Code releases",
-    "url": "https://github.com/anthropics/claude-code/releases.atom",
-    "enabled": true
-  },
-  {
-    "name": "Simon Willison",
-    "url": "https://simonwillison.net/atom/everything/",
-    "enabled": true
-  },
-  {
     "name": "r/ClaudeAI",
     "url": "https://www.reddit.com/r/ClaudeAI/.rss",
     "enabled": true
   },
   {
-    "name": "Hacker News (Claude/Anthropic)",
-    "url": "https://hnrss.org/frontpage?q=Claude+OR+%22Claude+Code%22+OR+Anthropic",
+    "name": "r/ClaudeCode",
+    "url": "https://www.reddit.com/r/ClaudeCode/.rss",
+    "enabled": true
+  },
+  {
+    "name": "Hacker News frontpage",
+    "url": "https://hnrss.org/frontpage",
+    "enabled": true
+  },
+  {
+    "name": "Wired AI",
+    "url": "https://www.wired.com/feed/tag/ai/latest/rss",
+    "enabled": true
+  },
+  {
+    "name": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml",
     "enabled": true
   }
 ]

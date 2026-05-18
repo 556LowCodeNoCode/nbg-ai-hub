@@ -89,20 +89,34 @@ describe("triage.triageItem", () => {
     expect(system?.content).toContain("JSON");
   });
 
-  it("system prompt carries source-aware rules for r/ClaudeAI and HN", () => {
+  it("system prompt carries source-group rules for Reddit and major tech/AI news", () => {
     expect(SYSTEM_PROMPT).toContain("r/ClaudeAI");
-    expect(SYSTEM_PROMPT).toContain("Hacker News");
-    expect(SYSTEM_PROMPT).toContain("Anthropic news");
-    expect(SYSTEM_PROMPT).toContain("Simon Willison");
+    expect(SYSTEM_PROMPT).toContain("r/ClaudeCode");
+    expect(SYSTEM_PROMPT).toContain("Hacker News frontpage");
+    expect(SYSTEM_PROMPT).toContain("Wired AI");
+    expect(SYSTEM_PROMPT).toContain("The Verge");
+    expect(SYSTEM_PROMPT).toContain("Major tech / AI news");
     expect(SYSTEM_PROMPT).toContain("When in doubt, reject");
     expect(SYSTEM_PROMPT).toContain("editor_confidence");
   });
 
-  it("r/ClaudeAI block names all four ACCEPT categories", () => {
+  it("Reddit group block names all four ACCEPT categories", () => {
     expect(SYSTEM_PROMPT).toContain("Tips, tricks, prompts, workflow recipes");
     expect(SYSTEM_PROMPT).toContain("Field reports / war stories");
     expect(SYSTEM_PROMPT).toContain("Platform news");
     expect(SYSTEM_PROMPT).toContain("Professional / enterprise use");
+  });
+
+  it("major tech/AI news block names ACCEPT and REJECT criteria", () => {
+    expect(SYSTEM_PROMPT).toContain("Major new model launches");
+    expect(SYSTEM_PROMPT).toContain("Significant capability breakthroughs");
+    expect(SYSTEM_PROMPT).toContain("Consumer gadget reviews");
+    expect(SYSTEM_PROMPT).toContain("Marketing fluff");
+  });
+
+  it("confidence guidance instructs the model to reserve 'high' and prefer lower", () => {
+    expect(SYSTEM_PROMPT).toContain('RESERVE "high"');
+    expect(SYSTEM_PROMPT).toContain("go LOWER, not higher");
   });
 
   it("drops items marked irrelevant (returns null)", async () => {
