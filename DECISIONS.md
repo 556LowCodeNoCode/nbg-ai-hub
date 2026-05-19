@@ -544,3 +544,20 @@ The pipeline now emits four step outputs on `$GITHUB_OUTPUT`: `new_items`, `auto
 - Keep variant C and tighten the cross-feed dedup further (rejected — adds complexity to avoid an editorial cost the operator has decided to absorb).
 - Confidence-only gate without the feed dimension (rejected — operator wants zero gate, not a narrower one).
 **Implementation evidence:** `pipeline/src/auto-promote.ts` lost the `editor_confidence !== "high"` short-circuit; `config/rss-sources.json` Reddit entries flipped to `auto_promote_eligible: true`; orchestrator + config tests adjusted (the "mixed mode" test rewritten as "unconditional auto-promote" coverage). 145 tests still pass.
+
+## 2026-05-19 — Rolling 7-day retention for news/published/
+
+**Status:** accepted
+**Context:** With unconditional auto-promote shipping every relevant item straight to `news/published/`, the site accrues stale news indefinitely. Operator wants a one-week window — older items disappear automatically.
+**Decision:** Each daily pipeline run prunes any `news/published/<YYYY-MM-DD>-*.md` whose date prefix is strictly older than `today - 7 days` (UTC). Pruning happens in-process via a new module `pipeline/src/retention.ts` and lands in the same commit as the day's new items. The workflow gates the commit on a new `had_changes` step output (true if new items OR pruning occurred).
+**Rationale:**
+- Bounded site size + freshness — the "news" pillar is by nature ephemeral; old items obsolete fast.
+- Same commit semantics — one commit per day with both adds and deletions makes the diff legible and rollback trivial.
+- No-fallback rule respected: retention window is a hardcoded `RETENTION_DAYS = 7` constant, not a config value silently defaulted. To change the policy, edit the constant (or surface it as config later).
+**Reverses:** nothing.
+**Alternatives considered:**
+- Separate daily cleanup workflow (rejected — doubles commits, splits a single semantic operation).
+- Bash `find -mtime +7 -delete` in the YAML (rejected — operates on mtime not filename date; brittle).
+- Date-tag everything and let the site filter at render time (rejected — files keep accumulating, repo bloats; site builds slower over time).
+- Configurable retention via a new config file or env var (deferred — YAGNI; revisit if the policy gets renegotiated).
+**Implementation evidence:** `pipeline/src/retention.ts` (parseFileDate, isStale, findStalePublished, pruneStalePublished); `pipeline/src/index.ts` calls pruning after the write loop and emits `pruned_count` + `had_changes` step outputs; `.github/workflows/rss-triage.yml` direct-push branch fires on `had_changes == true` (was `mode == auto_only`), and the commit message includes both counts ("N auto-promoted, P pruned"); `pipeline/tests/retention.test.ts` with 16 tests. Pipeline tests grow 145 → 161.

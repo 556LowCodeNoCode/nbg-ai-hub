@@ -31,6 +31,11 @@ import { triageItem, MalformedTriageResponseError } from "./triage.js";
 import { writeNewsItem } from "./write.js";
 import { buildPrBody, setStepOutput, writePrBodyFile } from "./pr.js";
 import { buildFeedMap, shouldAutoPromote } from "./auto-promote.js";
+import {
+  findStalePublished,
+  pruneStalePublished,
+  RETENTION_DAYS,
+} from "./retention.js";
 import { makeAzureClient } from "./azure-client.js";
 import { readEnv } from "./env.js";
 import { makeLogger, type Logger } from "./logger.js";
@@ -310,6 +315,22 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
     filenames: written.map((w) => w.filename),
   });
 
+  // 5b. Rolling-window retention. Delete published items older than
+  // RETENTION_DAYS (default 7) per DECISIONS 2026-05-19 (third entry).
+  // Workflow stages news/published/ with `git add` which picks up deletions.
+  const publishedDir = path.join(newsRoot, "published");
+  const stalePaths = await findStalePublished(
+    publishedDir,
+    now(),
+    RETENTION_DAYS,
+    fs,
+  );
+  for (const p of stalePaths) {
+    logger.info("prune_stale_published", { file: path.basename(p) });
+  }
+  const prunedCount = await pruneStalePublished(stalePaths, fs);
+  logger.info("items_pruned", { count: prunedCount, retentionDays: RETENTION_DAYS });
+
   // 6. PR signaling.
   // Variant C three-mode contract (DECISIONS 2026-05-19):
   //  - auto_only:   review==0, auto>0  → workflow commits directly to main
@@ -343,9 +364,12 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
   await setStepOutput("auto_promote_count", String(autoCount), process.env, fs);
   await setStepOutput("review_count", String(reviewCount), process.env, fs);
   await setStepOutput("mode", mode, process.env, fs);
+  await setStepOutput("pruned_count", String(prunedCount), process.env, fs);
+  const hadChanges = written.length > 0 || prunedCount > 0;
+  await setStepOutput("had_changes", String(hadChanges), process.env, fs);
 
   const durationMs = Date.now() - startMs;
-  logger.info("pipeline_end", { exitCode: 0, durationMs, mode });
+  logger.info("pipeline_end", { exitCode: 0, durationMs, mode, prunedCount });
 
   return {
     feedsAttempted: enabled.length,

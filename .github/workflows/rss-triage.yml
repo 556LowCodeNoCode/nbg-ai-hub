@@ -78,22 +78,30 @@ jobs:
           AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
           AZURE_OPENAI_API_KEY:     ${{ secrets.AZURE_OPENAI_API_KEY }}
 
-      # Variant C path: auto_only — every item was high-confidence from an
-      # eligible feed. The orchestrator already wrote files under
-      # news/published/; we commit them directly to main without an editorial
-      # PR. DECISIONS.md 2026-05-19 documents the policy.
-      - name: Commit auto-promoted items directly to main
-        if: steps.pipeline.outputs.mode == 'auto_only'
+      # Direct-to-main path (post-DECISIONS 2026-05-19 unconditional-auto-promote
+      # + rolling 7-day retention). Fires when ANY change occurred — new
+      # items auto-promoted OR stale items pruned (or both). Skipped only when
+      # the orchestrator chose the editorial PR path (mixed/review_only),
+      # which the current all-eligible config never hits but is preserved for
+      # operator flexibility.
+      - name: Commit auto-promoted items + retention deletions to main
+        if: |
+          steps.pipeline.outputs.had_changes == 'true' &&
+          steps.pipeline.outputs.mode != 'mixed' &&
+          steps.pipeline.outputs.mode != 'review_only'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           DATE_UTC=$(date -u +%F)
           N="${{ steps.pipeline.outputs.auto_promote_count }}"
+          P="${{ steps.pipeline.outputs.pruned_count }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # `git add news/published` stages new files AND deletions of pruned
+          # items (7-day rolling window per DECISIONS 2026-05-19).
           git add news/published
-          git commit -m "News triage ${DATE_UTC}: ${N} auto-promoted"
+          git commit -m "News triage ${DATE_UTC}: ${N} auto-promoted, ${P} pruned"
           git push origin main
 
       # Variant C path: mixed or review_only — open the editorial PR. The
@@ -122,9 +130,9 @@ jobs:
             --title "News triage ${DATE_UTC} (${AUTO_N} auto + ${REVIEW_N} review)" \
             --body-file pipeline/pr-body.md
 
-      # Variant C path: empty — nothing to do. Step is a placeholder so the
-      # workflow's intent is fully spelled out at the YAML level rather than
-      # relying on absence-of-step semantics.
+      # No-op — no new items AND no retention deletions. Placeholder step so
+      # the workflow's intent is fully spelled out at the YAML level rather
+      # than relying on absence-of-step semantics.
       - name: No-op (empty run)
-        if: steps.pipeline.outputs.mode == 'empty'
+        if: steps.pipeline.outputs.had_changes == 'false'
         run: echo "No new items this run — nothing to commit."
