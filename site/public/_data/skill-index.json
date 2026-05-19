@@ -1,5 +1,93 @@
 {
   "schema_version": 1,
   "type": "skill",
-  "items": []
+  "items": [
+    {
+      "slug": "claudemd",
+      "title": "/claudemd — scaffold a project CLAUDE.md",
+      "audience": "beginner",
+      "topics": [
+        "setup",
+        "project-template"
+      ]
+    },
+    {
+      "slug": "commit-work",
+      "title": "commit-work — high-quality git commits",
+      "audience": "beginner",
+      "topics": [
+        "git",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "database-schema-designer",
+      "title": "database-schema-designer — robust schema design",
+      "audience": "both",
+      "topics": [
+        "database",
+        "schema",
+        "design"
+      ]
+    },
+    {
+      "slug": "deploy",
+      "title": "deploy — deploy to NBG Azure",
+      "audience": "advanced",
+      "topics": [
+        "deployment",
+        "azure"
+      ]
+    },
+    {
+      "slug": "frontend-design",
+      "title": "frontend-design — distinctive UI generation",
+      "audience": "both",
+      "topics": [
+        "frontend",
+        "design",
+        "ui"
+      ]
+    },
+    {
+      "slug": "gsd",
+      "title": "gsd-* — Get Shit Done framework family",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "planning",
+        "multi-phase"
+      ]
+    },
+    {
+      "slug": "jira",
+      "title": "jira — JIRA from Claude Code",
+      "audience": "both",
+      "topics": [
+        "jira",
+        "project-management",
+        "integration"
+      ]
+    },
+    {
+      "slug": "team",
+      "title": "/team — multi-agent build orchestrator",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "orchestration",
+        "agents"
+      ]
+    },
+    {
+      "slug": "uat-panel",
+      "title": "uat-panel — User Acceptance Testing system",
+      "audience": "both",
+      "topics": [
+        "testing",
+        "qa",
+        "uat"
+      ]
+    }
+  ]
 }

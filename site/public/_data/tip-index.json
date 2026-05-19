@@ -1,5 +1,115 @@
 {
   "schema_version": 1,
   "type": "tip",
-  "items": []
+  "items": [
+    {
+      "slug": "always-review-changes",
+      "title": "Always look at the diff before you accept",
+      "audience": "beginner",
+      "topics": [
+        "safety",
+        "trust-model"
+      ]
+    },
+    {
+      "slug": "azure-openai-for-bank-data",
+      "title": "Real bank data at runtime: Azure OpenAI only",
+      "audience": "advanced",
+      "topics": [
+        "compliance",
+        "data-residency",
+        "llm-strategy"
+      ]
+    },
+    {
+      "slug": "compact-and-clear",
+      "title": "/compact and /clear — context-window discipline",
+      "audience": "both",
+      "topics": [
+        "context",
+        "basics"
+      ]
+    },
+    {
+      "slug": "correction-no-what-i-meant",
+      "title": "Correct with 'No, what I meant was…'",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "corrections"
+      ]
+    },
+    {
+      "slug": "esc-to-stop",
+      "title": "Esc to stop Claude mid-action (the survival key)",
+      "audience": "beginner",
+      "topics": [
+        "survival",
+        "basics"
+      ]
+    },
+    {
+      "slug": "prompt-bad-vs-good-openers",
+      "title": "Bad vs. good openers",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "examples"
+      ]
+    },
+    {
+      "slug": "prompt-context-first",
+      "title": "Context first, ask second",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "prompt-describe-business-value",
+      "title": "Describe the business value, not the steps",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "prompt-iterate-dont-restart",
+      "title": "Iterate, don't restart",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "prompt-one-thing-per",
+      "title": "One thing per prompt",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "prompt-pin-constraints",
+      "title": "Pin the constraints, not the method",
+      "audience": "both",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "prompt-show-dont-describe",
+      "title": "Show, don't describe",
+      "audience": "both",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    }
+  ]
 }

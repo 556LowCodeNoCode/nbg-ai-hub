@@ -12,12 +12,84 @@
       ]
     },
     {
+      "slug": "branch",
+      "title": "Branch",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "build-time-vs-runtime",
+      "title": "Build time vs. runtime",
+      "audience": "both",
+      "topics": [
+        "llm-strategy",
+        "architecture"
+      ]
+    },
+    {
+      "slug": "claude-code",
+      "title": "Claude Code",
+      "audience": "both",
+      "topics": [
+        "claude-code",
+        "fundamentals"
+      ]
+    },
+    {
       "slug": "claudemd",
       "title": "CLAUDE.md",
       "audience": "beginner",
       "topics": [
         "conventions",
         "setup"
+      ]
+    },
+    {
+      "slug": "commit",
+      "title": "Commit",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "context-window",
+      "title": "Context window",
+      "audience": "both",
+      "topics": [
+        "claude-code",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "gh",
+      "title": "gh (GitHub CLI)",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "tooling"
+      ]
+    },
+    {
+      "slug": "gsd",
+      "title": "GSD (Get Shit Done) framework",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "planning"
+      ]
+    },
+    {
+      "slug": "issue",
+      "title": "Issue",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
       ]
     },
     {
@@ -36,6 +108,24 @@
       "topics": [
         "extensibility",
         "marketplace"
+      ]
+    },
+    {
+      "slug": "pull-request",
+      "title": "Pull Request (PR)",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "repository",
+      "title": "Repository",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
       ]
     },
     {
