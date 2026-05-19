@@ -93,6 +93,8 @@ export type RunResult = {
   feedsFailed: { name: string; reason: string }[];
   itemsFetched: number;
   itemsDeduped: number;
+  /** Cross-feed near-duplicates dropped by title normalisation. */
+  itemsDedupedByTitle: number;
   itemsJudgedIrrelevant: number;
   itemsWritten: EmittedItem[];
   autoPromoted: EmittedItem[];

@@ -22,7 +22,7 @@ import type {
   TriageResult,
 } from "./types.js";
 import { loadConfig } from "./config.js";
-import { loadSeenFingerprints } from "./dedup.js";
+import { dedupByTitle, loadSeenFingerprints } from "./dedup.js";
 import { fetchFeedXml, FeedFetchError } from "./fetch.js";
 import { parseFeed, FeedParseError } from "./parse.js";
 import { computeFingerprint } from "./fingerprint.js";
@@ -102,6 +102,7 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
       feedsFailed: [],
       itemsFetched: 0,
       itemsDeduped: 0,
+      itemsDedupedByTitle: 0,
       itemsJudgedIrrelevant: 0,
       itemsWritten: [],
       autoPromoted: [],
@@ -189,27 +190,45 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
   }
   logger.info("items_deduped", { count: itemsDeduped });
 
-  // Build Azure client only if we actually need it.
+  // Variant C (DECISIONS 2026-05-19): `feedMap` powers both the cross-feed
+  // title dedup (below) and the auto-promote / review partition (later).
+  const feedMap = buildFeedMap(allSources);
+
+  // Cross-feed title dedup — catches items whose fingerprints already differ
+  // (distinct feedName / guid / link) but whose normalised titles collide,
+  // e.g. the same article cross-posted to r/ClaudeAI AND r/ClaudeCode. Among
+  // ties, prefer an auto_promote_eligible feed.
+  const { kept: dedupedCandidates, dropped: crossFeedDuplicates } =
+    dedupByTitle(candidates, feedMap);
+  for (const { dropped, survivor } of crossFeedDuplicates) {
+    logger.warn("cross_feed_duplicate_dropped", {
+      droppedFeed: dropped.item.feedName,
+      droppedTitle: dropped.item.title,
+      survivorFeed: survivor.item.feedName,
+    });
+  }
+  const itemsDedupedByTitle = crossFeedDuplicates.length;
+  logger.info("items_deduped_by_title", { count: itemsDedupedByTitle });
+
+  // Build Azure client only if we actually need it (post-title-dedup).
   let client: AzureOpenAI | null = null;
   let deployment = "";
-  if (candidates.length > 0) {
+  if (dedupedCandidates.length > 0) {
     const env = readEnv();
     deployment = env.deployment;
     client = options.makeClient ? options.makeClient() : makeAzureClient(env);
   }
 
   // Triage each candidate, write each relevant one.
-  // Variant C (DECISIONS 2026-05-19): partition writes between `incoming/`
-  // (editorial review) and `published/` (auto-promote — high confidence +
-  // professional source). `feedMap` is the policy lookup.
-  const feedMap = buildFeedMap(allSources);
+  // Variant C: partition writes between `incoming/` (editorial review) and
+  // `published/` (auto-promote — high confidence + professional source).
   let itemsJudgedIrrelevant = 0;
   const takenSlugs = new Set<string>();
   const written: EmittedItem[] = [];
   const autoPromoted: EmittedItem[] = [];
   const reviewNeeded: EmittedItem[] = [];
 
-  for (const c of candidates) {
+  for (const c of dedupedCandidates) {
     let triageResult: TriageResult | null;
     try {
       triageResult = await triageItem(client!, deployment, c.item);
@@ -266,6 +285,7 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
         feedsFailed: failures,
         itemsFetched,
         itemsDeduped,
+        itemsDedupedByTitle,
         itemsJudgedIrrelevant,
         itemsWritten: written,
         autoPromoted,
@@ -332,6 +352,7 @@ export async function run(options: RunOptions = {}): Promise<RunResult> {
     feedsFailed: failures,
     itemsFetched,
     itemsDeduped,
+    itemsDedupedByTitle,
     itemsJudgedIrrelevant,
     itemsWritten: written,
     autoPromoted,

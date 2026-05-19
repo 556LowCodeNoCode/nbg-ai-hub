@@ -84,3 +84,68 @@ async function collectFromDir(
 export function isUnseen(fingerprint: string, seen: Set<string>): boolean {
   return !seen.has(fingerprint);
 }
+
+/**
+ * Normalises a title for cross-feed duplicate detection.
+ *
+ * Pure. Lowercases, strips Reddit/HN-style leading prefixes (`Re:`, `[Update]`,
+ * `[Discussion]`), collapses internal whitespace, and strips trailing
+ * punctuation. Two titles that normalise to the same string are treated as
+ * the same item even if they come from different feeds.
+ */
+export function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/^\s*(re|fwd|fw):\s*/i, "")
+    .replace(/^\s*\[[^\]]+\]\s*/g, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/[.!?,;:]+$/g, "");
+}
+
+/**
+ * Second-pass cross-feed dedup. Runs AFTER fingerprint dedup; catches items
+ * that have distinct fingerprints (different feedName / guid / link) but
+ * identical normalised titles (the same story cross-posted to multiple feeds).
+ *
+ * Tie-breaker among same-title candidates:
+ *   1. Prefer the candidate from an `auto_promote_eligible: true` feed
+ *      (HN/Wired/Verge wins over Reddit).
+ *   2. Otherwise preserve insertion order (first seen wins, which mirrors
+ *      the feed-list order in config/rss-sources.json).
+ *
+ * Pure. Returns `kept` in the original input order so downstream stages see a
+ * deterministic, config-driven sequence.
+ */
+export function dedupByTitle<
+  T extends { item: { feedName: string; title: string } },
+>(
+  candidates: readonly T[],
+  feedMap: ReadonlyMap<string, { auto_promote_eligible: boolean }>,
+): { kept: T[]; dropped: { dropped: T; survivor: T }[] } {
+  const survivorByTitle = new Map<string, T>();
+  const dropped: { dropped: T; survivor: T }[] = [];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeTitle(candidate.item.title);
+    const existing = survivorByTitle.get(normalized);
+    if (!existing) {
+      survivorByTitle.set(normalized, candidate);
+      continue;
+    }
+    const existingEligible =
+      feedMap.get(existing.item.feedName)?.auto_promote_eligible ?? false;
+    const candidateEligible =
+      feedMap.get(candidate.item.feedName)?.auto_promote_eligible ?? false;
+    if (candidateEligible && !existingEligible) {
+      dropped.push({ dropped: existing, survivor: candidate });
+      survivorByTitle.set(normalized, candidate);
+    } else {
+      dropped.push({ dropped: candidate, survivor: existing });
+    }
+  }
+
+  const keptSet = new Set(survivorByTitle.values());
+  const kept = candidates.filter((c) => keptSet.has(c));
+  return { kept, dropped };
+}
