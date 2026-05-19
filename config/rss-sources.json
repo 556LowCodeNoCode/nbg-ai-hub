@@ -3,13 +3,13 @@
     "name": "r/ClaudeAI",
     "url": "https://www.reddit.com/r/ClaudeAI/.rss",
     "enabled": true,
-    "auto_promote_eligible": false
+    "auto_promote_eligible": true
   },
   {
     "name": "r/ClaudeCode",
     "url": "https://www.reddit.com/r/ClaudeCode/.rss",
     "enabled": true,
-    "auto_promote_eligible": false
+    "auto_promote_eligible": true
   },
   {
     "name": "Hacker News frontpage",

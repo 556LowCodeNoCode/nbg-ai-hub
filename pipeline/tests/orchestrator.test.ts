@@ -419,7 +419,10 @@ describe("orchestrator.run", () => {
     }
   });
 
-  it("mixed mode: routes high-eligible to published/, medium-eligible to incoming/", async () => {
+  it("eligible feed auto-promotes regardless of confidence (unconditional auto-promote policy)", async () => {
+    // Confirms the policy reversal: with the confidence gate removed,
+    // an eligible feed promotes EVERY relevant item to news/published/,
+    // including medium / low confidence ones.
     const memFsObj = memFs({
       "/repo/config/rss-sources.json": JSON.stringify([
         { name: "Good", url: "https://good.example/feed.xml", enabled: true, auto_promote_eligible: true },
@@ -427,7 +430,6 @@ describe("orchestrator.run", () => {
       "/runner/output": "",
     });
     const fetchImpl = vi.fn(async () => new Response(rss20, { status: 200 }));
-    // First item high-confidence (auto-promote); second item medium (review).
     const { client } = makeMockClient({
       "Claude 4 launches":
         '{"relevant":true,"audience":"both","topics":["news"],"summary":"S1. S2.","editor_confidence":"high"}',
@@ -451,19 +453,14 @@ describe("orchestrator.run", () => {
         makeClient: () => client,
         logger,
       });
-      expect(result.autoPromoted.length).toBe(1);
-      expect(result.reviewNeeded.length).toBe(1);
+      expect(result.autoPromoted.length).toBe(2);
+      expect(result.reviewNeeded.length).toBe(0);
       expect(result.itemsWritten.length).toBe(2);
 
       const output = String(await memFsObj.readFile("/runner/output", "utf8"));
-      expect(output).toContain("mode=mixed");
-      expect(output).toContain("auto_promote_count=1");
-      expect(output).toContain("review_count=1");
-
-      // PR body shows both sections.
-      const body = String(await memFsObj.readFile("/repo/pipeline/pr-body.md", "utf8"));
-      expect(body).toContain("## Auto-promoted");
-      expect(body).toContain("## For review");
+      expect(output).toContain("mode=auto_only");
+      expect(output).toContain("auto_promote_count=2");
+      expect(output).toContain("review_count=0");
     } finally {
       if (prevOutput === undefined) {
         delete process.env.GITHUB_OUTPUT;

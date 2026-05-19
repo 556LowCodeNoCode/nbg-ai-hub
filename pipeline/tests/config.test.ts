@@ -30,11 +30,11 @@ describe("config.loadConfig", () => {
     }
   });
 
-  it("real seed encodes the variant C policy (Reddit feeds ineligible, professional feeds eligible)", async () => {
+  it("real seed encodes the unconditional auto-promote policy (every enabled feed is eligible)", async () => {
     const sources = await loadConfig(REPO_CONFIG);
     const eligible = new Map(sources.map((s) => [s.name, s.auto_promote_eligible]));
-    expect(eligible.get("r/ClaudeAI")).toBe(false);
-    expect(eligible.get("r/ClaudeCode")).toBe(false);
+    expect(eligible.get("r/ClaudeAI")).toBe(true);
+    expect(eligible.get("r/ClaudeCode")).toBe(true);
     expect(eligible.get("Hacker News frontpage")).toBe(true);
     expect(eligible.get("Wired AI")).toBe(true);
     expect(eligible.get("The Verge")).toBe(true);

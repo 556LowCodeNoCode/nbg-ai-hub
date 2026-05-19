@@ -40,28 +40,18 @@ function makeEmitted(overrides: {
 }
 
 describe("auto-promote.shouldAutoPromote", () => {
-  it("returns true for high confidence AND eligible feed", () => {
+  it("returns true for an eligible feed regardless of confidence", () => {
     const feeds = buildFeedMap([makeFeed()]);
-    expect(shouldAutoPromote(makeEmitted(), feeds)).toBe(true);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "high" }), feeds)).toBe(true);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "medium" }), feeds)).toBe(true);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "low" }), feeds)).toBe(true);
   });
 
-  it("returns false for high confidence on an INELIGIBLE feed", () => {
+  it("returns false on an INELIGIBLE feed regardless of confidence", () => {
     const feeds = buildFeedMap([makeFeed({ auto_promote_eligible: false })]);
-    expect(shouldAutoPromote(makeEmitted(), feeds)).toBe(false);
-  });
-
-  it("returns false for medium confidence on an eligible feed", () => {
-    const feeds = buildFeedMap([makeFeed()]);
-    expect(
-      shouldAutoPromote(makeEmitted({ editor_confidence: "medium" }), feeds),
-    ).toBe(false);
-  });
-
-  it("returns false for low confidence on an eligible feed", () => {
-    const feeds = buildFeedMap([makeFeed()]);
-    expect(
-      shouldAutoPromote(makeEmitted({ editor_confidence: "low" }), feeds),
-    ).toBe(false);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "high" }), feeds)).toBe(false);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "medium" }), feeds)).toBe(false);
+    expect(shouldAutoPromote(makeEmitted({ editor_confidence: "low" }), feeds)).toBe(false);
   });
 
   it("returns false when the feed is unknown (not in the map)", () => {
@@ -74,7 +64,7 @@ describe("auto-promote.shouldAutoPromote", () => {
     expect(shouldAutoPromote(makeEmitted(), feeds)).toBe(false);
   });
 
-  it("Reddit-shaped feed (eligible=false) never auto-promotes even at high confidence", () => {
+  it("flagging a feed false later (operator override) blocks auto-promote", () => {
     const feeds = buildFeedMap([
       makeFeed({ name: "r/ClaudeAI", auto_promote_eligible: false }),
     ]);

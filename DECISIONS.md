@@ -529,3 +529,18 @@ The pipeline now emits four step outputs on `$GITHUB_OUTPUT`: `new_items`, `auto
 - **Approval-bot auto-merge of the editorial PR** (rejected — same outcome as auto-promote but doubles the GH-Actions cost and adds a PR-bot to the audit trail with no benefit over committing direct to `main`).
 
 **Implementation evidence:** new module `pipeline/src/auto-promote.ts` + `pipeline/tests/auto-promote.test.ts`; `FeedSource.auto_promote_eligible: boolean` is now a required field with no fallback; `config/rss-sources.json` updated with the per-feed flag; `writeNewsItem` takes a `destination: "incoming" | "published"` parameter; `buildPrBody` takes separate `autoPromoted` and `reviewNeeded` arrays; `.github/workflows/rss-triage.yml` has three conditional steps branching on `mode`. Pipeline tests grow 112 → 124. Build + lint + tests green.
+
+## 2026-05-19 — Unconditional auto-promote (reverses variant C from earlier today)
+
+**Status:** accepted
+**Context:** Variant C (added earlier 2026-05-19) gated auto-promote on `editor_confidence: high` AND `auto_promote_eligible: true`. After a single production run, the editor reviewed the resulting PR #6 and decided the gate was overkill — Reddit-sourced items are typically duplicates of HN posts (and the cross-feed title dedup added later in the day catches those) and the cost of letting an occasional off-topic Reddit drama through is small compared to the standing operational cost of having to merge a PR every day.
+**Decision:** Drop the `editor_confidence` half of the gate entirely. Flip all feeds to `auto_promote_eligible: true` in `config/rss-sources.json`. Every relevant triaged item now writes directly to `news/published/`; the workflow's `auto_only` branch pushes straight to `main` with no PR. The `auto_promote_eligible` field is retained as a per-feed kill switch so an operator can reintroduce gating on a specific feed by flipping `true → false` without code change.
+**Rationale:**
+- After deploying variant C, the only items that auto-promoted in test runs were 0 — the Reddit feeds (most of the daily firehose) were all gated, and HN/Wired/Verge happened to produce only medium-confidence items in the sample window.
+- Cross-feed title dedup (added earlier in the day in the same conversation thread) is now the load-bearing quality control. If it misses a cross-post, the worst-case is a single near-duplicate on the live site — quickly fixable with a follow-up commit.
+- Daily-PR-review friction was identified as a higher product cost than a few "noisy" published items per week.
+**Reverses:** The earlier 2026-05-19 entry titled *"Auto-promotion of high-confidence professional-source news items"*. The infrastructure for that variant (per-feed eligibility flag, three-mode workflow branching, PR body splitting) stays in place — only the policy values changed.
+**Alternatives considered:**
+- Keep variant C and tighten the cross-feed dedup further (rejected — adds complexity to avoid an editorial cost the operator has decided to absorb).
+- Confidence-only gate without the feed dimension (rejected — operator wants zero gate, not a narrower one).
+**Implementation evidence:** `pipeline/src/auto-promote.ts` lost the `editor_confidence !== "high"` short-circuit; `config/rss-sources.json` Reddit entries flipped to `auto_promote_eligible: true`; orchestrator + config tests adjusted (the "mixed mode" test rewritten as "unconditional auto-promote" coverage). 145 tests still pass.
