@@ -412,3 +412,88 @@ The REJECT list was extended in the same edit to keep the categories tight: now 
 - Production hosting decision (Pro Pages vs Vercel/Netlify/Cloudflare vs defer) remains open in SCOPE.md.
 
 **Status:** accepted; operational locally. Production deploy = follow-up workstream.
+
+
+## 2026-05-19 — Hub plugin (plan-003) shipped
+
+**Decision:** The `/hub` plugin is **OPERATIONAL** as of 2026-05-19. Eleven `/hub-*` commands (`/hub`, `/hub-search`, `/hub-skills`, `/hub-tips`, `/hub-news`, `/hub-glossary`, `/hub-onboard`, `/hub-install`, `/hub-audience`, `/hub-refresh`, `/hub-open`) ship in a sibling workspace at `plugin/` alongside `pipeline/` and `site/`. Marketplace manifest at repo-root `.claude-plugin/marketplace.json` points at `./plugin`; plugin manifest at `plugin/.claude-plugin/plugin.json`. Bundled content snapshot via `npm run build:snapshot`. Compiled entries via `npm run build` (esbuild ESM, `packages: "external"`).
+
+**Why this entry exists:** Promotion-grade demo target ("hub installable in one command" per SCOPE.md demo checklist). Closes the third workstream after RSS pipeline and Astro site. Inside Claude Code, colleagues can now look up a glossary term, search the hub, browse curated news, or walk an onboarding journey without leaving their terminal.
+
+**Architectural calls (resolved during Phase 3a investigation, not negotiable downstream):**
+
+- **Manifest paths.** Plugin manifest at `plugin/.claude-plugin/plugin.json` (not `plugin/plugin.json` — Claude Code spec requires the `.claude-plugin/` subdir). Marketplace manifest at REPO-ROOT `.claude-plugin/marketplace.json` (not inside `plugin/`). `source: "./plugin"`.
+- **Commands are filesystem-discovered.** No `commands` array in the manifest — Claude Code reads `plugin/commands/*.md`. Each markdown file is an LLM prompt that pre-executes a bundled Node script via `` !`node "${CLAUDE_PLUGIN_ROOT}/dist/<command>.mjs" $ARGUMENTS` ``. The script's stdout becomes the LLM's context.
+- **Per-user state at `${CLAUDE_PLUGIN_DATA}/state.json`.** Falls back to `${XDG_DATA_HOME:-$HOME/.local/share}/claude-code/plugins/nbg-ai-hub/state.json` if env not set. State CANNOT live in the repo — multiple colleagues installing the plugin would clobber each other's audience prefs on every `/hub-refresh`.
+- **Plugin config in repo.** `plugin/config.json` (shared) holds default URLs, search weights (title × 5 + topics × 3 + body × 1), snippet length (200), refresh cache path. Travels with the repo across org moves.
+- **`/hub-open` defaults to localhost.** `devMode: true` until GH Pages production deploy. `/hub-open` probes `http://localhost:4321` first; instructs user to run `cd site && npm run dev` if dev server isn't up. Flip the flag in `config.json` post-deploy.
+- **`/hub-refresh` via `git pull`.** Clones (first run) or `git pull --ff-only --depth 1` (subsequent) into `~/.cache/nbg-ai-hub/snapshot/`. Reuses the user's existing git auth — no separate token needed for the private repo. Atomic update via tmp-clone-then-rename.
+- **TS-guard frontmatter validation (not Zod).** Keeps the esbuild bundle small and avoids a runtime dep duplication with the site. The pipeline + site own canonical schema authority; the plugin's validators are 1:1 mirrors that throw `FrontmatterInvalidError` on mismatch.
+- **Search: pure TS, no library.** Title × 5 + topics × 3 + body × 1, case-insensitive substring, 200-char snippets centered on first match, ties broken by sourcePath. Upgradeable later if newcomers ask for semantic search.
+
+**Evidence:**
+
+- `cd plugin && npm install` → 210 packages, 0 vulnerabilities.
+- `npm test` → **108/108 tests pass** across 11 test files (manifest, errors, snapshot, url-builder, config, state, frontmatter, search, audience, journeys, output).
+- `npm run typecheck` → 0 errors.
+- `npm run lint` → 0 errors, 0 warnings.
+- `npm run build` → 11 bundled entries in `dist/*.mjs` (esbuild ESM, externalized deps).
+- `npm run build:snapshot` → bundled 5 glossary + 0 tips + 0 skills + 1 journey + 8 news items into `plugin/snapshot/` with `.snapshot-meta.json`.
+- End-to-end smoke against the real snapshot: `/hub` shows the 5-pillar menu with correct counts; `/hub-glossary plugin` returns the definition; `/hub-search claude` returns 13 ranked matches; `/hub-audience advanced` persists to state.json; `/hub-open glossary mcp` resolves to `http://localhost:4321/glossary#mcp`.
+
+**Implications going forward:**
+
+- The hub now has three operational workstreams (pipeline, site, plugin). Promotion demo target met: hub installable from a fresh Claude Code install in one command.
+- When new tips/skills land in the repo, `npm run build:snapshot && npm run build` rebuilds the bundled snapshot. The intended release flow: a future GH Action that auto-bumps plugin version on content regeneration.
+- `tips/` and `skills/` directories ship empty in this build (per current SCOPE.md). Plugin handles empty pillars gracefully — `/hub-skills` returns "no matching skills" rather than throwing.
+- Day-1 journey content is still placeholder; `/hub-onboard day-1` surfaces "[content in progress]" honestly per A20.
+- `devMode: true` in `plugin/config.json` remains until GH Pages production deploy. Flip with a one-line edit at deploy time; no plugin republish required if config is read at runtime (current behavior).
+
+**Open follow-ups** (registered in `Issues - Pending Items.md`):
+- OQ4: by-role journey slug spellings (`backend`, `data-scientist`, `ml-engineer`) — confirm before authoring content.
+- OQ5: confirm Claude Code marketplace install flow against current spec when publishing.
+- OQ6: surface `editor_confidence` in `/hub-news` output → DONE (already shipped as `[confidence: high|medium|low]` marker per spec).
+
+**Status:** accepted; operational. Plugin codebase + manifests + snapshot tooling complete.
+
+---
+
+## 2026-05-19 — Personalization + community contributions: PAT-scoped gist + URL-redirect submissions
+
+**Status:** accepted
+
+**Context:** A brainstorm/refine session converged on adding per-user favourites + a marketplace contribution form, both leveraging GitHub as the backend (no servers, no proxies). The original design — favourites synced via OAuth Device Flow + a `gist`-scoped token, submissions via browser-side fork/branch/PR API choreography — hit a hard CORS wall (the investigator's R1 finding: GitHub's OAuth handshake endpoints `github.com/login/device/code` and `/login/oauth/access_token` do not send `Access-Control-Allow-Origin` headers, so a static site cannot complete Device Flow from the browser). The two viable fixes were (a) introduce a Cloudflare Worker proxy or (b) drop OAuth entirely and pivot to a PAT-paste UX for favourites + URL-redirect for submissions. The user picked (b) to keep the project zero-infrastructure.
+
+**Decision:** Use a classic Personal Access Token (PAT) with **`gist` scope only**, pasted into a sign-in modal, for the favourites feature. Favourites are synced via the user's unlisted GitHub gist `nbgaihub-favorites.json` (one file, wrapped JSON shape `{schema_version: 1, favourites: [{type, slug, pinned_at}]}`, read-modify-write protocol with last-write-wins). For skill submissions, use a **GitHub `new file` URL redirect** (`github.com/<owner>/<repo>/new/main/skills?filename=&value=`), not browser-side write APIs — GitHub's own UI handles the fork/branch/PR flow; a CI validator catches malformed entries at PR time.
+
+**Rationale:**
+- The original Device Flow + OAuth App design was blocked by R1 (CORS).
+- The recommended fix (Cloudflare Worker proxy) was rejected to keep the project zero-deployable-infrastructure. Adding a worker would have been a permanent operational tax for the team.
+- PAT-paste reuses GitHub's existing token UI — every user already has a `Settings → Developer settings → Personal access tokens` page they know how to use. The `gist` scope is **narrower** than the OAuth App's `repo` scope; the blast radius of a compromised PAT is "the user's own gists" rather than "everything in every repo they can write to".
+- The gists API supports CORS for browser writes (verified in investigation R3).
+- The gist is **unlisted, not private** — anyone with the 32-char hex URL can read it, but the URL is never shared and is practically unguessable. The privacy callout in the gist contract is explicit so users understand this isn't auth-protected storage.
+- URL-redirect submissions remove an entire class of API-call failure modes (no auth needed; no fork-then-branch-then-PR API sequence to choreograph in the browser); GitHub's web UI gives a much better author UX than any browser-side implementation would.
+- The CI validator catches malformed entries deterministically at PR time — same 17 rules run on the client during form fill, so authors see most errors before submitting.
+
+**Reverses:**
+- SCOPE.md "Per-user personalization or bookmarking" — was in "Out of scope — NO", now in MVP-IN.
+- SCOPE.md "Community contributions (PRs from outside the team)" — was in "Deferred — LATER", now in MVP-IN.
+
+**Alternatives considered:**
+- **OAuth App + Cloudflare Worker proxy** — REJECTED. The worker would terminate the OAuth handshake server-side and re-emit a token to the browser. Technically clean; operationally a permanent piece of infrastructure the team would have to own and rotate keys for. Killed on the "zero deployable infrastructure" promise.
+- **User-pasted PAT + local-only favourites (no sync)** — REJECTED. Loses cross-device sync entirely; breaks symmetry with the future Claude-side `/hub-*` skill, which is the whole point of having a stored data contract.
+- **Browser-side write APIs for submissions** (`POST /repos/.../forks` + `POST /repos/.../git/refs` + `PUT /repos/.../contents/...` + `POST /repos/.../pulls`) — REJECTED. Would have required the `repo` scope on the PAT (much broader than `gist`); fragile against API rate limits; gives a worse author experience than GitHub's own new-file UI; complicates the failure modes (partial submissions, orphan branches).
+
+**Privacy posture (documented verbatim in the gist contract):**
+> Your pins live in an unlisted gist on your own GitHub account — unlisted means anyone with the URL can read it, but the URL is a 32-char hex id and is never shared by NbgAiHub. The site uses your `gist`-scoped token only to read/write that one file. NbgAiHub does not see or store your pins. To fully revoke access, delete the token at github.com/settings/tokens.
+
+The gist is owned by the user, not the project. If the user leaves the org, their pins vanish with them. No aggregation. No team-wide stats. (Opt-in aggregation is parked as a low-priority follow-up in `Issues - Pending Items.md`.)
+
+**References:**
+- `docs/reference/investigation-personalization.md` — R1 (CORS) + Topic 2 (unlisted vs private) + the Option C historical section.
+- `docs/refined-requests/personalization-and-contributions.md` — refined request reflecting Option C end-to-end.
+- `docs/design/plan-003-personalization-and-contributions.md` — 23-step plan executed across waves A–E.
+- `docs/design/project-design.md §P` — interface contracts, data models, error classes.
+- `docs/reference/gist-contract.md` — wire format shared with the future Claude-side `/hub-*` skill.
+
+**Implementation evidence:** commits `c1df291` (Wave A — foundations), `5a08260` (Wave B — core libs incl. `auth.ts`, `gist.ts`, `submission.ts`, validator), `64f83b2` (Wave C — UI: `SignIn.astro`, `PinButton.astro`, `/my-pins/`, `/submit-skill/`, CI workflow). Site 127 tests; pipeline 112 tests (was 93). Anonymous browsing parity verified.

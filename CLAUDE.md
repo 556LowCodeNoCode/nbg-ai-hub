@@ -70,3 +70,9 @@ Final name: **NbgAiHub**. Repo: `github.com/chomovazuzana/NbgAiHub`.
 
 - **Astro Starlight dev server: `4321`** (in use — `cd site && npm run dev`). Fallback band 4322–4329 per global port rules.
 - No other dev servers planned for MVP.
+
+## Project tools
+
+Per global CLAUDE.md `docs/tools/<name>.md` convention — reusable TypeScript capabilities documented for future invocation:
+
+- **`skill-validator`** — CI validator enforcing the 17-rule skill frontmatter contract on `skills/**/*.md` PRs. Source: `pipeline/src/validators/{skill,cli,config}.ts`. Doc: `docs/tools/skill-validator.md`.

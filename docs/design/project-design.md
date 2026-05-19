@@ -4,7 +4,7 @@ Single source of truth for **how the project's components are built**: interface
 
 Functional contract ("what the components do") lives in `project-functions.md`. Sequencing and verification criteria live in per-feature plan files (`plan-NNN-*.md`).
 
-**Last updated:** 2026-05-18
+**Last updated:** 2026-05-19
 
 ---
 
@@ -3051,6 +3051,1063 @@ Reverse-mapping each plan step to its design anchor (Coder picks up step N → r
 
 **Result:** every plan step has a design anchor; every AC has a backing design contract or an explicit doc-only step. A Coder can pick up any unit P-A0..P-C6 and execute given only this design + the plan.
 
+### P.13 Implementation notes (post-build)
+
+The Option C personalization + contributions architecture documented in §P.0–§P.12 above shipped across three commits in Wave A–C of plan-003-personalization:
+
+| Wave | Commit | Scope |
+|---|---|---|
+| A — Foundations | `c1df291` | Vitest setup in `site/`, `slug.ts` duplicate from `pipeline/src/slug.ts`, `config/maintainers.json`, schema extension for the 7 new skill fields (`install_command`, `skill_id`, `origin`, `category`, `status`, `maintainer`, `requires`). |
+| B — Core libs | `5a08260` | `site/src/lib/auth.ts`, `site/src/lib/gist.ts`, `site/src/lib/submission.ts`, `site/src/lib/pin-store.ts`, `site/scripts/build-pin-index.ts`, `pipeline/src/validators/{skill,cli,config}.ts`. |
+| C — UI + workflow | `64f83b2` | `SignIn.astro` (Starlight `SocialIcons` slot override), `PinButton.astro` embedded across content cards, `/my-pins/` page, `/submit-skill/` page with URL-redirect + clipboard fallback, `.github/workflows/validate-skill-submission.yml`. |
+
+**Test counts at hand-off:**
+
+- `site/` — **127 tests** pass (Vitest 4.x). Covers `auth.ts` (token validate + storage), `gist.ts` (RMW + dedup + schema-version tolerance), `submission.ts` (serialiser + URL builder + 7000-char gate + slug pre-check), `pin-store.ts` (join with `<type>-index.json`), `slug.ts` (drift-test against pipeline copy).
+- `pipeline/` — **112 tests** pass (was 93 before Wave B). +19 tests cover the new validator suite (`pipeline/tests/validators/skill.test.ts`: 11 tests) plus extras for the CLI entry point and config loader.
+
+**Key files shipped:**
+
+- Web: `site/src/lib/{auth,gist,submission,pin-store,slug}.ts`, `site/src/components/{SignIn,PinButton}.astro`, `site/src/pages/{my-pins,submit-skill}.astro`, `site/scripts/build-pin-index.ts`, `site/public/_data/<type>-index.json` (5 files, emitted by build script).
+- Pipeline: `pipeline/src/validators/{skill,cli,config}.ts`, `pipeline/tests/validators/skill.test.ts`.
+- Config: `config/maintainers.json`.
+- Workflow: `.github/workflows/validate-skill-submission.yml`.
+- Schema: `site/src/content.config.ts` skills collection layered the 7 new fields.
+
+**Deviations from design.** None of structural import. Minor:
+
+- `slug.ts` is a literal copy of `pipeline/src/slug.ts` rather than a shared package (carried over from astro-starlight-site A4); drift-tested by both workspaces. Tracked as a follow-up in `Issues - Pending Items.md` for a future monorepo cleanup.
+- The `SocialIcons` slot override is the chosen wiring point (P.4.10); a Header override was considered and rejected as fragile against Starlight upgrades.
+
 ---
 
 *End of Personalization architecture section.*
+
+---
+
+## H. Hub plugin (plan-003-hub-plugin)
+
+The `plugin/` workspace is the third sibling to `pipeline/` and `site/`. It packages the NbgAiHub knowledge hub as a Claude Code marketplace plugin (`nbg-ai-hub`) installable via `/plugin marketplace add chomovazuzana/NbgAiHub` and exposing eleven `/hub-*` slash commands backed by compiled TypeScript scripts.
+
+**Section prefix note:** `P.x` is taken by the Personalization architecture; this section uses **`H.x`** (Hub) for sub-sections H.1–H.13. Coders consuming this document should resolve `H.<n>` references against the headings below.
+
+### H.0 Conflicts requiring user input
+
+**None.** Phase 3a investigation resolved the three load-bearing unknowns (manifest paths, no `commands` array in the manifest, command-as-LLM-prompt model). Plan-003 §1 records fifteen Reconciliations (R-1 .. R-15) that are accepted as locked-in for this design.
+
+OQ4 (by-role journey slugs), OQ5 (marketplace `schemaVersion`), OQ6 (`editor_confidence` surfacing in `/hub-news`) are deferred to follow-ups in `Issues - Pending Items.md` (plan Step 13) — none block this design.
+
+One **flagged-but-not-changed** observation surfaced during design review:
+
+- **Refined-request AC23 wording is obsolete** (plan R-3 already rewrote it). The plan correctly redefines AC23 as "eleven `.md` files in `plugin/commands/` whose basenames match the locked set." This design treats the rewritten AC23 as authoritative; the original "`plugin.json` declares the exact eleven commands" wording is dead-letter.
+
+### H.1 System architecture and component diagram
+
+The plugin has four distinct layers (manifest, LLM-prompt, script, content snapshot) plus per-user state. Each `/hub-*` invocation traverses three of them.
+
+```text
+                                ┌──────────────────────────────────────────────┐
+                                │ User runs `/plugin marketplace add           │
+                                │            chomovazuzana/NbgAiHub`           │
+                                └─────────────────┬────────────────────────────┘
+                                                  │ git clone
+                                                  ▼
+              ┌────────────────────────────────────────────────────────────────────┐
+              │ Repo root  (= marketplace root)                                    │
+              │                                                                    │
+              │  .claude-plugin/marketplace.json   → { plugins: [{ source:        │
+              │                                                  "./plugin" }] }  │
+              │                                                                    │
+              │  plugin/                            ← the plugin workspace        │
+              │  ├── .claude-plugin/plugin.json     ← manifest (name only req.)   │
+              │  ├── config.json                    ← productionUrl, devMode, …   │
+              │  ├── commands/<11 .md>              ← LLM-prompt layer            │
+              │  │     hub.md, hub-search.md, …                                   │
+              │  ├── dist/<11 .mjs>                 ← compiled+bundled scripts    │
+              │  │     hub-search.mjs invokes lib/* inline                        │
+              │  ├── src/<11 .ts> + src/lib/<9 .ts> ← TypeScript source           │
+              │  ├── snapshot/                      ← bundled markdown content   │
+              │  │     glossary/  tips/  skills/                                  │
+              │  │     news/published/  journeys/                                 │
+              │  │     .snapshot-meta.json                                        │
+              │  ├── scripts-build/build.mjs        ← esbuild driver              │
+              │  ├── scripts-build/build-snapshot.mjs                             │
+              │  └── tests/<18+ .test.ts>           ← Vitest 4 suites             │
+              │                                                                    │
+              │  glossary/  tips/  skills/  news/published/  journeys/             │
+              │     ▲ source-of-truth content; snapshot/ is a build-time mirror   │
+              └────────────────────────────────────────────────────────────────────┘
+
+                                          │
+                  Claude Code copies plugin/ into ~/.claude/plugins/cache/<id>/
+                  Sets env: CLAUDE_PLUGIN_ROOT = <cache path>
+                            CLAUDE_PLUGIN_DATA = ~/.claude/plugins/data/<id>/
+                                          │
+                                          ▼
+                  ┌───────────────────────────────────────────────────────────┐
+                  │ At runtime, per `/hub-*` invocation                       │
+                  └───────────────────────────────────────────────────────────┘
+```
+
+**Runtime flow for a read-only command — `/hub-glossary mcp`:**
+
+```text
+  user types: /hub-glossary mcp
+        │
+        ▼
+  Claude Code reads commands/hub-glossary.md
+        │  ─ substitutes $ARGUMENTS → "mcp"
+        │  ─ substitutes ${CLAUDE_PLUGIN_ROOT} → cache path
+        │  ─ executes `!`-fenced block
+        ▼
+  node ${CLAUDE_PLUGIN_ROOT}/dist/hub-glossary.mjs mcp
+        │
+        ▼
+  dist/hub-glossary.mjs (bundle of src/hub-glossary.ts + lib/*):
+        │  1. lib/config.ts        loads plugin/config.json or throws
+        │  2. lib/snapshot.ts      dual-lookup: prefer ${CLAUDE_PLUGIN_DATA}/snapshot/,
+        │                            else ${CLAUDE_PLUGIN_ROOT}/snapshot/
+        │  3. lib/state.ts         reads ${CLAUDE_PLUGIN_DATA}/state.json (audience)
+        │  4. lib/frontmatter.ts   gray-matter + yaml engine
+        │  5. command logic        match "mcp" → mcp.md; scan others for [mcp] refs
+        │  6. lib/output.ts        format definition + related terms + freshness
+        ▼
+  stdout (formatted block) — script exits 0
+        │
+        ▼
+  Claude Code inlines stdout into the rendered prompt at the `!`-block site
+        │
+        ▼
+  LLM sees the prompt: "<frame line>\n<stdout>\n<present-verbatim instruction>"
+        │
+        ▼
+  user sees the formatted block in the conversation
+```
+
+**Runtime flow for a side-effect command — `/hub-refresh`:**
+
+```text
+  user types: /hub-refresh
+        │
+        ▼
+  commands/hub-refresh.md → node dist/hub-refresh.mjs
+        │
+        ▼
+  dist/hub-refresh.mjs:
+        │  1. lib/config.ts        load productionUrl, refreshUrl
+        │  2. preflight            CLAUDE_PLUGIN_DATA set? else throw
+        │  3. resolve              CACHE   = $DATA/snapshot-clone
+        │                          STAGING = $DATA/snapshot-new
+        │                          LIVE    = $DATA/snapshot
+        │  4. git clone (first run) OR git fetch --depth 1 + reset --hard
+        │     against CACHE                              ← user's git auth used
+        │  5. build STAGING by cpSync of 5 pillars from CACHE
+        │  6. write STAGING/.snapshot-meta.json
+        │  7. atomic: if LIVE exists, rename LIVE → trash; rename STAGING → LIVE
+        │  8. cleanup trash
+        ▼
+  stdout: "OK <sha> <ISO timestamp> | glossary: 5  tips: 0  skills: 0
+                                       news: 8  journeys: 1"
+        │
+        ▼
+  LLM presents the success line; future `/hub-*` commands now read from $DATA/snapshot/
+```
+
+**Failure path for `/hub-refresh`:** the `git` subprocess throws → `RefreshFailedError` → entry script writes the error to stderr, prints `ERROR <reason>` to stdout, exits 1. The LIVE snapshot is untouched (STAGING was never renamed in).
+
+### H.2 File/module structure
+
+All paths relative to `plugin/`. **`src/**/*.ts` files use the canonical Node-ESM `.js`-extension import convention** (matching `pipeline/`'s `import './types.js'` precedent, codebase scan §3.6). The compiled bundle in `dist/` inlines everything; no `node_modules/` is shipped (R-9).
+
+#### H.2.1 Shared library modules — `src/lib/`
+
+Each lib module is pure or has a single I/O surface; they are composed by the eleven entry scripts. Imports use explicit `.js` extensions in TS sources (Node-ESM convention).
+
+| Path | Public exports | Imports | Side effects |
+|---|---|---|---|
+| `src/lib/errors.ts` | `MissingPluginConfigError`, `InvalidAudienceError`, `SnapshotNotFoundError`, `UnknownSectionError`, `JourneyNotFoundError`, `SkillNotFoundError`, `GlossaryTermNotFoundError`, `RefreshFailedError`, `FrontmatterInvalidError`, `GitUnavailableError`, `BrowserOpenError`, `StateWriteError`, `ContentNotFoundError` | (none — pure) | none |
+| `src/lib/config.ts` | `loadConfig(): PluginConfig`, `type PluginConfig` | `node:fs`, `node:path`, `errors.js` | reads `config.json` once per process |
+| `src/lib/snapshot.ts` | `loadSnapshot(): Snapshot`, `type Snapshot`, `type SnapshotItem`, `type Pillar` | `node:fs`, `node:path`, `frontmatter.js`, `errors.js` | reads `snapshot/` directory tree |
+| `src/lib/frontmatter.ts` | `parseFrontmatter<T>(raw: string, type: Pillar): { data: T; body: string }`, `type BaseFrontmatter`, `type NewsFrontmatter`, `type SkillFrontmatter` | `gray-matter`, `yaml`, `errors.js` | none (pure parser) |
+| `src/lib/state.ts` | `readState(): UserState`, `writeState(s: UserState): void`, `type UserState`, `type Audience` | `node:fs`, `node:path`, `node:os`, `errors.js` | reads/writes `state.json` |
+| `src/lib/search.ts` | `search(items, query, audience, limit?): Hit[]`, `type SearchItem`, `type Hit` | (none — pure) | none |
+| `src/lib/url-builder.ts` | `buildUrl(baseUrl, section?, subsection?): string`, `type SectionKey` | `errors.js` | none (pure) |
+| `src/lib/audience.ts` | `filterByAudience<T extends { audience: Audience }>(items: T[], pref: Audience): T[]`, `passesAudience(item, pref): boolean` | (none — pure) | none |
+| `src/lib/journeys.ts` | `loadJourney(slug, snapshot): Journey`, `type Journey`, `isPlaceholder(body): boolean` | `errors.js` | none (pure given snapshot) |
+| `src/lib/browser.ts` | `openInBrowser(url: string): Promise<void>`, `probeDevServer(url: string, timeoutMs: number): Promise<boolean>` | `open` (npm), `node:net` | spawns browser; probes localhost |
+| `src/lib/output.ts` | `renderList(items, opts): string`, `renderItem(item, opts): string`, `renderBadge(a: Audience): string`, `renderFreshness(meta): string`, `divider(): string`, `truncate(body, query?, length?): string` | `errors.js` | none (pure text) |
+
+**Sequencing inside Step 5 (lib build):** `errors.ts` first (10 min, no deps). Then everything else fans out per plan §3 Workers A/B/C. `journeys.ts` depends on `snapshot.ts` + `frontmatter.ts` — Worker C builds those first internally. `state.ts`, `snapshot.ts`, `config.ts` depend on `errors.ts` only.
+
+#### H.2.2 Per-command entry scripts — `src/<command>.ts`
+
+Each entry script is 30–120 lines: parse `process.argv`, compose lib modules, write to stdout via `lib/output.ts`, exit with an explicit code. All eleven entry points are independent (no cross-imports) — Phase 6 fan-out is unblocked once the lib layer lands.
+
+| Path | Responsibility | Composes |
+|---|---|---|
+| `src/hub.ts` | Pillars menu + last journey + current audience | `config`, `state`, `snapshot`, `output` |
+| `src/hub-search.ts` | Cross-pillar ranked search; respects audience unless `--all` | `config`, `snapshot`, `state`, `audience`, `search`, `output` |
+| `src/hub-skills.ts` | List skills, optional topic filter, surfaces extended 17-key fields | `config`, `snapshot`, `state`, `audience`, `output` |
+| `src/hub-tips.ts` | List tips, optional topic filter | `config`, `snapshot`, `state`, `audience`, `output` |
+| `src/hub-news.ts` | List news; flags `--today` / `--week`; default 7-day window | `config`, `snapshot`, `state`, `audience`, `output` |
+| `src/hub-glossary.ts` | Term lookup + related-terms scan; 3-closest on miss | `config`, `snapshot`, `output`, `errors` |
+| `src/hub-onboard.ts` | Resolve journey; render body; mark placeholder; update `lastJourney` | `config`, `snapshot`, `state`, `journeys`, `output` |
+| `src/hub-install.ts` | Echo `install_command` from skill frontmatter | `config`, `snapshot`, `output`, `errors` |
+| `src/hub-audience.ts` | Get/set audience; validate against the three-value set | `state`, `output`, `errors` |
+| `src/hub-refresh.ts` | Clone-or-pull → staging → atomic rename → meta | `config`, `node:child_process`, `node:fs`, `errors` |
+| `src/hub-open.ts` | URL build + dev-server probe + cross-platform browser launch | `config`, `url-builder`, `browser`, `output` |
+
+#### H.2.3 Top-level files
+
+| Path | Purpose |
+|---|---|
+| `.claude-plugin/plugin.json` | Minimal manifest. `name: "nbg-ai-hub"`; no `version` (R-7). |
+| `config.json` | Plugin-wide config (productionUrl, devMode, search weights). |
+| `commands/<11>.md` | LLM-prompt shells that invoke `dist/<name>.mjs`. |
+| `dist/<11>.mjs` | esbuild bundles, committed to repo (R-9). |
+| `snapshot/` | Bundled markdown mirror (build-time). |
+| `scripts-build/build.mjs` | esbuild driver: 11 entries → 11 bundles. |
+| `scripts-build/build-snapshot.mjs` | Copies 5 pillars from repo root → `snapshot/`; writes meta. |
+| `tests/` | Vitest 4 suites (≥18 files). |
+| `package.json`, `tsconfig.json`, `eslint.config.js`, `vitest.config.ts`, `.nvmrc`, `.gitignore` | Standard workspace plumbing mirroring `pipeline/`. |
+
+Repo-root files added: **`.claude-plugin/marketplace.json`** only.
+
+### H.3 Public interface contracts
+
+TypeScript strict + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` are inherited from `pipeline/`'s tsconfig.
+
+#### H.3.1 `src/lib/errors.ts`
+
+```ts
+export class MissingPluginConfigError extends Error {
+  constructor(path: string) {
+    super(`Plugin config not found at ${path}. The plugin requires config.json; no fallbacks.`);
+    this.name = 'MissingPluginConfigError';
+  }
+}
+export class SnapshotNotFoundError extends Error {
+  constructor(searched: readonly string[]) {
+    super(`No snapshot directory found. Tried: ${searched.join(', ')}. Run /hub-refresh or reinstall.`);
+    this.name = 'SnapshotNotFoundError';
+  }
+}
+export class InvalidAudienceError extends Error {
+  constructor(value: string) {
+    super(`Invalid audience "${value}". Valid: beginner | advanced | both.`);
+    this.name = 'InvalidAudienceError';
+  }
+}
+export class UnknownSectionError extends Error {
+  constructor(section: string, valid: readonly string[]) {
+    super(`Unknown section "${section}". Valid sections: ${valid.join(', ')}.`);
+    this.name = 'UnknownSectionError';
+  }
+}
+export class JourneyNotFoundError extends Error {
+  constructor(slug: string, available: readonly string[]) {
+    super(`Journey "${slug}" not found. Available: ${available.join(', ') || '(none)'}.`);
+    this.name = 'JourneyNotFoundError';
+  }
+}
+export class SkillNotFoundError extends Error {
+  constructor(id: string, suggestions: readonly string[]) {
+    super(`Skill "${id}" not found.${suggestions.length ? ` Did you mean: ${suggestions.join(', ')}?` : ''}`);
+    this.name = 'SkillNotFoundError';
+  }
+}
+export class GlossaryTermNotFoundError extends Error {
+  constructor(term: string, suggestions: readonly string[]) {
+    super(`Glossary term "${term}" not found.${suggestions.length ? ` Closest: ${suggestions.join(', ')}.` : ''}`);
+    this.name = 'GlossaryTermNotFoundError';
+  }
+}
+export class FrontmatterInvalidError extends Error {
+  constructor(file: string, reason: string) {
+    super(`Frontmatter invalid in ${file}: ${reason}`);
+    this.name = 'FrontmatterInvalidError';
+  }
+}
+export class RefreshFailedError extends Error {
+  constructor(stage: 'clone' | 'pull' | 'stage' | 'rename', cause: unknown) {
+    super(`/hub-refresh failed at "${stage}": ${cause instanceof Error ? cause.message : String(cause)}. Cache unchanged.`);
+    this.name = 'RefreshFailedError';
+  }
+}
+export class GitUnavailableError extends Error {
+  constructor() {
+    super('git executable not found on PATH. /hub-refresh requires git.');
+    this.name = 'GitUnavailableError';
+  }
+}
+export class BrowserOpenError extends Error {
+  constructor(url: string, cause: unknown) {
+    super(`Could not open browser to ${url}: ${cause instanceof Error ? cause.message : String(cause)}`);
+    this.name = 'BrowserOpenError';
+  }
+}
+export class StateWriteError extends Error {
+  constructor(path: string, cause: unknown) {
+    super(`Could not write state to ${path}: ${cause instanceof Error ? cause.message : String(cause)}`);
+    this.name = 'StateWriteError';
+  }
+}
+export class ContentNotFoundError extends Error {
+  constructor(pillar: string) {
+    super(`No items in snapshot for "${pillar}". Run /hub-refresh or contribute via PR.`);
+    this.name = 'ContentNotFoundError';
+  }
+}
+
+export type ExitCode = 0 | 1 | 2 | 3 | 4;
+// 0 = ok; 1 = no matches / known not-found; 2 = snapshot missing;
+// 3 = config missing; 4 = unexpected runtime error.
+```
+
+#### H.3.2 `src/lib/config.ts`
+
+```ts
+export interface SearchWeights {
+  readonly title: number;
+  readonly topics: number;
+  readonly body: number;
+}
+export interface SearchConfig {
+  readonly weights: SearchWeights;
+  readonly snippetLength: number;
+  readonly topN: number;
+}
+export interface PluginConfig {
+  readonly productionUrl: string;       // literal "PLACEHOLDER_NOT_YET_DEPLOYED" when undeployed
+  readonly devMode: boolean;
+  readonly refreshUrl: string;          // HTTPS git URL to clone for /hub-refresh
+  readonly search: SearchConfig;
+}
+
+/** Resolve path: $CLAUDE_PLUGIN_ROOT/config.json, else path-relative-to-this-module/../config.json. */
+export function resolveConfigPath(): string;
+/** Throws MissingPluginConfigError if absent; JSON-parses; runtime-validates shape. */
+export function loadConfig(): PluginConfig;
+```
+
+No fallback values inside the loader: every key listed above must be present in `config.json` or the loader throws `MissingPluginConfigError` with the offending key named.
+
+#### H.3.3 `src/lib/frontmatter.ts`
+
+```ts
+export type Audience = 'beginner' | 'advanced' | 'both';
+export type Pillar = 'glossary' | 'tip' | 'skill' | 'news' | 'journey-step';
+
+export interface BaseFrontmatter {
+  readonly type: Pillar;
+  readonly title: string;
+  readonly audience: Audience;
+  readonly topics: readonly string[];
+  readonly internal: boolean;
+  readonly authored: string;        // YYYY-MM-DD (normalised if YAML coerced to Date)
+  readonly last_reviewed: string;   // YYYY-MM-DD
+  readonly external_link: string | null;
+  readonly deeper_link: string | null;
+  readonly ai_summary: string;
+}
+export interface NewsFrontmatter extends BaseFrontmatter {
+  readonly type: 'news';
+  readonly editor_confidence: 'high' | 'medium' | 'low';
+  readonly source: string;
+  readonly fingerprint: string;
+  readonly hero_image?: string;
+}
+export interface SkillFrontmatter extends BaseFrontmatter {
+  readonly type: 'skill';
+  readonly install_command: string;        // starts with "/plugin marketplace add " or "/plugin install "
+  readonly skill_id: string;               // /^[a-z0-9-]+$/
+  readonly origin: 'internal' | 'community' | 'external';
+  readonly category: 'workflow' | 'code' | 'docs' | 'integration' | 'productivity' | 'testing' | 'other';
+  readonly status: 'active' | 'experimental' | 'deprecated';
+  readonly maintainer: string;
+  readonly requires?: readonly string[];
+}
+
+/**
+ * Parses a single .md file's frontmatter using gray-matter with the explicit `yaml` engine
+ * (R-14, matches pipeline/'s fix). Normalises authored/last_reviewed (Date → "YYYY-MM-DD"
+ * when YAML 1.1 coerced). Throws FrontmatterInvalidError naming the offending key.
+ */
+export function parseFrontmatter(raw: string, file: string): { data: BaseFrontmatter | NewsFrontmatter | SkillFrontmatter; body: string };
+```
+
+**Validation approach:** simple TS guards (no Zod runtime dep — the bundle stays small; site already pays the Zod cost). Each required key is checked by name; missing or wrong-type → `FrontmatterInvalidError(file, reason)`. Justification: pipeline-side already enforces the canonical shape; the plugin is read-only and the site's Zod schemas are the canonical authority. A TS-guard duplicates ~50 lines vs. shipping Zod's ~50KB bundle to every command.
+
+#### H.3.4 `src/lib/snapshot.ts`
+
+```ts
+export interface SnapshotMeta {
+  readonly generatedAt: string;     // ISO8601
+  readonly sourceCommit: string;    // 40-char SHA
+}
+export interface SnapshotItem<F extends BaseFrontmatter = BaseFrontmatter> {
+  readonly slug: string;            // basename without ".md"; for news, with date prefix
+  readonly file: string;            // absolute path
+  readonly frontmatter: F;
+  readonly body: string;
+}
+export interface Snapshot {
+  readonly root: string;            // resolved path (either DATA or ROOT branch)
+  readonly source: 'bundled' | 'refreshed';
+  readonly meta: SnapshotMeta;
+  readonly glossary: readonly SnapshotItem[];
+  readonly tips: readonly SnapshotItem[];
+  readonly skills: readonly SnapshotItem<SkillFrontmatter>[];
+  readonly news: readonly SnapshotItem<NewsFrontmatter>[];
+  readonly journeys: readonly SnapshotItem[];
+}
+
+/**
+ * Dual-lookup per R-6: prefer $CLAUDE_PLUGIN_DATA/snapshot/ if it exists, else fall back to
+ * $CLAUDE_PLUGIN_ROOT/snapshot/. Throws SnapshotNotFoundError with both paths in the message
+ * if neither is present. Walks each pillar, parses every *.md via frontmatter.ts, returns
+ * the typed Snapshot. Empty pillar → empty array (NOT throw).
+ */
+export function loadSnapshot(): Snapshot;
+```
+
+#### H.3.5 `src/lib/state.ts`
+
+```ts
+export type Audience = 'beginner' | 'advanced' | 'both';
+export interface UserState {
+  readonly audience: Audience;
+  readonly lastJourney: string | null;
+}
+
+/** Resolves $CLAUDE_PLUGIN_DATA, else $XDG_DATA_HOME/claude-code/plugins/nbg-ai-hub/, else $HOME/.local/share/... */
+export function resolveStateDir(): string;
+/** First-run bootstrap returns { audience: 'both', lastJourney: null } if file absent (documented as bootstrap, NOT a config fallback). */
+export function readState(): UserState;
+/** Creates parent dir if missing; atomic write via tmp + rename. Throws StateWriteError on failure. */
+export function writeState(state: UserState): void;
+```
+
+#### H.3.6 `src/lib/search.ts`
+
+```ts
+export interface SearchItem {
+  readonly pillar: Pillar;
+  readonly slug: string;
+  readonly title: string;
+  readonly topics: readonly string[];
+  readonly body: string;
+  readonly audience: Audience;
+  readonly file: string;
+}
+export interface Hit {
+  readonly item: SearchItem;
+  readonly score: number;
+  readonly snippet: string;        // 200-char window centred on first match
+}
+
+/**
+ * Pure ranking: title × weights.title + topics × weights.topics + body × weights.body
+ * (defaults 5/3/1, configurable via PluginConfig). Case-insensitive substring match.
+ * Returns top-N (default 10) by descending score. Tie-break: pillar order → slug.
+ * Empty query → []. No I/O.
+ */
+export function search(
+  items: readonly SearchItem[],
+  query: string,
+  audience: Audience,
+  options?: { readonly weights?: SearchWeights; readonly snippetLength?: number; readonly limit?: number; readonly includeAll?: boolean }
+): readonly Hit[];
+```
+
+#### H.3.7 `src/lib/url-builder.ts`
+
+```ts
+export type SectionKey =
+  | 'news' | 'glossary' | 'skills' | 'tips' | 'journeys'
+  | 'reference' | 'contribute'
+  | 'day-1' | 'week-1' | 'backend' | 'data-scientist' | 'ml-engineer';
+
+export const VALID_SECTIONS: readonly SectionKey[];
+
+/**
+ * Pure URL builder per AC16. Rules:
+ *   buildUrl(base)                              → `${base}/`
+ *   buildUrl(base, "news")                      → `${base}/news/`
+ *   buildUrl(base, "glossary", "mcp")           → `${base}/glossary#mcp`
+ *   buildUrl(base, "day-1")                     → `${base}/start-here/day-1/`
+ *   buildUrl(base, "<pillar>")                  → `${base}/<pillar>/`   (skills|tips|news|glossary|journeys|reference|contribute)
+ *   buildUrl(base, "<unknown>")                 → throws UnknownSectionError
+ * Strips trailing "/" on `base` before composing.
+ */
+export function buildUrl(baseUrl: string, section?: string, subsection?: string): string;
+```
+
+#### H.3.8 `src/lib/browser.ts`
+
+```ts
+/** Opens the URL in the user's default browser via the `open` npm package. Throws BrowserOpenError on failure. */
+export function openInBrowser(url: string): Promise<void>;
+/** TCP-connect probe with timeout; resolves true if anything answers on the host:port, false otherwise. No HTTP fetch. */
+export function probeDevServer(url: string, timeoutMs: number): Promise<boolean>;
+```
+
+#### H.3.9 `src/lib/audience.ts`
+
+```ts
+export function passesAudience(itemAudience: Audience, preference: Audience): boolean;
+export function filterByAudience<T extends { audience: Audience }>(items: readonly T[], preference: Audience): readonly T[];
+```
+
+Semantics: `both` matches all; `beginner` matches `beginner` + `both`; `advanced` matches `advanced` + `both`. Mirrors `site/src/components/AudienceFilter.astro` exactly (F17).
+
+#### H.3.10 `src/lib/journeys.ts`
+
+```ts
+export interface Journey {
+  readonly slug: string;
+  readonly title: string;
+  readonly body: string;
+  readonly isPlaceholder: boolean;
+}
+/** Resolves a journey by slug from snapshot.journeys; throws JourneyNotFoundError listing available slugs on miss. */
+export function loadJourney(slug: string, snapshot: Snapshot): Journey;
+/** Detects body text matching /coming soon|content in progress|placeholder/i (case-insensitive). */
+export function isPlaceholder(body: string): boolean;
+```
+
+#### H.3.11 `src/lib/output.ts`
+
+```ts
+export interface ListOptions {
+  readonly showBadge: boolean;
+  readonly showTopics: boolean;
+  readonly showDescription: boolean;
+  readonly emptyMessage: string;          // e.g., "no tips in this snapshot yet — see /hub-refresh"
+}
+export function divider(): string;        // "─" × 60
+export function renderBadge(a: Audience): '[BEGINNER]' | '[ADVANCED]' | '[BOTH]';
+export function truncate(body: string, query?: string, length?: number): string;  // 200-char window centred on first match
+export function renderItem<T extends BaseFrontmatter>(item: SnapshotItem<T>, opts: ListOptions): string;
+export function renderList<T extends BaseFrontmatter>(items: readonly SnapshotItem<T>[], opts: ListOptions): string;
+export function renderFreshness(meta: SnapshotMeta): string;  // "(snapshot: 2026-05-19, source: c73c36d)"
+export function renderHits(hits: readonly Hit[]): string;
+```
+
+### H.4 Data models
+
+#### H.4.1 `plugin/.claude-plugin/plugin.json`
+
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "nbg-ai-hub",
+  "description": "Hub-as-skill: /hub-* commands for the NbgAiHub knowledge hub.",
+  "author": { "name": "chomovazuzana" },
+  "repository": "https://github.com/chomovazuzana/NbgAiHub",
+  "license": "MIT",
+  "keywords": ["claude-code", "knowledge-hub", "onboarding", "skills"]
+}
+```
+
+**Required:** `name`. **Deliberately omitted:** `version` (R-7 — during active development the git SHA is the cache key; pin `version` only at stable release).
+
+#### H.4.2 `.claude-plugin/marketplace.json` (repo root)
+
+```json
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "nbg-ai-hub-marketplace",
+  "description": "NbgAiHub Claude Code plugin marketplace.",
+  "owner": { "name": "chomovazuzana" },
+  "plugins": [
+    {
+      "name": "nbg-ai-hub",
+      "source": "./plugin",
+      "description": "Hub-as-skill: /hub-* commands for the NbgAiHub knowledge hub.",
+      "category": "knowledge-management",
+      "keywords": ["claude-code", "knowledge-hub", "onboarding"]
+    }
+  ]
+}
+```
+
+**Required:** `name`, `owner.name`, `plugins[].name`, `plugins[].source`. Install path: `/plugin install nbg-ai-hub@nbg-ai-hub-marketplace`.
+
+#### H.4.3 `plugin/config.json`
+
+```json
+{
+  "$schema": "./config.schema.json",
+  "productionUrl": "PLACEHOLDER_NOT_YET_DEPLOYED",
+  "devMode": true,
+  "refreshUrl": "https://github.com/chomovazuzana/NbgAiHub.git",
+  "search": {
+    "weights": { "title": 5, "topics": 3, "body": 1 },
+    "snippetLength": 200,
+    "topN": 10
+  }
+}
+```
+
+All five keys mandatory. No fallbacks. `productionUrl` sentinel `PLACEHOLDER_NOT_YET_DEPLOYED` is a normal string value (recognised by `/hub-open`), NOT a missing-value default.
+
+#### H.4.4 `${CLAUDE_PLUGIN_DATA}/state.json`
+
+```json
+{
+  "audience": "both",
+  "lastJourney": null
+}
+```
+
+`audience: 'beginner' | 'advanced' | 'both'`; `lastJourney: string | null`. Initial bootstrap (file absent) returns the literal `{ audience: 'both', lastJourney: null }` — documented in DECISIONS.md as **user-state initialization**, not a missing-config fallback (the global no-fallback rule applies to *configuration*; first-run UX is a separate concern).
+
+#### H.4.5 `plugin/snapshot/.snapshot-meta.json`
+
+```json
+{
+  "generatedAt": "2026-05-19T07:00:00Z",
+  "sourceCommit": "c73c36d480f112ec6e47d50a94d203ea48979246"
+}
+```
+
+`generatedAt: string` (ISO8601, UTC, milliseconds optional); `sourceCommit: string` (40-char SHA). Both mandatory. Used by `renderFreshness()` (NF7).
+
+### H.5 Frontmatter contracts
+
+The plugin parses frontmatter from snapshot `.md` files. The shapes below mirror `site/src/content.config.ts` exactly.
+
+#### H.5.1 Base 10-key shape (glossary / tips / journeys)
+
+```yaml
+type: glossary | tip | journey-step
+title: string (≥1 char)
+audience: beginner | advanced | both
+topics: string[]
+internal: boolean
+authored: "YYYY-MM-DD"
+last_reviewed: "YYYY-MM-DD"
+external_link: URL | null
+deeper_link: URL | null
+ai_summary: string
+```
+
+#### H.5.2 News 14-key shape
+
+Base 10 keys (`type: 'news'`) plus:
+
+```yaml
+editor_confidence: high | medium | low
+source: string (≥1 char)
+fingerprint: string (≥1 char)
+hero_image?: URL          # optional
+```
+
+**`editor_confidence` surfacing (OQ6):** design rules that `/hub-news` displays `[confidence: medium]` only when value is `medium` or `low` (i.e., omit when `high` — the common case stays clean; the lower-confidence cases get the marker so users notice). This is a Designer-resolved choice for OQ6; revisit if user prefers always-on.
+
+#### H.5.3 Extended skill 17-key shape
+
+Base 10 keys (`type: 'skill'`) plus:
+
+```yaml
+install_command: string         # must start with "/plugin marketplace add " or "/plugin install "
+skill_id: string                # /^[a-z0-9-]+$/
+origin: internal | community | external
+category: workflow | code | docs | integration | productivity | testing | other
+status: active | experimental | deprecated
+maintainer: string (≥1 char)
+requires?: string[]             # optional
+```
+
+**`/hub-skills` MUST surface these.** The plugin's list output for skills includes:
+
+```text
+<title>  [BADGE]                                              [<status>]
+  <skill_id> · <category> · <origin> · maintainer: <maintainer>
+  <ai_summary>
+  Install: <install_command>
+  Requires: <requires.join(', ')>     ← line omitted if `requires` absent
+```
+
+#### H.5.4 Validation strategy
+
+`lib/frontmatter.ts` uses **simple TS guards** (not Zod) — one explicit check per required key, named-error on miss. Rationale: (a) keeps the bundle small (Zod ≈ 50KB per command bundle × 11 commands), (b) the canonical authority is `pipeline/`'s emitter + `site/`'s Zod schema; the plugin is a downstream reader and a duplicate Zod schema would be the *third* place to keep in sync. The TS-guard implementation is roughly 80 lines and mechanical to maintain.
+
+**Date-coercion handling (R-14):** `gray-matter` is wired with the explicit `yaml` engine; `parseFrontmatter()` normalises any `authored` or `last_reviewed` that arrives as a `Date` object to `YYYY-MM-DD` via `d.toISOString().slice(0, 10)`. Matches `site/src/content.config.ts` line 34–37 and `pipeline/`'s precedent.
+
+### H.6 Per-command CLI contracts
+
+For each command, the table shows: the markdown invocation, the script argv after `$ARGUMENTS` expansion, stdout shape, stderr shape, and exit code semantics.
+
+Stdout is the LLM-presentation surface (Pattern A/B/C from investigation §2). Stderr is for failure detail; the entry script writes a one-line user-friendly message to stderr and a machine-parseable `ERROR <name>: <message>` to stdout when failing, so the LLM (instructed by the command markdown body) can surface the error verbatim.
+
+| # | Command | Script | Argv | Stdout (success) | Exit |
+|---|---|---|---|---|---|
+| 1 | `/hub` | `hub.mjs` | (none) | Menu header + 5 pillar lines + `Audience: <X>` + `Last journey: <slug \| (none)>` + freshness footer | 0 |
+| 2 | `/hub-search <query> [--all]` | `hub-search.mjs <query...> [--all]` | varargs; `--all` skips audience filter | `Top N results for "<q>":` + 1..N hit blocks (title, pillar, badge, snippet, file) + freshness | 0 success; 1 no matches |
+| 3 | `/hub-skills [topic]` | `hub-skills.mjs [topic]` | 0..1 positional | List header + per-skill 4-line block (see H.5.3) + freshness | 0 success; 1 empty pillar (graceful message, not error) |
+| 4 | `/hub-tips [topic]` | `hub-tips.mjs [topic]` | 0..1 positional | List of tips (title, badge, topics, ai_summary) + freshness | 0; 1 empty (graceful) |
+| 5 | `/hub-news [--today\|--week]` | `hub-news.mjs [flag]` | 0..1 flag | List of news (title, badge, topics, source, ai_summary, "Read on source: <url>"), `editor_confidence` marker per H.5.2 | 0; 1 no items in range |
+| 6 | `/hub-glossary <term>` | `hub-glossary.mjs <term>` | 1 positional | Definition body verbatim + `Related terms: a, b, c` + freshness | 0 found; 1 not-found-with-suggestions |
+| 7 | `/hub-onboard <journey>` | `hub-onboard.mjs <slug>` | 1 positional | Journey body verbatim + `[content in progress]` marker if placeholder + freshness | 0 found; 1 not-found |
+| 8 | `/hub-install <skill-id>` | `hub-install.mjs <id>` | 1 positional | `Run this to install: <install_command>` + skill summary + freshness | 0 found; 1 not-found |
+| 9 | `/hub-audience [beginner\|advanced\|both]` | `hub-audience.mjs [value]` | 0..1 positional | No arg: `Current audience: <X>`; with arg: `Audience set to: <X>` | 0; 1 invalid value |
+| 10 | `/hub-refresh` | `hub-refresh.mjs` | (none) | `OK <sha> <iso>` + per-pillar count line + freshness | 0 success; 1 refresh failed (cache untouched) |
+| 11 | `/hub-open [section] [subsection]` | `hub-open.mjs [section] [subsection]` | 0..2 positional | `Opened: <url>` or `Not opened: <url> (reason: <r>)` | 0 always (graceful) |
+
+#### H.6.1 Cross-cutting exit-code policy
+
+| Code | Meaning |
+|---|---|
+| 0 | Success (or graceful "nothing to show" with a user-friendly message). |
+| 1 | Known not-found / no-matches / invalid-input. Stdout carries the user-facing message; LLM presents verbatim. |
+| 2 | Snapshot directory missing entirely. Stdout: `ERROR SnapshotNotFoundError: <message>`. Stderr: developer detail. |
+| 3 | `config.json` missing or malformed. Stdout: `ERROR MissingPluginConfigError: <message>`. |
+| 4 | Unexpected runtime error (uncaught throw). Stdout: `ERROR <ErrorClass>: <message>`. Stderr: stack. |
+
+#### H.6.2 stdout/stderr conventions
+
+- **stdout:** the LLM-presentation surface. Always plain text. Never includes ANSI colour codes (A18). Never includes a stack trace.
+- **stderr:** for developer-facing detail (full error message, stack). The LLM does NOT see stderr (Pattern A inlines only stdout).
+- **Final newline:** every script ends with exactly one trailing `\n`.
+- **Argument parsing:** simple positional parsing — no `commander` / `yargs` (keeps the bundle small). The only flags in scope: `--all` (`/hub-search`), `--today`, `--week` (`/hub-news`). All other tokens are positionals.
+
+### H.7 Output format style guide
+
+Uniform text shape across all eleven commands, so the LLM never has to reformat. No ANSI colours (A18).
+
+#### H.7.1 Visual primitives
+
+| Element | Rendering |
+|---|---|
+| Section divider | `──────────────────────────────────────────────────────────` (`─` × 60) |
+| Audience badge | `[BEGINNER]`, `[ADVANCED]`, `[BOTH]` (uppercase, brackets, no colour) |
+| Topics list | `topic-a, topic-b, topic-c` (comma + space, no brackets, lowercase as in frontmatter) |
+| Snippet ellipsis | ` … ` (space + Unicode horizontal ellipsis + space) on left/right of truncation |
+| Empty-pillar message | `(no <pillar> in this snapshot yet — run /hub-refresh or contribute via PR)` |
+| Freshness footer | `(snapshot: 2026-05-19, source: c73c36d)` — short SHA = first 7 chars |
+| `editor_confidence` marker | `[confidence: medium]` or `[confidence: low]` — omit when `high` (H.5.2) |
+| Status marker (skills) | `[experimental]` or `[deprecated]` — omit when `active` |
+
+#### H.7.2 Per-item block shape
+
+```text
+<title>  [BADGE]
+  <topic-a, topic-b, …>
+  <ai_summary or excerpt>
+```
+
+For news, add `Source: <source>` and `Read on source: <external_link>` lines.
+
+For skills, see H.5.3 (4-line extended block).
+
+For search hits, add `Pillar: <pillar>` and `<file path>`:
+
+```text
+<title>  [BADGE]   (score: 17)
+  Pillar: glossary  ·  topics: protocol, integrations
+  … the protocol Claude Code uses to plug into the outside world: databases, file systems, APIs … 
+  plugin/snapshot/glossary/mcp.md
+```
+
+#### H.7.3 List frame
+
+```text
+──────────────────────────────────────────────────────────
+<List header>   (audience: <X>)
+──────────────────────────────────────────────────────────
+
+<item block>
+
+<item block>
+
+──────────────────────────────────────────────────────────
+(snapshot: 2026-05-19, source: c73c36d)
+```
+
+### H.8 Error handling strategy
+
+#### H.8.1 Catalogue (cross-reference H.3.1)
+
+Every failure category has a named error class. The flat hierarchy mirrors `pipeline/`'s pattern (codebase scan §3.5).
+
+| Class | Where raised | Exit code |
+|---|---|---|
+| `MissingPluginConfigError` | `lib/config.ts` when `config.json` absent or unparsable | 3 |
+| `FrontmatterInvalidError` | `lib/frontmatter.ts` on missing required key / wrong type | 4 (or surfaced as warning per-file with skip — Designer rule: skip file, log to stderr, continue; throw only when *every* file in a pillar is invalid) |
+| `SnapshotNotFoundError` | `lib/snapshot.ts` when both DATA and ROOT snapshots absent | 2 |
+| `ContentNotFoundError` | per-command when audience-filtered list is empty AND user asked for a specific topic that matched zero items (distinguished from empty-pillar) | 1 |
+| `InvalidAudienceError` | `lib/state.ts` (validation) and `src/hub-audience.ts` | 1 |
+| `UnknownSectionError` | `lib/url-builder.ts` | 1 |
+| `JourneyNotFoundError` | `lib/journeys.ts` | 1 |
+| `SkillNotFoundError` | `src/hub-install.ts` | 1 |
+| `GlossaryTermNotFoundError` | `src/hub-glossary.ts` | 1 (stdout includes 3-closest suggestions) |
+| `RefreshFailedError` | `src/hub-refresh.ts` wraps any of: GitUnavailableError, clone/pull failure, rename failure | 1 |
+| `GitUnavailableError` | `src/hub-refresh.ts` preflight | 1 |
+| `BrowserOpenError` | `src/hub-open.ts` when `open()` rejects | 0 (graceful — print "could not open <url>", do not error) |
+| `StateWriteError` | `lib/state.ts` write failure | 4 |
+
+#### H.8.2 Decision rules
+
+1. **No fallback values for missing configuration** (CLAUDE.md). Loader throws `MissingPluginConfigError`; the entry script catches at top level, writes the message to stderr AND stdout (so the LLM surfaces it to the user), exits 3.
+2. **Bootstrap is not a fallback.** First-run `state.json` returning `{ audience: 'both', lastJourney: null }` is initialization. Documented in DECISIONS.md to forestall confusion.
+3. **All errors flow up to the entry script.** No try/catch inside lib modules except where translating a low-level error to a named class (`fs` ENOENT → `SnapshotNotFoundError`, `git` non-zero → `RefreshFailedError`, etc.).
+4. **Entry-script top-level shape (per script):**
+
+```ts
+// src/<command>.ts (skeleton applied by all 11)
+try {
+  await main(process.argv.slice(2));
+  process.exit(0);
+} catch (err) {
+  const e = err as Error;
+  process.stderr.write(`${e.stack ?? e.message ?? String(e)}\n`);
+  process.stdout.write(`ERROR ${e.name}: ${e.message}\n`);
+  process.exit(exitCodeFor(e));
+}
+```
+
+5. **Frontmatter-invalid is per-file, not fatal.** Skip the offending file with a single stderr line; continue the listing. Only when *zero* valid items remain in a pillar do we surface a user-visible warning.
+6. **`/hub-open` never errors out.** Even browser-launch failure is presented as `Not opened: <url> (reason: <r>)` — exit 0. Rationale: opening a URL is fundamentally best-effort; the user gets the URL and can copy/paste.
+
+#### H.8.3 LLM presentation contract
+
+The command markdown body (H.9) instructs the LLM:
+- On `ERROR <ClassName>:` stdout: surface verbatim, do not retry, do not editorialise.
+- On normal stdout: present verbatim in the original ordering (especially for ranked search results).
+
+### H.9 `commands/*.md` body prompt wording
+
+Each command markdown file has YAML frontmatter declaring `description`, `argument-hint`, and `allowed-tools`, followed by a one-sentence frame, the `!`-fenced execution, and a closing presentation instruction. Investigation §2 Pattern A is the dominant shape.
+
+#### H.9.1 Universal frontmatter template
+
+```yaml
+---
+description: <one-line in tone — no marketing voice, no AI-slop>
+argument-hint: <e.g. "<query> [--all]"; empty if no args>
+allowed-tools: Bash(node *)
+---
+```
+
+#### H.9.2 Body template (Pattern A — pass-through)
+
+```markdown
+<One-sentence frame: "Search NbgAiHub content for the user's query.">
+
+```!
+node ${CLAUDE_PLUGIN_ROOT}/dist/<command>.mjs $ARGUMENTS
+```
+
+The block above is the script's output. Present it to the user verbatim, in the original order. Do not summarise, rerank, or add commentary. If the output starts with `ERROR `, surface that line and tell the user no changes were made.
+```
+
+#### H.9.3 Full example — `commands/hub-search.md`
+
+```markdown
+---
+description: Search NbgAiHub content (glossary, tips, skills, news, journeys) and return ranked snippets.
+argument-hint: <query> [--all]
+allowed-tools: Bash(node *)
+---
+
+Search NbgAiHub for the user's query. Results are ranked by where the match lands (title > topics > body) and respect the user's audience filter unless `--all` is passed.
+
+```!
+node ${CLAUDE_PLUGIN_ROOT}/dist/hub-search.mjs $ARGUMENTS
+```
+
+The block above is the ranked result list. Present it to the user verbatim, in the order shown — do not rerank, do not summarise, do not collapse entries. If the block reads `(no results for "<q>")`, surface that line so the user knows to try a broader query. If the block starts with `ERROR `, surface that line verbatim and tell the user the snapshot may be missing — they can run `/hub-refresh` to fetch it.
+```
+
+#### H.9.4 Full example — `commands/hub.md` (entry point)
+
+```markdown
+---
+description: NbgAiHub entry point — shows the five pillars, your last journey, and your audience filter.
+argument-hint:
+allowed-tools: Bash(node *)
+---
+
+The user is opening the NbgAiHub menu.
+
+```!
+node ${CLAUDE_PLUGIN_ROOT}/dist/hub.mjs
+```
+
+The block above is the hub menu. Present it verbatim. After the menu, you may briefly remind the user that each pillar has its own command (`/hub-skills`, `/hub-tips`, `/hub-news`, `/hub-glossary`, `/hub-onboard`) and that they can search across everything with `/hub-search <query>`. Do not add any other commentary, especially not marketing-style framing.
+```
+
+#### H.9.5 Side-effect example — `commands/hub-refresh.md` (Pattern B)
+
+```markdown
+---
+description: Pull the latest snapshot of NbgAiHub content into your local cache.
+argument-hint:
+allowed-tools: Bash(node *)
+---
+
+Refreshing the content snapshot from the source repo. This uses your local git credentials.
+
+```!
+node ${CLAUDE_PLUGIN_ROOT}/dist/hub-refresh.mjs
+```
+
+If the block above starts with `OK `, the snapshot was replaced atomically — confirm success to the user with the timestamp and per-pillar counts. If it starts with `ERROR `, surface the error verbatim and tell the user their previous snapshot is unchanged. Do not invent counts or timestamps if they are not in the output.
+```
+
+#### H.9.6 Browser-launch example — `commands/hub-open.md` (Pattern C)
+
+```markdown
+---
+description: Open the NbgAiHub website in your browser. Deep-links into pillars and journeys.
+argument-hint: [section] [subsection]
+allowed-tools: Bash(node *)
+---
+
+```!
+node ${CLAUDE_PLUGIN_ROOT}/dist/hub-open.mjs $ARGUMENTS
+```
+
+The block above reports whether the browser was launched. If it says `Opened: <url>`, confirm the URL to the user. If it says `Not opened: <url> (reason: <r>)`, surface that line — the user should know which URL was *intended* even if it didn't open (this happens when the site isn't deployed yet or no dev server is running).
+```
+
+The other seven command files follow the H.9.2 template with command-specific frame and instruction adjustments. Tone-pass is reviewer-judged at plan Step 12 (R-15).
+
+### H.10 Integration points
+
+Every contract crossing the plugin boundary into the rest of the project.
+
+| # | Boundary | Direction | Contract | Owner of the contract |
+|---|---|---|---|---|
+| 1 | Repo content folders (`glossary/`, `tips/`, `skills/`, `news/published/`, `journeys/`) | read (build-time, via `scripts-build/build-snapshot.mjs`) | Filesystem layout 1:1; markdown files with canonical frontmatter (H.5) | DECISIONS.md "Shared content shape" (2026-05-18) |
+| 2 | `site/src/content.config.ts` schemas | informal — schemas must stay in sync | When site changes Zod schema, plugin's TS guards must mirror within the same PR | DECISIONS.md entry (Step 13) to document the coupling |
+| 3 | Pipeline's NewsFrontmatter (`pipeline/src/types.ts`) | informal — read alignment | News file shape (14 keys) emitted by pipeline = shape parsed by plugin | DECISIONS.md "Shared content shape" |
+| 4 | Claude Code marketplace install flow | external API | `/plugin marketplace add chomovazuzana/NbgAiHub` resolves `.claude-plugin/marketplace.json`, installs `nbg-ai-hub` via `source: "./plugin"`; no `npm install` runs on user machine (R-9) | Claude Code docs |
+| 5 | Local user environment for `/hub-refresh` | shell exec | `git` on PATH; user's existing `gh auth` / SSH keys for private repo. Plugin invokes `git clone` / `git fetch` / `git reset` — read-only against user cache. | README documents prerequisite |
+| 6 | `${CLAUDE_PLUGIN_ROOT}` and `${CLAUDE_PLUGIN_DATA}` env vars | input from harness | Claude Code sets these per plugin spec; plugin reads via `process.env`. Fallbacks (R-5) for non-Claude invocation (tests, manual runs). | Claude Code plugin reference |
+| 7 | The `open` npm package (cross-platform browser) | dep | Bundled via esbuild; no runtime fetch | upstream (`open@^10`) |
+| 8 | Snapshot freshness signal | output | `renderFreshness()` shape `(snapshot: YYYY-MM-DD, source: <sha7>)` consumed by user; not by other code | H.7.1 |
+
+### H.11 Technology choices with justification
+
+| Tech | Choice | Justification |
+|---|---|---|
+| Frontmatter parser | `gray-matter@^4` + `yaml@^2` engine | R-14; matches pipeline's fix for YAML 1.1 date coercion. Stable, tiny, no async. |
+| Browser launch | `open@^10` | De-facto Node cross-platform browser launcher; actively maintained successor to `opn`. Bundled via esbuild (~3KB). |
+| Bundler | `esbuild@^0.24` | R-9; produces self-contained `.mjs` per command; no `node_modules/` shipped; sub-100ms per bundle. Aligned with the no-`tsx` decision (investigation §3b). |
+| Test framework | `vitest@^4.1.6` | Pipeline precedent; DECISIONS.md 2026-05-18 entry locks Vitest 4.x. Matches the workspace's `vi.stubEnv`, `vi.mock` patterns. |
+| Lint | ESLint 9 flat config + `@typescript-eslint@^8` | Pipeline precedent. |
+| TS compiler | `typescript@^5.8` | Pipeline precedent; `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`. |
+| Runtime | Node 22 (LTS) ESM | NF2; matches `pipeline/` and `site/`. |
+| Schema validation | TS guards (no Zod) | Bundle size; site already pays Zod's cost; plugin is downstream reader. See H.5.4. |
+| Web framework | **none** | Plugin runs as one-shot CLI per command. No long-running server. |
+| HTTP server | **none** | Same as above. |
+| Database | **none** | State is one JSON file. |
+
+### H.12 Parallel implementation units for Phase 6
+
+Mapped from plan-003 §3. Each unit owns a non-overlapping file set; cross-unit needs flow through the public interfaces in H.3 only.
+
+#### H.12.1 Lib layer (Step 5) — 3 workers
+
+| Worker | Owned files | Shared interfaces depended on | Verification |
+|---|---|---|---|
+| **H-L1** | `src/lib/errors.ts`, `src/lib/snapshot.ts`, `src/lib/url-builder.ts` | none (errors.ts) → H.3.1; then H.3.3 (frontmatter API) for snapshot.ts | `cd plugin && npm run typecheck && npm test -- snapshot.test url-builder.test` |
+| **H-L2** | `src/lib/config.ts`, `src/lib/state.ts`, `src/lib/audience.ts` | H.3.1 | `cd plugin && npm test -- config.test state.test` |
+| **H-L3** | `src/lib/frontmatter.ts`, `src/lib/search.ts`, `src/lib/journeys.ts`, `src/lib/output.ts`, `src/lib/browser.ts` | H.3.1, H.3.3 (frontmatter types) | `cd plugin && npm test -- frontmatter.test search.test` |
+
+**Sequencing inside the wave:** `errors.ts` ships first from H-L1 (10 min). Once landed, H-L2 and H-L3 can start; H-L1 continues with `snapshot.ts` which needs H-L3's `frontmatter.ts` interface (just the exported types — the implementation can lag). Use **interface-first** discipline: H-L3 commits the `.d.ts`-equivalent (signatures + empty bodies) on day one so H-L1 can typecheck against it.
+
+#### H.12.2 Entry-point layer (Step 6) — 5 workers
+
+| Worker | Owned files | Shared interfaces depended on | Verification |
+|---|---|---|---|
+| **H-E1** | `src/hub.ts`, `src/hub-search.ts` | H.3.2/4/5/6/9/11 | `cd plugin && npm test -- hub-entry.test search.test` |
+| **H-E2** | `src/hub-skills.ts`, `src/hub-tips.ts` | H.3.4/5/9/11 | `cd plugin && npm test -- skills.test tips.test` |
+| **H-E3** | `src/hub-news.ts`, `src/hub-glossary.ts` | H.3.3/4/9/11 | `cd plugin && npm test -- news.test glossary.test` |
+| **H-E4** | `src/hub-onboard.ts`, `src/hub-install.ts` | H.3.4/5/10/11 | `cd plugin && npm test -- onboard.test install.test` |
+| **H-E5** | `src/hub-audience.ts`, `src/hub-refresh.ts`, `src/hub-open.ts` | H.3.2/5/7/8/11 | `cd plugin && npm test -- audience.test refresh.test open.test` |
+
+**File-ownership invariant:** every file in H.12.1 and H.12.2 has exactly one writer. The eleven command markdown files (`plugin/commands/*.md`, Step 9) are also independent — the same 5-worker split can own them, each writer's commands paired with the entry scripts they implemented. The two manifest files (`plugin/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`) and `config.json` (Step 3) are written by whichever worker picks up Step 3 first — single small commit.
+
+#### H.12.3 Test layer (Step 7) — fans out alongside Step 6
+
+Each entry-point worker writes the tests for the entry points they implemented (plus optionally a lib test). The manifest tests (`plugin/tests/manifest.test.ts`, `plugin/tests/marketplace.test.ts`) land at plan Step 4 by the same worker that did Step 3.
+
+#### H.12.4 Critical path
+
+```text
+Step 1 (scaffold) → Step 2 (package.json) → Step 3 (manifests + config) → Step 4 (manifest tests)
+                                                ↓
+                                  Step 5: H-L1, H-L2, H-L3 parallel  (~1.5h)
+                                                ↓
+                                  Step 6: H-E1..H-E5 parallel        (~2h)
+                                                ↓
+                              Step 7 (tests fan out per H-E worker)
+                                                ↓
+                                Step 8 (esbuild) → Step 9 (commands)
+                                                ↓
+                                  Step 10 (snapshot) → Step 11 (README)
+                                                ↓
+                                  Step 12 (smoke) → Step 13 (DECISIONS) → Step 14 (SCOPE)
+```
+
+Plan §3 estimates 6–7 hours of parallel-team work end-to-end; this design preserves that estimate.
+
+### H.13 Verification checklist (design-level)
+
+Plan-step → design-anchor mapping. A Coder picks a plan step, reads the anchor, executes.
+
+| Plan step | Design anchor | Hand-off ready? |
+|---|---|---|
+| Step 1 (scaffold) | H.2.3 | YES |
+| Step 2 (package.json) | H.11 (tech choices), H.2.3 | YES |
+| Step 3 (manifests + config) | H.4.1, H.4.2, H.4.3 | YES — all three JSON shapes locked |
+| Step 4 (manifest tests) | H.4.1, H.4.2 | YES |
+| Step 5 (lib modules) | H.3.1..H.3.11 | YES — every signature given |
+| Step 6 (entry scripts) | H.6 (CLI contracts), H.7 (output style), H.8.2 #4 (top-level wrapper) | YES |
+| Step 7 (tests) | H.3 (signatures to assert), H.6 (exit codes), H.8 (error classes) | YES |
+| Step 8 (esbuild) | H.11 (esbuild rationale), H.2.3 (`dist/` layout) | YES |
+| Step 9 (commands/*.md) | H.9 (all four pattern examples) | YES |
+| Step 10 (snapshot build) | H.4.5 (meta shape), H.2.3 | YES |
+| Step 11 (README) | H.6 (per-command CLI), H.11 (tech list) | YES |
+| Step 12 (smoke) | H.1 (system diagram), H.6 (CLI), H.10 (integration points) | YES |
+| Step 13 (DECISIONS + design append) | THIS section | YES |
+| Step 14 (SCOPE.md) | (doc edit, no contract) | N/A |
+| Step 15 (project-functions.md) | (doc edit, no contract) | N/A |
+
+**AC-level evidence anchors:**
+
+| AC | Design anchor |
+|---|---|
+| AC1 (`/hub` menu) | H.6 row 1, H.3.5 (state), H.7 (format) |
+| AC2 (search ranking) | H.3.6, H.6 row 2 |
+| AC3–AC4 (skills/tips listing) | H.5.3, H.6 rows 3–4, H.7.2 |
+| AC5 (news flags) | H.5.2, H.6 row 5 |
+| AC6–AC7 (glossary lookup + suggestions) | H.6 row 6, H.3.1 (GlossaryTermNotFoundError) |
+| AC8–AC9 (journeys + placeholder) | H.3.10, H.6 row 7 |
+| AC10–AC11 (install echo + missing) | H.3.1 (SkillNotFoundError), H.5.3, H.6 row 8 |
+| AC12–AC13 (audience persist + invalid) | H.3.5, H.3.1 (InvalidAudienceError), H.6 row 9 |
+| AC14–AC15 (refresh atomic + cache preserved) | H.1 (failure path), H.6 row 10, H.8.1 (RefreshFailedError) |
+| AC16 (URL builder) | H.3.7 |
+| AC17 (not-yet-deployed) | H.3.8 (probe), H.6 row 11 |
+| AC18 (bundled snapshot) | H.4.5, H.2.3 |
+| AC19 (audience cross-session) | H.3.5 |
+| AC20 (URL builder pure) | H.3.7 (no I/O imports) |
+| AC21 (graceful undeployed E2E) | H.6 row 11 + H.6.1 exit-code policy |
+| AC22 (marketplace.json valid) | H.4.2 |
+| AC23 — rewritten (11 commands files) | H.2.3 + H.9 |
+| AC24 (README docs 11) | H.6 (table feeds README) |
+| AC25 (DECISIONS.md entry) | plan Step 13 (doc edit) |
+| AC26 (SCOPE.md) | plan Step 14 (doc edit) |
+| AC27 (no-fallback) | H.4.3 + H.3.2 + H.8.2 #1 |
+| AC28 (frontmatter shape) | H.3.3 + H.5 |
+| AC29 (tone) | H.9 templates + reviewer pass |
+
+**Result:** every plan step and every AC has a backing design contract. Coders can pick up any unit H-L1..H-L3 or H-E1..H-E5 and execute from this section alone plus the plan.
+
+---
+
+*End of Hub plugin section.*

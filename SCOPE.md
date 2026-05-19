@@ -1,6 +1,6 @@
 # NbgAiHub — Scope
 
-**Last updated:** 2026-05-18 (Astro Starlight site built + serving locally; pipeline rounds 2-3 of triage tightening + feed list pivot)
+**Last updated:** 2026-05-19 (Personalization + community contributions shipped — PAT-paste sign-in, unlisted-gist-backed favourites, /my-pins/, /submit-skill/ with URL-redirect, CI validator on skills PRs; site 127 tests, pipeline 112 tests. Hub plugin previously shipped 2026-05-19 — eleven `/hub-*` commands in `plugin/`, 108/108 tests.)
 
 ## Vision
 
@@ -50,9 +50,11 @@ A curated Claude Code knowledge hub for bank colleagues — a one-stop shop comb
 | **~10 Glossary terms** — CLAUDE.md, MCP, skill, plugin, agent, hook, GSD, build-time vs runtime, etc. | **5/10 seeded** (claudemd, mcp, skill, plugin, agent); 5 more TBD |
 | **RSS curation pipeline** — daily GH Action: fetch feeds → Azure OpenAI triage → `/news/incoming` → PR → editorial review → promote to `/news/published` | **✅ BUILT & OPERATIONAL** — 93/93 tests pass (after triage tightening); live runs producing daily PRs. Spec: `docs/refined-requests/rss-pipeline.md`. Verification: `docs/reference/integration-verification-rss-pipeline.md`. |
 | **Astro Starlight static site** with beginner/advanced filter | **✅ BUILT** — Astro 6.3.5 + Starlight 0.39.2, 10 pages (Home, Start Here→Day 1/Week 1, News, Skills, Tips, Glossary, Reference, Contribute, 404), 7 components (HomeHero, NewsPanel, NewsList, AudienceBadge, SkillCard, AudienceFilter + bonus ConfidenceChip), Pagefind search, dark theme default. Spec: `docs/refined-requests/astro-starlight-site.md`. Verification: `docs/reference/integration-verification-astro-site.md`. Hosting open. |
-| **Hub-as-skill plugin** — `/hub`, `/hub-search`, `/hub-news`, `/hub-tips`, `/hub-skills`, `/hub-onboard <journey>` | not started |
+| **Hub-as-skill plugin** — eleven `/hub-*` commands (`/hub`, `/hub-search`, `/hub-news`, `/hub-tips`, `/hub-skills`, `/hub-glossary`, `/hub-onboard <journey>`, `/hub-install <skill-id>`, `/hub-audience <b|a|both>`, `/hub-refresh`, `/hub-open [section] [subsection]`) | **✅ BUILT & OPERATIONAL (2026-05-19)** — TypeScript workspace at `plugin/` sibling to `pipeline/` and `site/`. 108/108 tests pass, typecheck + lint clean, esbuild produces 11 ESM entries in `dist/`, bundled snapshot of repo content via `npm run build:snapshot`. Marketplace at repo-root `.claude-plugin/marketplace.json`, plugin manifest at `plugin/.claude-plugin/plugin.json`. Spec: `docs/refined-requests/hub-plugin.md`. Plan: `docs/design/plan-003-hub-plugin.md`. |
 | **Hybrid glossary** — canonical `/glossary` page + inline anchor links | **✅ page renders with 5 anchored terms; pattern proven** |
 | **Public/private gating** — `internal: true|false` frontmatter | schema defined; in use by pipeline + site |
+| **Per-user favourites (PAT-paste + unlisted-gist-backed)** — sign in by pasting a `gist`-scope PAT; pin any content item; favourites stored in the user's own unlisted GitHub gist `nbgaihub-favorites.json`; `/my-pins/` page renders pinned items; same gist consumable by future Claude-side `/hub-*` skill | **✅ BUILT (2026-05-19)** in commits `c1df291`, `5a08260`, `64f83b2`. 127/127 site tests pass. See `docs/refined-requests/personalization-and-contributions.md`, plan `docs/design/plan-003-personalization-and-contributions.md`, gist contract `docs/reference/gist-contract.md`. |
+| **Skill submission web form (URL-redirect to GitHub editor)** — `/submit-skill/` page; anonymous-accessible; live-validated against the 17-rule frontmatter contract; serialises markdown and redirects to GitHub's `new/main/skills?filename=&value=` editor (7000-char clipboard fallback for oversize payloads); CI validator workflow on `skills/**/*.md` PRs surfaces `::error` annotations | **✅ BUILT (2026-05-19)** in commits `c1df291`, `5a08260`, `64f83b2`. Validator at `pipeline/src/validators/skill.ts` (17 rules); workflow at `.github/workflows/validate-skill-submission.yml`. Pipeline now 112 tests (was 93). |
 
 ## Deferred — LATER
 
@@ -60,7 +62,6 @@ A curated Claude Code knowledge hub for bank colleagues — a one-stop shop comb
 - Full-text or semantic search across content (currently Pagefind covers full-text; semantic deferred)
 - Greek-language content
 - Authentication / SSO for gated content
-- Community contributions (PRs from outside the team)
 - Analytics on what newcomers click
 - Expanded news sources beyond the initial five
 - Hero image extraction for news items (RSS thumbnail + og:image fallback) — `hero_image` field reserved in site schema (optional) for forward compat
@@ -72,7 +73,6 @@ A curated Claude Code knowledge hub for bank colleagues — a one-stop shop comb
 ## Out of scope — NO
 
 - Live chat or forum
-- Per-user personalization or bookmarking
 - Hosting user-generated content
 - Marketing-style branding
 - Live chatbot widget on the website (the Claude skill IS the chatbot)
@@ -107,7 +107,9 @@ For full RSS pipeline context, see refined request: `docs/refined-requests/rss-p
 - [x] **At least 5 glossary terms visible** *(5/10 seeded)*
 - [x] At least 1 news item visible *(43 items in PR #1 on 2026-05-18; need PR merge to surface in `news/published/`)*
 - [x] **Beginner/Advanced/Both filter wired** *(AudienceFilter component built, `localStorage.nbgaihub.audience` persistence; visible no-op until news populated)*
-- [ ] `/hub` commands work from a fresh Claude Code install *(plugin not yet scaffolded)*
+- [x] **`/hub` commands work from a fresh Claude Code install** *(eleven commands ship in `plugin/`; install via `/plugin marketplace add chomovazuzana/NbgAiHub`; smoke-tested end-to-end on 2026-05-19)*
 - [x] **One full end-to-end RSS pipeline run completed** *(run `26047997638`, 2m46s, PR #1, then PR #2/#3 with tightened triage)*
-- [ ] Hub installable as a plugin (`/plugin marketplace add chomovazuzana/NbgAiHub`) in one command
+- [x] **Hub installable as a plugin (`/plugin marketplace add chomovazuzana/NbgAiHub`) in one command** *(marketplace.json points at `./plugin`; plugin.json declares `nbg-ai-hub`)*
 - [x] **SCOPE.md + DECISIONS.md tell the story of how we got here** *(this file + 20+ DECISIONS entries through 2026-05-18)*
+- [x] **Signed-in user can pin and see pins on `/my-pins/`** *(verified in build — PAT-paste flow validates against `GET /user`; first pin lazily creates unlisted gist `nbgaihub-favorites.json`; `/my-pins/` joins gist `favourites[]` against build-time `<type>-index.json`; stale references render as dimmed "no longer available — unpin" rows)*
+- [x] **Anonymous visitor can submit a skill via `/submit-skill/` and reach GitHub's editor with the content pre-filled** *(verified in build — form is anonymous-accessible; live frontmatter validation mirrors the 17 CI rules; submit serialises YAML + body, URL-encodes, and either redirects directly (≤7000 chars) or copies content to clipboard + redirects to bare new-file URL (>7000 chars); CI validator workflow re-runs the same rules on the PR)*
