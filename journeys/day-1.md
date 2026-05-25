@@ -8,7 +8,7 @@ authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
 deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
-ai_summary: A six-step walkthrough for someone who just got Claude Code access — install, first session, survival keys, CLAUDE.md, skills marketplace, where to go tomorrow. Designed to be done in under an hour.
+ai_summary: A six-step walkthrough for someone who just got Claude Code access — install, first session, survival keys, CLAUDE.md, GitHub account, where to go tomorrow. Designed to be done in under an hour.
 ---
 
 You just got Claude Code. Here's the path that takes you from "installed" to "actually productive" in under an hour. Six steps. Don't skip any.
@@ -63,35 +63,38 @@ Two levels:
 - **Global** at `~/.claude/CLAUDE.md` — applies to every project on your machine
 - **Project** at `<repo-root>/CLAUDE.md` — applies to this project, overrides global
 
-For a new project, run `/claudemd` (a team skill — see step 5) to scaffold the template. For an existing project, ask Claude: *"propose a `CLAUDE.md` for this project."*
+For a new project, run `/claudemd` (a team skill — see step 6 for how to install it). For an existing project, ask Claude: *"propose a `CLAUDE.md` for this project."*
 
 Keep it under two pages. Lead with hard rules. Add to it whenever you find yourself correcting Claude on the same thing twice.
 
 ---
 
-## Step 5 — Add the team skills marketplace
+## Step 5 — Get a GitHub account
 
-The team curates a marketplace of ready-made skills at `github.com/556LowCodeNoCode/Skills`. One-time install, then any team member can install individual skills.
+**Do I need a GitHub account?** Yes — but don't worry. You don't need to "be a coder" to have one, and Claude Code does the heavy lifting from here. `gh` (the GitHub CLI you installed in step 1) is what Claude uses under the hood every time it touches GitHub. You'll see commands like `gh pr create` or `gh repo clone` flash past in sessions — you don't have to type them. Claude proposes, you approve.
 
-```
-/plugin marketplace add 556LowCodeNoCode/Skills
-```
+**What is GitHub and why does the team use it?** GitHub is where every line of code, every script, every Claude skill, every document the team writes lives. It's the industry standard — every software team in the world uses it for the same reasons:
 
-Then install individual skills you'll use:
+- **It's the shared filing cabinet.** Every team project lives in a *repository* (a GitHub folder). Clone one to your laptop and you have the whole thing — no "can you email me the latest version?", no version-confusion, no "which folder is current?". Whoever pushes a change, everyone gets it.
+- **It's how work gets reviewed.** Changes go through a *pull request* — a side-by-side diff your colleagues can comment on before it lands. The whole team's knowledge gets baked into the review trail.
+- **It's how Claude Code knows what to work on.** Claude reads a project from a GitHub-cloned folder on your laptop. Without GitHub, there's nothing for it to read and nowhere for its work to go.
+- **It's the team's collective memory.** Every decision, every issue, every conversation about why the code looks the way it does — it's all searchable, forever. Newcomers (you, today) can read the trail and catch up without bothering anyone.
 
-```
-/plugin install team@556LowCodeNoCode-skills
-/plugin install claudemd@556LowCodeNoCode-skills
-/plugin install deploy@556LowCodeNoCode-skills
-/plugin install commit-work@556LowCodeNoCode-skills
-```
+Once you have an account, you can also pin favourites and submit your own skills to this hub.
 
-You can also install this hub itself as a plugin so `/hub-search`, `/hub-glossary`, `/hub-tips` work inside Claude Code:
+**Don't be intimidated.** Signing up takes five minutes. From there, Claude Code makes GitHub feel like a quiet utility, not a wall of jargon.
 
-```
-/plugin marketplace add chomovazuzana/NbgAiHub
-/plugin install nbg-ai-hub@nbg-ai-hub-marketplace
-```
+**What to do:**
+
+1. Go to [github.com](https://github.com/) and sign up. Five minutes. No credit card, no technical questions, use your bank email.
+2. In a terminal, run:
+   ```
+   gh auth login
+   ```
+   Pick `GitHub.com` → `HTTPS` → `Login with a web browser`. Copy the code it shows, hit return, log in in the browser. Done.
+3. Ping the team channel to be added to the team org — that's where the team's repositories live.
+
+If anything in those three steps confuses you, just ask Claude: *"walk me through setting up my GitHub account."* It does this all day long.
 
 ---
 
@@ -99,9 +102,20 @@ You can also install this hub itself as a plugin so `/hub-search`, `/hub-glossar
 
 You're set up. By tomorrow, do these three things:
 
-1. **Try `/team` on one small task** — fix a bug, add a small feature. See the multi-agent workflow end-to-end on something low-stakes.
-2. **Read your project's `CLAUDE.md`** — once. Then keep it open in a tab.
-3. **Bookmark this hub** — and remember `/hub-search` works inside Claude Code without leaving the terminal.
+1. **Add the team skills marketplace** — one-time install for the whole team's curated skill set:
+   ```
+   /plugin marketplace add 556LowCodeNoCode/Skills
+   /plugin install team@556LowCodeNoCode-skills
+   /plugin install claudemd@556LowCodeNoCode-skills
+   /plugin install commit-work@556LowCodeNoCode-skills
+   ```
+   And install this hub itself so `/hub-search`, `/hub-glossary`, `/hub-tips` work inside Claude Code:
+   ```
+   /plugin marketplace add chomovazuzana/NbgAiHub
+   /plugin install nbg-ai-hub@nbg-ai-hub-marketplace
+   ```
+2. **Try `/team` on one small task** — fix a bug, add a small feature. See the multi-agent workflow end-to-end on something low-stakes.
+3. **Read your project's `CLAUDE.md`** — once. Then keep it open in a tab.
 
 Stuck on anything? `/hub-glossary <term>` for definitions, `/hub-tips` for patterns. Or ask in the team channel — *every* newcomer hits the same walls in the first week. Asking earlier saves time.
 
