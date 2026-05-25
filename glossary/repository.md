@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A project's home on GitHub — one folder per repo, contains all the code, history, issues, and PRs for one piece of work.
 tldr: "A project's home on GitHub. One folder that contains all the code, every change ever made, and the discussions around it."
 aliases: ["repo", "repos", "repositories"]

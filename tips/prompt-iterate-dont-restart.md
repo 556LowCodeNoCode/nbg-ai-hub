@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: When Claude's answer is wrong, don't `/clear` and start over. Tell it what's wrong and let it adjust — you keep all the context you've already built up.
 ---
 

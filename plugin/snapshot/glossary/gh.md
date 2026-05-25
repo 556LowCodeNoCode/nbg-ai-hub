@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://cli.github.com/"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: The official GitHub command-line tool. Claude Code uses `gh` to clone repos, create issues, open PRs, and check workflow status — you describe what you want in plain English, Claude calls `gh`.
 ---
 

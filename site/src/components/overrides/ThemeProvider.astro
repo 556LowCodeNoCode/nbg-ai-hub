@@ -1,0 +1,28 @@
+---
+// Override of @astrojs/starlight/components/ThemeProvider.astro.
+// Two-option theme model (light default). Upstream's three-mode
+// (auto / light / dark) reads `prefers-color-scheme` when nothing is
+// stored — which means dark-mode-OS users land on a dark site even
+// though we want a consistent light surface for the bank-colleague
+// audience. We honour an explicit 'dark' choice only; everything else
+// (empty, stale 'auto', invalid values) resolves to light.
+//
+// Paired with ./ThemeSelect.astro which renders the single-button
+// toggle that writes 'light' | 'dark' back into the same storage key.
+//
+// Wired in astro.config.mjs via `components.ThemeProvider`.
+---
+
+{/* Inlined to avoid FOUC — runs synchronously before paint. */}
+<script is:inline>
+	(() => {
+		let stored = null;
+		try { stored = localStorage.getItem('starlight-theme'); } catch (e) { /* SSR / private mode */ }
+		const theme = stored === 'dark' ? 'dark' : 'light';
+		document.documentElement.dataset.theme = theme;
+		// Compatibility shim. Anything in Starlight that still reaches for
+		// `StarlightThemeProvider.updatePickers()` (we don't ship pickers
+		// to update) is now a no-op rather than a ReferenceError.
+		window.StarlightThemeProvider = { updatePickers: () => {} };
+	})();
+</script>

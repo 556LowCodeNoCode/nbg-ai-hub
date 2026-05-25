@@ -1,13 +1,22 @@
 ---
-// AudienceFilter.astro — Three-checkbox audience filter.
-// See project-design.md §S.3.6 + §S.13.12 (AudienceFilter row).
+// AudienceFilter.astro — Single-select segmented audience filter.
 //
-// Visual restyle ONLY (AC23 + AC35 + A6). The wrapping <form> retains the
-// `.audience-filter` class and `data-scope` attribute (read by the script
-// verbatim). The three checkbox inputs stay real inputs — multi-select
-// behaviour preserved. The script block below is unchanged bit-for-bit from
-// the pre-redesign component. Only the surrounding label chrome changes to
-// render as a segmented control via CSS tokens.
+// 2026-05-25 redesign (UAT feedback #9, #17):
+//   - Three checkboxes → three radios (single-select segmented control)
+//   - "Both" dropped as a visible option (it's an audience tag, not a
+//     filter selector — the user wanted to know whether a tip applies to
+//     them, not pick a third bucket).
+//   - Active state is now an obvious dark-inverted pill — no more "did
+//     anything happen?" guessing.
+//
+// Filter semantics:
+//   "All"        → show every item
+//   "Beginner"   → show items tagged beginner OR both
+//   "Advanced"   → show items tagged advanced OR both
+//
+// State is persisted in localStorage.nbgaihub.audience as one of
+// 'all' | 'beginner' | 'advanced'. The legacy array-of-strings format
+// from the previous checkbox UI is migrated automatically on read.
 
 interface Props {
   scope?: string;
@@ -17,19 +26,19 @@ const { scope = '[data-audience]' } = Astro.props;
 ---
 
 <form class="audience-filter not-content" data-scope={scope}>
-  <span class="audience-filter__label">Audience</span>
-  <div class="audience-filter__group" role="group" aria-label="Audience filter">
+  <span class="audience-filter__label">Show</span>
+  <div class="audience-filter__group" role="radiogroup" aria-label="Audience filter">
     <label class="audience-filter__option">
-      <input type="checkbox" value="beginner" checked />
-      <span class="audience-filter__chip">Beginner</span>
+      <input type="radio" name="audience" value="all" checked />
+      <span class="audience-filter__chip">Everything</span>
     </label>
     <label class="audience-filter__option">
-      <input type="checkbox" value="advanced" checked />
-      <span class="audience-filter__chip">Advanced</span>
+      <input type="radio" name="audience" value="beginner" />
+      <span class="audience-filter__chip">For beginners</span>
     </label>
     <label class="audience-filter__option">
-      <input type="checkbox" value="both" checked />
-      <span class="audience-filter__chip">Both</span>
+      <input type="radio" name="audience" value="advanced" />
+      <span class="audience-filter__chip">For experienced</span>
     </label>
   </div>
 </form>
@@ -70,7 +79,7 @@ const { scope = '[data-audience]' } = Astro.props;
       position: relative;
     }
     /* Visually hide the real input but keep it focusable for keyboard + AT. */
-    .audience-filter__option input[type='checkbox'] {
+    .audience-filter__option input[type='radio'] {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -82,9 +91,9 @@ const { scope = '[data-audience]' } = Astro.props;
     .audience-filter__chip {
       display: inline-flex;
       align-items: center;
-      padding: var(--nbg-sp-1) var(--nbg-sp-3);
+      padding: var(--nbg-sp-1-5) var(--nbg-sp-3-5);
       font-family: var(--nbg-type-body);
-      font-size: var(--nbg-fs-xs);
+      font-size: var(--nbg-fs-sm);
       font-weight: var(--nbg-fw-medium);
       line-height: 1.3;
       color: var(--nbg-color-fg-secondary);
@@ -92,17 +101,23 @@ const { scope = '[data-audience]' } = Astro.props;
       border-radius: var(--nbg-r-pill);
       transition:
         background-color var(--nbg-dur-fast) var(--nbg-ease-out),
-        color            var(--nbg-dur-fast) var(--nbg-ease-out);
+        color            var(--nbg-dur-fast) var(--nbg-ease-out),
+        transform        var(--nbg-dur-fast) var(--nbg-ease-out);
       user-select: none;
     }
     .audience-filter__option:hover .audience-filter__chip {
       color: var(--nbg-color-fg-primary);
+      background: var(--nbg-color-bg-surface-hover);
     }
-    .audience-filter__option input[type='checkbox']:checked + .audience-filter__chip {
-      background: var(--nbg-color-accent-bg);
-      color: var(--nbg-color-accent-fg);
+    /* Active state — high-contrast dark pill so it's unmistakably "selected".
+       Previously a subtle accent-bg tint was used, which was almost invisible
+       in the screenshot and made the user think the filter did nothing. */
+    .audience-filter__option input[type='radio']:checked + .audience-filter__chip {
+      background: var(--nbg-color-fg-primary);
+      color: var(--nbg-color-bg-page);
+      font-weight: var(--nbg-fw-semibold);
     }
-    .audience-filter__option input[type='checkbox']:focus-visible + .audience-filter__chip {
+    .audience-filter__option input[type='radio']:focus-visible + .audience-filter__chip {
       outline: none;
       box-shadow: var(--nbg-sh-focus-ring);
     }
@@ -112,49 +127,82 @@ const { scope = '[data-audience]' } = Astro.props;
 <script is:inline>
   (function () {
     const KEY = 'nbgaihub.audience';
-    const DEFAULT = ['beginner', 'advanced', 'both'];
 
-    function applyAll() {
-      document.querySelectorAll('.audience-filter').forEach(function (form) {
-        const scope = form.getAttribute('data-scope') || '[data-audience]';
-        const boxes = form.querySelectorAll('input[type="checkbox"]');
-        const visible = new Set();
-        boxes.forEach(function (b) {
-          if (b.checked) visible.add(b.value);
-        });
-        document.querySelectorAll(scope).forEach(function (el) {
-          const a = el.getAttribute('data-audience') || 'both';
-          el.classList.toggle('audience-hidden', !visible.has(a));
-        });
-        try {
-          localStorage.setItem(KEY, JSON.stringify(Array.from(visible)));
-        } catch (e) {
-          /* private-mode / quota: ignore */
-        }
-      });
-    }
-
-    function restore() {
+    /** Read current selection, migrating the old checkbox-array format. */
+    function readSelection() {
       try {
         const raw = localStorage.getItem(KEY);
-        const saved = raw ? JSON.parse(raw) : DEFAULT;
-        document
-          .querySelectorAll('.audience-filter input[type="checkbox"]')
-          .forEach(function (box) {
-            box.checked = saved.indexOf(box.value) !== -1;
-          });
-      } catch (e) {
-        /* malformed or unavailable: keep defaults */
+        if (!raw) return 'all';
+        // New format: string. Old format: array of strings.
+        try {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed === 'string') return parsed;
+          if (Array.isArray(parsed)) {
+            // Legacy: array containing 'beginner','advanced','both'.
+            // If all three present → 'all'; if only beginner → 'beginner'; etc.
+            const hasB = parsed.includes('beginner');
+            const hasA = parsed.includes('advanced');
+            if (hasB && hasA) return 'all';
+            if (hasB) return 'beginner';
+            if (hasA) return 'advanced';
+            return 'all';
+          }
+          return 'all';
+        } catch (_) {
+          // raw was a bare string (not JSON-encoded)
+          return raw;
+        }
+      } catch (_) {
+        return 'all';
       }
     }
 
-    function init() {
-      restore();
-      applyAll();
+    function writeSelection(value) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(value));
+      } catch (_) { /* private-mode: ignore */ }
+    }
+
+    function applyAll(value) {
+      document.querySelectorAll('.audience-filter').forEach(function (form) {
+        const scope = form.getAttribute('data-scope') || '[data-audience]';
+        document.querySelectorAll(scope).forEach(function (el) {
+          const a = el.getAttribute('data-audience') || 'both';
+          let visible;
+          if (value === 'all') {
+            visible = true;
+          } else if (value === 'beginner') {
+            visible = a === 'beginner' || a === 'both';
+          } else if (value === 'advanced') {
+            visible = a === 'advanced' || a === 'both';
+          } else {
+            visible = true;
+          }
+          el.classList.toggle('audience-hidden', !visible);
+        });
+      });
+    }
+
+    function syncRadios(value) {
       document
-        .querySelectorAll('.audience-filter input[type="checkbox"]')
-        .forEach(function (box) {
-          box.addEventListener('change', applyAll);
+        .querySelectorAll('.audience-filter input[type="radio"]')
+        .forEach(function (radio) {
+          radio.checked = radio.value === value;
+        });
+    }
+
+    function init() {
+      const current = readSelection();
+      syncRadios(current);
+      applyAll(current);
+      document
+        .querySelectorAll('.audience-filter input[type="radio"]')
+        .forEach(function (radio) {
+          radio.addEventListener('change', function () {
+            if (!radio.checked) return;
+            writeSelection(radio.value);
+            applyAll(radio.value);
+          });
         });
     }
 

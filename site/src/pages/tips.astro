@@ -1,12 +1,20 @@
 ---
 /**
- * /tips — AgentNews-aesthetic tips index.
+ * /tips — single-column grouped tips index.
  *
- * Thematic clustering: prompting / survival / context / compliance, derived
- * from `topics` frontmatter with a small fallback table.
+ * 2026-05-25 redesign per UAT feedback #2:
+ *   - 3-column wall of cards → single-column list grouped by cluster
+ *     (Prompting / Survival keys / Context discipline / Compliance).
+ *   - Each row: clickable title + one-line teaser + audience pill.
+ *   - Anchor IDs live on each `<article id="tip-<slug>">` so deep links
+ *     from the homepage (/tips/#esc-to-stop) land on the row.
+ *   - Per-card "Sign in to pin" disappeared (PinButton now hides when
+ *     signed out — UAT #13).
+ *   - Filter chip row redesigned: All / Beginner / Advanced segmented
+ *     control with obvious active state (UAT #9).
  *
- * Related: project-design.md §S.13.16, plan-005 phase 4 #4.
- * Backs AC10, AC15.
+ * Cluster heuristic preserved from the previous file — `topics` frontmatter
+ * decides bucket, fallback "Other".
  */
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -19,16 +27,31 @@ type Tip = CollectionEntry<'tips'>;
 
 const all = await getCollection('tips');
 
-// Cluster heuristic — derive from topics. Order matters (first match wins).
-const CLUSTERS: Array<{ key: string; label: string; tag: string; match: (t: Tip) => boolean }> = [
-  { key: 'prompting',  label: 'Prompting',  tag: 'Prompting',
-    match: (t) => t.data.topics.some((x: string) => /prompt|model|opus|sonnet/i.test(x)) },
-  { key: 'survival',   label: 'Survival keys', tag: 'Survival',
-    match: (t) => t.data.topics.some((x: string) => /survival|esc|compact|clear|keyboard/i.test(x)) },
-  { key: 'context',    label: 'Context discipline', tag: 'Context',
-    match: (t) => t.data.topics.some((x: string) => /context|memory|claudemd|claude\.md|file/i.test(x)) },
-  { key: 'compliance', label: 'Compliance + safety', tag: 'Compliance',
-    match: (t) => t.data.topics.some((x: string) => /compliance|safety|trust|review|azure|secrets/i.test(x)) },
+const CLUSTERS: Array<{ key: string; label: string; blurb: string; match: (t: Tip) => boolean }> = [
+  {
+    key: 'prompting',
+    label: 'Prompting',
+    blurb: 'How to ask — phrasing, structure, what to include.',
+    match: (t) => t.data.topics.some((x: string) => /prompt|model|opus|sonnet/i.test(x)),
+  },
+  {
+    key: 'survival',
+    label: 'Survival keys',
+    blurb: 'The keystrokes and modes that save you when something goes wrong.',
+    match: (t) => t.data.topics.some((x: string) => /survival|esc|compact|clear|keyboard/i.test(x)),
+  },
+  {
+    key: 'context',
+    label: 'Context discipline',
+    blurb: 'Keeping Claude focused — what stays in the conversation, what should be cleared.',
+    match: (t) => t.data.topics.some((x: string) => /context|memory|claudemd|claude\.md|file/i.test(x)),
+  },
+  {
+    key: 'compliance',
+    label: 'Compliance & safety',
+    blurb: 'Working with bank data and external services — what is allowed and what is not.',
+    match: (t) => t.data.topics.some((x: string) => /compliance|safety|trust|review|azure|secrets/i.test(x)),
+  },
 ];
 
 const buckets: Record<string, Tip[]> = Object.fromEntries(CLUSTERS.map((c) => [c.key, []]));
@@ -54,14 +77,13 @@ for (const tip of all) {
   <section class="hero hero--compact">
     <div class="wrap">
       <div class="hero__intro">
-        <h1 class="hero__title">Patterns I keep <em>reaching for.</em></h1>
+        <h1 class="hero__title">Patterns I keep <em>reaching for</em></h1>
         <p class="hero__lede">
           <Fragment set:html={linkGlossaryTerms("Prompts, gotchas, and workflow recipes — clustered by theme so you can skim the area you need. Opinionated and plainspoken.")} />
-          <small>{all.length} entries</small>
         </p>
       </div>
-      <div style="margin-top: 2rem;">
-        <AudienceFilter scope=".card[data-audience]" />
+      <div style="margin-top: 1.5rem;">
+        <AudienceFilter scope=".tip-row[data-audience]" />
       </div>
     </div>
   </section>
@@ -70,57 +92,77 @@ for (const tip of all) {
     const items = buckets[cluster.key] ?? [];
     if (items.length === 0) return null;
     return (
-      <section class="section" id={cluster.key}>
+      <section class="section section--tight" id={cluster.key}>
         <div class="wrap">
-          <div class="section__head">
-            <h2>{cluster.label}</h2>
-            <span class="count">{items.length} {items.length === 1 ? 'tip' : 'tips'}</span>
-          </div>
-          <div class="grid-3">
+          <header class="tips-group__head">
+            <h2 class="tips-group__heading">{cluster.label}</h2>
+            <p class="tips-group__blurb">{cluster.blurb}</p>
+          </header>
+          <ul class="tips-list" role="list">
             {items.map((tip) => (
-              <article class="card card--text" data-audience={tip.data.audience}>
-                <div class="card__body">
-                  <div class="card__meta">
-                    <span class="tag tag--link">{cluster.tag}</span>
-                    <span class={`tag tag--audience-${tip.data.audience}`}>{tip.data.audience}</span>
+              <li>
+                <article
+                  id={`tip-${tip.id}`}
+                  class="tip-row"
+                  data-audience={tip.data.audience}
+                >
+                  <div class="tip-row__main">
+                    <h3 class="tip-row__title">{tip.data.title}</h3>
+                    <p class="tip-row__summary" set:html={linkGlossaryTerms(tip.data.ai_summary)} />
                   </div>
-                  <h3 class="card__title">{tip.data.title}</h3>
-                  <p class="card__summary" set:html={linkGlossaryTerms(tip.data.ai_summary)} />
-                  <div style="margin-top: 0.5rem;">
+                  <div class="tip-row__side">
+                    <span
+                      class={`tip-row__audience tip-row__audience--${tip.data.audience}`}
+                      title={
+                        tip.data.audience === 'beginner'
+                          ? 'For colleagues new to Claude Code'
+                          : tip.data.audience === 'advanced'
+                          ? 'For experienced Claude Code users'
+                          : 'Applies to everyone'
+                      }
+                    >
+                      {tip.data.audience}
+                    </span>
                     <PinButton type="tip" slug={tip.id} />
                   </div>
-                </div>
-              </article>
+                </article>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
     );
   })}
 
   {orphans.length > 0 && (
-    <section class="section" id="other">
+    <section class="section section--tight" id="other">
       <div class="wrap">
-        <div class="section__head">
-          <h2>Other</h2>
-          <span class="count">{orphans.length} {orphans.length === 1 ? 'tip' : 'tips'}</span>
-        </div>
-        <div class="grid-3">
+        <header class="tips-group__head">
+          <h2 class="tips-group__heading">Other</h2>
+          <p class="tips-group__blurb">Patterns that don't fit neatly elsewhere.</p>
+        </header>
+        <ul class="tips-list" role="list">
           {orphans.map((tip) => (
-            <article class="card card--text" data-audience={tip.data.audience}>
-              <div class="card__body">
-                <div class="card__meta">
-                  <span class="tag">Misc</span>
+            <li>
+              <article
+                id={`tip-${tip.id}`}
+                class="tip-row"
+                data-audience={tip.data.audience}
+              >
+                <div class="tip-row__main">
+                  <h3 class="tip-row__title">{tip.data.title}</h3>
+                  <p class="tip-row__summary" set:html={linkGlossaryTerms(tip.data.ai_summary)} />
                 </div>
-                <h3 class="card__title">{tip.data.title}</h3>
-                <p class="card__summary">{tip.data.ai_summary}</p>
-                <div style="margin-top: 0.5rem;">
+                <div class="tip-row__side">
+                  <span
+                    class={`tip-row__audience tip-row__audience--${tip.data.audience}`}
+                  >{tip.data.audience}</span>
                   <PinButton type="tip" slug={tip.id} />
                 </div>
-              </div>
-            </article>
+              </article>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   )}
@@ -128,6 +170,119 @@ for (const tip of all) {
 
 <style>
   @layer nbg.components {
-    .card.audience-hidden { display: none; }
+    /* AudienceFilter hides rows it doesn't want to show. */
+    .tip-row.audience-hidden { display: none; }
+
+    .section--tight { padding-block: 2rem; }
+
+    .tips-group__head {
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .tips-group__heading {
+      margin: 0 0 0.25rem;
+      font-family: var(--nbg-ff-body);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: var(--nbg-ink, #1a2030);
+    }
+    .tips-group__blurb {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--nbg-muted, #6b7280);
+    }
+
+    .tips-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.25rem;
+    }
+    /* Defeat Starlight's `:not(...) + :not(...) { margin-top: 1rem }` rule
+       inside .sl-markdown-content that would otherwise shove each <li>
+       down by 16px and break the tight rhythm. */
+    .tips-list > li { margin: 0; }
+
+    .tip-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 1.5rem;
+      padding: 1rem 0.5rem 1rem 0.75rem;
+      border-radius: 8px;
+      transition: background-color 120ms ease;
+      scroll-margin-top: 6rem;
+    }
+    .tip-row:hover {
+      background: var(--nbg-surface-2, #f6f8fa);
+    }
+    .tip-row:target {
+      background: color-mix(in srgb, var(--nbg-accent, #0a8a7d) 8%, transparent);
+      box-shadow: inset 3px 0 0 var(--nbg-accent, #0a8a7d);
+    }
+
+    .tip-row__main {
+      min-width: 0;
+    }
+    .tip-row__title {
+      margin: 0 0 0.35rem;
+      font-family: var(--nbg-ff-body);
+      font-size: 1.0625rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--nbg-ink, #1a2030);
+      letter-spacing: -0.005em;
+    }
+    .tip-row__summary {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.55;
+      color: var(--nbg-muted, #6b7280);
+    }
+
+    .tip-row__side {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .tip-row__audience {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      cursor: help;
+    }
+    .tip-row__audience--beginner {
+      background: color-mix(in srgb, var(--nbg-accent, #0a8a7d) 12%, transparent);
+      color: var(--nbg-accent, #0a8a7d);
+      border: 1px solid color-mix(in srgb, var(--nbg-accent, #0a8a7d) 25%, transparent);
+    }
+    .tip-row__audience--advanced {
+      background: var(--nbg-surface-2, #f6f8fa);
+      color: var(--nbg-ink, #1a2030);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .tip-row__audience--both {
+      background: transparent;
+      color: var(--nbg-muted, #6b7280);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+
+    @media (max-width: 600px) {
+      .tip-row { grid-template-columns: 1fr; gap: 0.5rem; }
+      .tip-row__side { justify-self: start; }
+    }
   }
 </style>

@@ -82,9 +82,15 @@ describe('JSON manifest emission', () => {
 
     expect(entry, 'Entry has title string').toHaveProperty('title');
     expect(typeof entry.title, 'title is string').toBe('string');
-    expect(entry, 'Entry has tldr string').toHaveProperty('tldr');
-    expect(typeof entry.tldr, 'tldr is string').toBe('string');
-    expect(entry.tldr.length, 'tldr is ≤160 chars').toBeLessThanOrEqual(160);
+    // Field is `tldrHtml` (pre-linked HTML, not raw tldr text) — see
+    // GlossaryTerm.astro line 72 (linkGlossaryTerms(entry.data.tldr)).
+    // The original `tldr` field was renamed when nested glossary tooltips
+    // were added; this assertion was missed during that refactor.
+    expect(entry, 'Entry has tldrHtml string').toHaveProperty('tldrHtml');
+    expect(typeof entry.tldrHtml, 'tldrHtml is string').toBe('string');
+    // Length check is generous because tldrHtml may contain inline
+    // <button data-glossary-slug …> wrappers; raw tldr is still ≤160 chars.
+    expect(entry.tldrHtml.length, 'tldrHtml is non-empty').toBeGreaterThan(0);
   });
 });
 

@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Designs SQL and NoSQL database schemas with proper normalization, indexing, migration patterns, and constraint design. Ensures data integrity and query performance, not just "tables that look right".
 install_command: "/plugin install database-schema-designer@556LowCodeNoCode-skills"
 skill_id: database-schema-designer

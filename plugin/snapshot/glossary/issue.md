@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A tracked discussion thread on GitHub — bug reports, feature requests, ideas. Issues have a state (open/closed), labels, assignees, and a comment thread. They're how the team remembers what to do next.
 ---
 

@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A proposal to merge a branch back into `main`. The PR is where review, discussion, CI checks, and the final approval happen — it's the conversation, not just the code.
 ---
 

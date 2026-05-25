@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Give Claude the relevant files, paths, or screenshots BEFORE asking it to do anything. Cold-start questions get cold-start answers.
 ---
 

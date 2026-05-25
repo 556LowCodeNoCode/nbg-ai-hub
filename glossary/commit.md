@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A saved snapshot of changes with a message describing why. Commits live on your machine until you push them — they're the unit of "I'm done with this slice of work."
 tldr: "A saved checkpoint of your changes, with a short note explaining what and why. You can always come back to any earlier commit."
 aliases: ["commits"]

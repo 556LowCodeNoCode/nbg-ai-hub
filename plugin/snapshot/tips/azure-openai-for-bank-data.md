@@ -7,7 +7,7 @@ internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: If a tool will process real bank data at runtime, its LLM calls MUST go through Azure OpenAI. The public Anthropic API and Gemini are off-limits for real customer data. This is data-residency, not a preference.
 ---
 

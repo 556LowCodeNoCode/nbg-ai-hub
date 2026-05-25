@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Generates production-grade frontend components and pages with creative, polished design — avoids the generic "AI-slop" aesthetic that gives away machine-generated UIs.
 install_command: "/plugin install frontend-design@556LowCodeNoCode-skills"
 skill_id: frontend-design

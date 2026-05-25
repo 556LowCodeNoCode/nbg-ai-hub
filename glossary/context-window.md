@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: The amount of conversation history Claude can remember at once — when it fills up, older content gets dropped and Claude starts forgetting earlier parts of the session.
 tldr: "How much Claude can remember in one conversation. Once it fills up, the oldest messages get forgotten — like short-term memory has a limit."
 aliases: ["context window", "context windows"]

@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-25"
 last_reviewed: "2026-05-25"
 external_link: "https://github.com/"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: The web platform where every team repo, issue, and pull request lives. The team's collective filing cabinet and review surface — Claude Code reads code from a GitHub-cloned folder on your laptop and pushes changes back via `gh`.
 tldr: "The website where the team's code lives. Every project, every change, and every discussion about the code is stored and tracked there."
 aliases: []

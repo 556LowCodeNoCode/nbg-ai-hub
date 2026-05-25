@@ -63,11 +63,10 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
   <section class="hero hero--compact">
     <div class="wrap">
       <div class="hero__intro">
-        <h1 class="hero__title">The Claude Code <em>vocabulary.</em></h1>
+        <h1 class="hero__title">The Claude Code <em>vocabulary</em></h1>
         <p class="hero__lede">
           Plain-language definitions for the words that keep coming up.
           Link directly to any term with <code>/glossary#&lt;slug&gt;</code>.
-          <small>{items.length} terms</small>
         </p>
       </div>
     </div>
@@ -122,7 +121,6 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
           <div class="section__head">
             <h2>Terms</h2>
-            <span class="count">{rendered.length} entries</span>
           </div>
           <div class="glossary-terms">
             {rendered.map(({ entry, html, label, firstLetter }) => (
@@ -141,7 +139,49 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
                     </a>
                   </h3>
                 </div>
-                <div class="glossary-body sl-markdown-content" set:html={html} />
+
+                {/* In one line — every entry has a schema-required `tldr`,
+                    so this block always renders and gives the page its
+                    uniform spine. The detail/markdown body that follows can
+                    vary in length without breaking the rhythm. */}
+                <div class="glossary-tldr">
+                  <span class="glossary-tldr__label">In one line</span>
+                  <p class="glossary-tldr__body">{entry.data.tldr}</p>
+                </div>
+
+                <div class="glossary-detail">
+                  <span class="glossary-detail__label">In detail</span>
+                  <div class="glossary-body sl-markdown-content" set:html={html} />
+                </div>
+
+                {(entry.data.external_link || entry.data.deeper_link) && (
+                  <div class="glossary-learn">
+                    <span class="glossary-learn__label">Learn more</span>
+                    <ul class="glossary-learn__list">
+                      {entry.data.external_link && (
+                        <li>
+                          <a href={entry.data.external_link} target="_blank" rel="noopener">
+                            {(() => {
+                              try { return new URL(entry.data.external_link).hostname.replace(/^www\./, ''); }
+                              catch { return entry.data.external_link; }
+                            })()} ↗
+                          </a>
+                        </li>
+                      )}
+                      {entry.data.deeper_link && (
+                        <li>
+                          <a href={entry.data.deeper_link} target="_blank" rel="noopener">
+                            {(() => {
+                              try { return new URL(entry.data.deeper_link).hostname.replace(/^www\./, ''); }
+                              catch { return entry.data.deeper_link; }
+                            })()} ↗
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
                 <div class="glossary-term__footer">
                   <PinButton type="glossary" slug={entry.id} />
                 </div>
@@ -267,6 +307,36 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
       font-family: var(--nbg-ff-mono);
       font-weight: 500;
     }
+    /* Three uniform zones per entry. Each is preceded by a small mono
+       all-caps label so the structure is unmistakable even when the body
+       length varies. */
+    .glossary-tldr,
+    .glossary-detail,
+    .glossary-learn {
+      margin-top: 1rem;
+    }
+    .glossary-tldr__label,
+    .glossary-detail__label,
+    .glossary-learn__label {
+      display: block;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--nbg-muted);
+      margin-bottom: 0.35rem;
+    }
+    .glossary-tldr__body {
+      margin: 0;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--nbg-accent);
+      background: var(--nbg-accent-soft);
+      color: var(--nbg-ink);
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      border-radius: 0 6px 6px 0;
+    }
     .glossary-body {
       color: var(--nbg-ink-2);
       font-size: 0.9375rem;
@@ -277,6 +347,25 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
     }
     .glossary-body :global(p:last-child) {
       margin-bottom: 0;
+    }
+    .glossary-learn__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 1.25rem;
+    }
+    .glossary-learn__list li { margin: 0; }
+    .glossary-learn__list a {
+      font-size: 0.875rem;
+      color: var(--nbg-accent);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--nbg-accent, #0a8a7d) 35%, transparent);
+      padding-bottom: 1px;
+    }
+    .glossary-learn__list a:hover {
+      border-bottom-color: var(--nbg-accent);
     }
     .glossary-term__footer {
       display: flex;

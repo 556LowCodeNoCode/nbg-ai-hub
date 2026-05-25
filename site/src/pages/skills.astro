@@ -1,12 +1,17 @@
 ---
 /**
- * /skills — AgentNews-aesthetic skills catalog.
+ * /skills — single-column skills catalog.
  *
- * Single AgentNews section with grid-3 of skill cards. Lead skill shown as
- * a .feature. AudienceFilter + PinButton preserved.
- *
- * Related: project-design.md §S.13.16, plan-005 phase 4 #3.
- * Backs AC10, AC11, AC15.
+ * 2026-05-25 redesign per UAT feedback #3:
+ *   - 3-column wall of cards → single-column list rows.
+ *   - Slash IDs (`/claudemd`, `/gsd-progress`) now labelled "Type this in
+ *     Claude:" so they read as a command-line cue, not a URL or a file path.
+ *   - Audience badge has a `title` tooltip explaining who it's for.
+ *   - "Internal" / "External" origin badge labelled with a tooltip too.
+ *   - Anchor ID on every row so deep links from the homepage land on the
+ *     right entry.
+ *   - Filter chip row uses the new segmented control (UAT #9).
+ *   - Per-card "Sign in to pin" hidden when signed out (UAT #13).
  */
 import { getCollection } from 'astro:content';
 import MarketingShell from '../components/MarketingShell.astro';
@@ -19,8 +24,31 @@ const sorted = items.sort((a, b) => {
   const byDate = b.data.authored.localeCompare(a.data.authored);
   return byDate !== 0 ? byDate : a.data.title.localeCompare(b.data.title);
 });
-const lead = sorted[0];
-const rest = sorted.slice(1);
+
+function audienceTooltip(audience: string): string {
+  if (audience === 'beginner') return 'For colleagues new to Claude Code';
+  if (audience === 'advanced') return 'For experienced Claude Code users';
+  return 'Applies to everyone';
+}
+
+function originTooltip(origin: string): string {
+  if (origin === 'internal') return 'Built by the NBG AI team';
+  if (origin === 'external') return 'Built by the wider Claude Code community';
+  return origin;
+}
+
+/** Split a "command — explanation" title so we can render the parts separately. */
+function splitTitle(title: string, fallbackId: string): { command: string; explanation: string } {
+  const parts = title.split(' — ');
+  if (parts.length < 2) {
+    return { command: `/${fallbackId}`, explanation: title };
+  }
+  const head = parts[0]!;
+  return {
+    command: head.startsWith('/') ? head : `/${head}`,
+    explanation: parts.slice(1).join(' — '),
+  };
+}
 ---
 
 <MarketingShell
@@ -33,87 +61,238 @@ const rest = sorted.slice(1);
   <section class="hero hero--compact">
     <div class="wrap">
       <div class="hero__intro">
-        <h1 class="hero__title">Skills worth <em>installing.</em></h1>
+        <h1 class="hero__title">Skills worth <em>installing</em></h1>
         <p class="hero__lede">
           <Fragment set:html={linkGlossaryTerms("A curated catalog of Claude Code skills and plugins — the ones we keep reaching for. Each entry tells you what the skill does, who it's for, and how to install it.")} />
-          <small>{items.length} entries</small>
         </p>
       </div>
-      <div style="margin-top: 2rem;">
-        <AudienceFilter scope=".card[data-audience]" />
+      <div style="margin-top: 1.5rem;">
+        <AudienceFilter scope=".skill-row[data-audience]" />
       </div>
     </div>
   </section>
 
-  {lead && (
-    <section class="section">
-      <div class="wrap">
-        <div class="section__head">
-          <h2>Featured skill</h2>
-          <span class="count">{lead.data.origin}</span>
-        </div>
-        <article class="feature card" data-audience={lead.data.audience}>
-          <div class="feature__art feature__art--placeholder">
-            <span class="eyebrow eyebrow--accent">/{lead.data.skill_id}</span>
-          </div>
-          <div class="feature__body">
-            <div class="feature__meta">
-              <span class="tag tag--link">{lead.data.category}</span>
-              <span class={`tag tag--audience-${lead.data.audience}`}>{lead.data.audience}</span>
-              <span class="tag">{lead.data.origin}</span>
-            </div>
-            <h3 class="feature__title">{lead.data.title}</h3>
-            <p class="feature__summary" set:html={linkGlossaryTerms(lead.data.ai_summary)} />
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-              {lead.data.external_link && (
-                <a class="feature__cta" href={lead.data.external_link} target="_blank" rel="noopener">
-                  View source →
-                </a>
-              )}
-              <PinButton type="skill" slug={lead.id} />
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  )}
+  <section class="section section--tight">
+    <div class="wrap">
+      <header class="skills-list__head">
+        <p class="skills-list__legend">
+          Each skill below is a slash command you can run in Claude Code.
+          The line under the title shows what to type.
+        </p>
+      </header>
 
-  {rest.length > 0 && (
-    <section class="section">
-      <div class="wrap">
-        <div class="section__head">
-          <h2>All skills</h2>
-          <span class="count">{rest.length} more</span>
-        </div>
-        <div class="grid-3">
-          {rest.map((entry) => (
-            <article class="card card--text" data-audience={entry.data.audience}>
-              <div class="card__body">
-                <div class="card__meta">
-                  <span class="tag tag--link">/{entry.data.skill_id}</span>
-                  <span class={`tag tag--audience-${entry.data.audience}`}>{entry.data.audience}</span>
+      <ul class="skills-list" role="list">
+        {sorted.map((entry) => {
+          const { command, explanation } = splitTitle(entry.data.title, entry.data.skill_id);
+          return (
+            <li>
+              <article
+                id={`skill-${entry.id}`}
+                class="skill-row"
+                data-audience={entry.data.audience}
+              >
+                <div class="skill-row__main">
+                  <div class="skill-row__title-line">
+                    <h3 class="skill-row__title">{explanation}</h3>
+                    <span
+                      class={`skill-row__audience skill-row__audience--${entry.data.audience}`}
+                      title={audienceTooltip(entry.data.audience)}
+                    >{entry.data.audience}</span>
+                    <span
+                      class={`skill-row__origin skill-row__origin--${entry.data.origin}`}
+                      title={originTooltip(entry.data.origin)}
+                    >{entry.data.origin}</span>
+                  </div>
+
+                  <p class="skill-row__command-hint">
+                    <span class="skill-row__command-label">Type this in Claude:</span>
+                    <code class="skill-row__command">{command}</code>
+                  </p>
+
+                  <p class="skill-row__summary" set:html={linkGlossaryTerms(entry.data.ai_summary)} />
                 </div>
-                <h3 class="card__title">{entry.data.title}</h3>
-                <p class="card__summary" set:html={linkGlossaryTerms(entry.data.ai_summary)} />
-                <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+
+                <div class="skill-row__side">
                   {entry.data.external_link && (
-                    <a class="external-host" href={entry.data.external_link} target="_blank" rel="noopener">
-                      <span>{entry.data.origin}</span>
-                    </a>
+                    <a
+                      class="skill-row__source"
+                      href={entry.data.external_link}
+                      target="_blank"
+                      rel="noopener"
+                    >View source ↗</a>
                   )}
                   <PinButton type="skill" slug={entry.id} />
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+              </article>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </section>
 </MarketingShell>
 
 <style>
   @layer nbg.components {
-    .card.audience-hidden { display: none; }
+    .skill-row.audience-hidden { display: none; }
+
+    .section--tight { padding-block: 2rem; }
+
+    .skills-list__head {
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .skills-list__legend {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--nbg-muted, #6b7280);
+    }
+
+    .skills-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .skills-list > li { margin: 0; }
+
+    .skill-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 1.5rem;
+      padding: 1.25rem 0.75rem;
+      border-radius: 8px;
+      transition: background-color 120ms ease;
+      scroll-margin-top: 6rem;
+    }
+    .skill-row:hover {
+      background: var(--nbg-surface-2, #f6f8fa);
+    }
+    .skill-row:target {
+      background: color-mix(in srgb, var(--nbg-accent, #0a8a7d) 8%, transparent);
+      box-shadow: inset 3px 0 0 var(--nbg-accent, #0a8a7d);
+    }
+
+    .skill-row__main { min-width: 0; display: grid; gap: 0.5rem; }
+
+    .skill-row__title-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .skill-row__title {
+      margin: 0;
+      font-family: var(--nbg-ff-body);
+      font-size: 1.0625rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--nbg-ink, #1a2030);
+      letter-spacing: -0.005em;
+    }
+
+    /* "Type this in Claude:" — small, mono, with the slash command on the
+       same line. This is the line UAT feedback specifically called out: the
+       slash IDs were reading as file paths. Now they read as a command cue. */
+    .skill-row__command-hint {
+      margin: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .skill-row__command-label {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--nbg-muted, #6b7280);
+    }
+    .skill-row__command {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.8125rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: var(--nbg-ink, #1a2030);
+      color: var(--nbg-bg, #fff);
+      border: 1px solid var(--nbg-ink, #1a2030);
+      letter-spacing: 0;
+    }
+
+    .skill-row__summary {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.55;
+      color: var(--nbg-muted, #6b7280);
+    }
+
+    .skill-row__side {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .skill-row__source {
+      font-size: 0.8125rem;
+      color: var(--nbg-accent, #0a8a7d);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--nbg-accent, #0a8a7d) 35%, transparent);
+      padding-bottom: 1px;
+      transition: border-color 120ms ease;
+    }
+    .skill-row__source:hover {
+      border-bottom-color: var(--nbg-accent, #0a8a7d);
+    }
+
+    .skill-row__audience,
+    .skill-row__origin {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+      cursor: help;
+    }
+    .skill-row__audience--beginner {
+      background: color-mix(in srgb, var(--nbg-accent, #0a8a7d) 12%, transparent);
+      color: var(--nbg-accent, #0a8a7d);
+      border: 1px solid color-mix(in srgb, var(--nbg-accent, #0a8a7d) 25%, transparent);
+    }
+    .skill-row__audience--advanced {
+      background: var(--nbg-surface-2, #f6f8fa);
+      color: var(--nbg-ink, #1a2030);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .skill-row__audience--both {
+      background: transparent;
+      color: var(--nbg-muted, #6b7280);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .skill-row__origin--internal {
+      background: color-mix(in srgb, #1d4ed8 8%, transparent);
+      color: #1d4ed8;
+      border: 1px solid color-mix(in srgb, #1d4ed8 25%, transparent);
+    }
+    .skill-row__origin--external {
+      background: transparent;
+      color: var(--nbg-muted, #6b7280);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+
+    @media (max-width: 720px) {
+      .skill-row { grid-template-columns: 1fr; gap: 0.75rem; }
+      .skill-row__side { align-items: flex-start; flex-direction: row; }
+    }
   }
 </style>

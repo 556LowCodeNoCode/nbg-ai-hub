@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-25"
 last_reviewed: "2026-05-25"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A one-line prompt gets one-line-quality work. Brief Claude with Role + Goal + Task + Constraints + Context — the same shape you'd hand a colleague who's helping with the task.
 ---
 

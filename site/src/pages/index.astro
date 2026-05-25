@@ -20,9 +20,8 @@ import { getCollection } from 'astro:content';
 import MarketingShell from '../components/MarketingShell.astro';
 import { linkGlossaryTerms } from '../lib/glossary-link-string';
 
-const skills   = await getCollection('skills');
-const tips     = await getCollection('tips');
-const glossary = await getCollection('glossary');
+const skills = await getCollection('skills');
+const tips   = await getCollection('tips');
 
 const topSkills = skills.slice(0, 6);
 const topTips   = tips.slice(0, 6);
@@ -61,16 +60,42 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     <div class="wrap">
       <div class="hero__intro">
         <h1 class="hero__title">
-          What I wish I knew sooner about <em>Claude Code.</em>
+          What I wish I knew sooner about <em>Claude Code</em>
         </h1>
-        <p class="hero__lede" set:html={linkGlossaryTerms('A practical guide to Claude Code at NBG — for anyone just starting out and anyone already using it daily.')} />
+        <p class="hero__lede">
+          A practical guide to Claude Code at NBG — for anyone just starting out
+          and anyone already using it daily.
+        </p>
+        <p class="hero__what">
+          <strong>New here?</strong> Claude Code is a terminal-based AI assistant
+          from Anthropic that reads your code, edits files, and runs commands
+          alongside you. Think of it as a developer pair sitting next to you,
+          inside your project folder. The rest of this site explains how we use
+          it at NBG and how to get started.
+        </p>
       </div>
 
       <div class="router-grid">
+        {/* Newcomer card — bigger, brighter, single primary destination. */}
         <article class="router-card router-card--newcomer">
-          <div class="router-card__badge">New to Claude Code</div>
+          <div class="router-card__head">
+            {/* Compass — orientation. "Find your bearings before you start
+                walking." Universal symbol for "I'm new here, point me at
+                the start." Fits "Start with Foundations" better than the
+                shield (which read as security/protection). */}
+            <div class="router-card__icon router-card__icon--newcomer" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" stroke="none" opacity="0.85" />
+              </svg>
+            </div>
+            <div class="router-card__badge">New to Claude Code</div>
+          </div>
           <h2 class="router-card__title">Start with Foundations</h2>
-          <p class="router-card__body" set:html={linkGlossaryTerms('What makes Claude Code different from ChatGPT or Gemini, why we chose it at NBG, and how to get it running on your machine.')} />
+          <p class="router-card__body">
+            What makes Claude Code different from ChatGPT or Gemini, why we
+            chose it at NBG, and how to get it running on your machine.
+          </p>
           <div class="router-card__actions">
             <a class="router-card__cta router-card__cta--primary" href="/start-here/foundations/">
               → Open Foundations
@@ -81,10 +106,23 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
           </div>
         </article>
 
+        {/* Experienced card — compact, dense, quick-reach links. */}
         <article class="router-card router-card--experienced">
-          <div class="router-card__badge">Already using it</div>
-          <h2 class="router-card__title">Jump straight in</h2>
-          <p class="router-card__body" set:html={linkGlossaryTerms('Skip the intro and go straight to what you need — the skills catalog, tips and tricks, glossary lookups, or the curated News feed.')} />
+          <div class="router-card__head">
+            {/* Lightning bolt — speed / power. Matches "Jump straight in"
+                better than the double-chevron (which read as "next, next"
+                rather than "I already know what I want"). */}
+            <div class="router-card__icon router-card__icon--experienced" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2" />
+              </svg>
+            </div>
+            <div class="router-card__badge router-card__badge--quiet">Already using it</div>
+          </div>
+          <h2 class="router-card__title router-card__title--quiet">Jump straight in</h2>
+          <p class="router-card__body router-card__body--quiet">
+            Skip the intro and go straight to what you need.
+          </p>
           <div class="router-card__actions router-card__actions--grid">
             <a class="router-pill" href="/skills/">Skills</a>
             <a class="router-pill" href="/tips/">Tips &amp; Tricks</a>
@@ -101,7 +139,6 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     <div class="wrap">
       <div class="section__head">
         <h2>Skills</h2>
-        <span class="count">{skills.length} entries</span>
         <a href="/skills/">All skills →</a>
       </div>
       <div class="grid-3">
@@ -114,7 +151,7 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
                   <span class="eyebrow accent">Skill</span>
                 </div>
                 <h3 class="card__title">
-                  <a href={`/skills/#${skill.id}`}>{explanation}</a>
+                  <a href={`/skills/#skill-${skill.id}`}>{explanation}</a>
                 </h3>
                 <p class="card__command"><code>{command}</code></p>
                 {skill.data.ai_summary && (
@@ -133,7 +170,6 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     <div class="wrap">
       <div class="section__head">
         <h2>Tips</h2>
-        <span class="count">{tips.length} entries</span>
         <a href="/tips/">All tips →</a>
       </div>
       <div class="grid-3">
@@ -144,7 +180,7 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
                 <span class="eyebrow accent">Tip</span>
               </div>
               <h3 class="card__title">
-                <a href={`/tips/#${tip.id}`}>{tip.data.title}</a>
+                <a href={`/tips/#tip-${tip.id}`}>{tip.data.title}</a>
               </h3>
               {tip.data.ai_summary && (
                 <p class="card__summary" set:html={linkGlossaryTerms(tip.data.ai_summary)} />
@@ -163,8 +199,8 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
         <div>
           <h4>NBG AI Hub</h4>
           <p>
-            A curated Claude Code knowledge hub for bank colleagues. Skills,
-            tips, glossary, onboarding paths.
+            An internal field manual for colleagues onboarding to Claude Code at
+            the National Bank of Greece. Skills, tips, glossary, onboarding paths.
           </p>
         </div>
         <div>
@@ -180,20 +216,21 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
           <h4>Start</h4>
           <ul>
             <li><a href="/start-here/foundations/">Foundations</a></li>
+            <li><a href="/start-here/day-1/">Day 1 setup</a></li>
             <li><a href="/my-pins/">My Pins</a></li>
           </ul>
         </div>
         <div>
-          <h4>Connect</h4>
+          <h4>About</h4>
           <ul>
-            <li><a href="https://github.com/chomovazuzana/NbgAiHub" target="_blank" rel="noopener">GitHub</a></li>
-            <li><span class="footer-link--disabled">Discord (soon)</span></li>
+            <li>Maintained by the NBG AI team</li>
+            <li>Internal use only</li>
           </ul>
         </div>
       </div>
       <div class="site-footer__bottom">
         <span>NBG AI HUB — A FIELD MANUAL</span>
-        <span>{glossary.length} glossary · {tips.length} tips · {skills.length} skills</span>
+        <span>Last updated {new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
       </div>
     </div>
   </footer>
@@ -222,6 +259,29 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     max-width: none;
   }
 
+  /* "What is Claude Code?" intro block. Sits just below the lede,
+     gives the first-time visitor enough context to know what the
+     site is *about* before they pick a door. */
+  .hero__what {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--nbg-accent);
+    background: var(--nbg-accent-soft);
+    color: var(--nbg-ink);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    /* Full container width — matches the lede and the router grid below.
+       Previous max-width: 60rem cap clipped the right edge per UAT image #13. */
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 0 6px 6px 0;
+  }
+  .hero__what strong {
+    color: var(--nbg-ink);
+    font-weight: 600;
+  }
+
   /* Default grid `align-items: stretch` makes both cards equal height
      (each fills the row's natural max content). Inside each card a
      flex column stacks badge → title → body, then `margin-top: auto`
@@ -237,13 +297,11 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
   }
 
   /* CSS Grid with explicit row tracks. Each child is pinned to its
-     own row by `grid-row` — no auto-flow, no flex behavior. Row 4 is
-     `1fr` (the spacer) so the actions row 5 is always pushed to the
-     bottom. This makes the layout completely deterministic — every
-     element across both cards sits at the same Y guaranteed.
+     own row by `grid-row`. Asymmetric design: newcomer card carries
+     an icon + bigger title; experienced card is more compact.
 
      Row map:
-       1: badge      (auto, content-sized)
+       1: head       (icon + badge)
        2: title      (auto)
        3: body       (auto)
        4: SPACER     (1fr — absorbs extra height)
@@ -260,6 +318,40 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     box-sizing: border-box;
   }
 
+  /* Row 1 — icon + badge cluster. The icon is the primary visual
+     differentiator between newcomer vs experienced; the badge sits
+     next to it as a quiet label. */
+  .router-card__head {
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+  .router-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--nbg-surface);
+    border: 1px solid var(--nbg-border);
+  }
+  .router-card__icon--newcomer {
+    background: var(--nbg-accent);
+    color: #ffffff;
+    border-color: var(--nbg-accent);
+    box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--nbg-accent, #0a8a7d) 50%, transparent);
+  }
+  .router-card__icon--experienced {
+    width: 36px;
+    height: 36px;
+    color: var(--nbg-ink-2, #4a5563);
+    background: var(--nbg-surface-2, #eef2f7);
+  }
+
   /* ROOT CAUSE FIX (2026-05-25): the cards live inside Starlight's
      `.sl-markdown-content` wrapper, which applies a global vertical-
      rhythm rule:
@@ -271,11 +363,6 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
      `"0px"` on card 0. The override below cancels it for our grid. */
   .router-grid > * + * {
     margin-top: 0;
-  }
-
-  .router-card__badge {
-    grid-row: 1;
-    margin: 0;
   }
 
   .router-card__title {
@@ -296,6 +383,7 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
   .router-card--newcomer {
     background: var(--nbg-accent-soft);
     border-color: var(--nbg-accent);
+    box-shadow: 0 8px 24px -16px color-mix(in srgb, var(--nbg-accent, #0a8a7d) 35%, transparent);
   }
 
   .router-card__badge {
@@ -304,7 +392,10 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     text-transform: uppercase;
     font-weight: 600;
     color: var(--nbg-accent);
-    /* (was: align-self: start — only needed under subgrid) */
+  }
+  /* Experienced-side badge is muted — quieter than the newcomer accent. */
+  .router-card__badge--quiet {
+    color: var(--nbg-muted);
   }
 
   .router-card__title {
@@ -312,14 +403,21 @@ const AGENTNEWS_URL = 'https://biks2013.github.io/AgentNews/';
     line-height: 1.2;
     margin: 0;
     color: var(--nbg-ink);
-    /* (was: align-self: start — only needed under subgrid) */
+  }
+  /* Experienced-side title is smaller; the card is a hub, not a destination. */
+  .router-card__title--quiet {
+    font-size: clamp(1.15rem, 1.7vw, 1.35rem);
+    color: var(--nbg-ink-2, #4a5563);
+    font-weight: 600;
   }
 
   .router-card__body {
     color: var(--nbg-muted);
     line-height: 1.5;
     margin: 0;
-    /* (was: align-self: start — only needed under subgrid) */
+  }
+  .router-card__body--quiet {
+    font-size: 0.875rem;
   }
 
   /* Bottom half of the card flex column. justify-content: space-between

@@ -7,7 +7,7 @@ internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Automates end-to-end deployment of NBG Azure-hosted web applications via the Azure Management Portal REST API — first-deploy (provision), auth-setup (identity team credentials + proxy + Kafka), and redeploy (rebuild + push).
 install_command: "/plugin install deploy@556LowCodeNoCode-skills"
 skill_id: deploy

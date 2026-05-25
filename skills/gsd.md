@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A family of commands (gsd-new-project, gsd-progress, gsd-do, gsd-next, etc.) for managing multi-week Claude Code projects with persistent state in a `.planning/` folder.
 install_command: "/plugin install gsd@556LowCodeNoCode-skills"
 skill_id: gsd

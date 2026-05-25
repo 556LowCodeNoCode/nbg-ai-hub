@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Claude is fast and capable — treat it like a brilliant junior. Read what it's about to change before saying yes. Skipping the diff review is the most expensive habit a newcomer can pick up.
 ---
 

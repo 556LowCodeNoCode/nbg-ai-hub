@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Orchestrates a multi-agent team — refiner, scanner, investigator, planner, designer, parallel coders, reviewer, dependency validator, test builder, integration verifier — to take a request from idea to merged code in one sitting.
 install_command: "/plugin install team@556LowCodeNoCode-skills"
 skill_id: team

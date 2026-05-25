@@ -230,6 +230,13 @@
     letter-spacing: -0.025em;
     color: var(--nbg-ink);
     margin: 0;
+    /* Mobile overflow guard — without these, long unhyphenated words
+       ("Foundations", "Claude Code" in italic) push the title past the
+       viewport edge on narrow screens. text-wrap: balance makes the
+       title break at natural points; overflow-wrap: anywhere is the
+       safety net for the worst case. */
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
   .hero__title em {
     font-style: italic;
@@ -523,10 +530,9 @@
     font-size: 0.90625rem; /* 14.5px */
     line-height: 1.55;
     margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    /* No line-clamp: truncated previews ("…and then it…") read as a tease
+       with nowhere to click. Show the whole summary. Authors keep
+       ai_summary short (≤2 sentences); CSS no longer truncates. */
   }
 
   /* ─── Eyebrow / tag / dot / dates ──────────────────────────────── */

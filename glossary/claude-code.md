@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://docs.claude.com/en/docs/claude-code/overview"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A terminal-based AI coding agent from Anthropic that reads your project, proposes changes, runs commands, and iterates — treat it like an extremely capable junior colleague who needs review.
 tldr: "Anthropic's coding AI that lives in your terminal. It reads your project, suggests changes, and runs commands — you approve each step."
 aliases: ["Claude Code"]

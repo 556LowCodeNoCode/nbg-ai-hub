@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Tell Claude what you want the outcome to be, not which functions to call. Claude is better at finding the right code path than you are at prescribing it.
 ---
 

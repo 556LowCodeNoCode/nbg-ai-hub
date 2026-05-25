@@ -155,6 +155,28 @@
     font-size: inherit;
   }
 
+  /* Override Shiki's inline `background-color` and `color` on fenced code
+     blocks. Dark teal background + white text — on-brand with the rest of
+     the site (accent is teal #0a8a7d), reads as a "terminal" panel without
+     looking like a generic black box. Uses --nbg-c-teal-900 from the
+     project's teal scale. */
+  .sl-markdown-content pre.astro-code {
+    background: var(--nbg-c-teal-900, #052329) !important;
+    color: #f0f4f8 !important;
+    border: 1px solid var(--nbg-c-teal-800, #0a3a42);
+  }
+  .sl-markdown-content pre.astro-code code {
+    background: transparent !important;
+    color: inherit !important;
+  }
+  /* Force syntax-token colors to the dark-theme palette regardless of the
+     site's light/dark mode — the block surface is dark navy in both modes,
+     so dark-theme tokens always read correctly. */
+  .sl-markdown-content pre.astro-code .line span {
+    color: var(--shiki-dark, #f0f4f8) !important;
+    background-color: transparent !important;
+  }
+
   /* ─── Tables ────────────────────────────────────────────────────────── */
 
   .sl-markdown-content table {

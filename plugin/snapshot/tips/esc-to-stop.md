@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: When Claude is going down the wrong path, press Esc to halt it immediately. This single key prevents most "Claude just deleted everything" horror stories.
 ---
 

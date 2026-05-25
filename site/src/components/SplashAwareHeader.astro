@@ -132,7 +132,7 @@ function isCurrent(href: string): boolean {
           </div>
         )}
         <AuthControls />
-        <div class="nbg-topnav__theme">
+        <div class="nbg-topnav__theme" title="Switch theme" aria-label="Switch theme">
           <ThemeSelect />
         </div>
       </div>
@@ -495,22 +495,11 @@ function isCurrent(href: string): boolean {
       height: 14px;
       --sl-icon-size: 14px;
     }
+    /* Hide the ⌘K keyboard hint inside the search trigger.
+       The hint reads as Mac-only and as visual noise for non-developers.
+       The button still opens Pagefind on click; the shortcut still works. */
     .nbg-topnav__search :global(button[data-open-modal] > kbd) {
-      margin-left: auto;
-      padding: 2px 6px;
-      gap: 1px;
-      background: var(--nbg-color-bg-canvas);
-      border: 1px solid var(--nbg-color-border-subtle);
-      border-radius: var(--nbg-r-sm);
-      font-family: var(--nbg-type-mono);
-      font-size: 11px;
-      color: var(--nbg-color-fg-muted);
-      line-height: 1;
-    }
-    .nbg-topnav__search :global(button[data-open-modal] > kbd kbd) {
-      all: unset;
-      font-family: inherit;
-      color: inherit;
+      display: none;
     }
 
     /* ── Theme toggle — icon-only ─────────────────────────────────────

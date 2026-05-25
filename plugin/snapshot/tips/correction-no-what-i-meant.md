@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: When Claude misunderstood, lead the correction with 'No, what I meant was…' — it's shorter than re-explaining everything and Claude takes the cue cleanly.
 ---
 

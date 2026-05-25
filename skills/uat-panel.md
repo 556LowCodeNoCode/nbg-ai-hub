@@ -7,7 +7,7 @@ internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Conversational UAT — Claude walks a non-developer through validating a built feature, asks scripted questions, and records pass/fail evidence the team can sign off on.
 install_command: "/plugin install uat-panel@556LowCodeNoCode-skills"
 skill_id: uat-panel

@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A community workflow framework that adds a `.planning/` folder to your project — roadmap, milestones, phases, audit trail — so Claude can pick up multi-week work across sessions without losing the thread.
 tldr: "A community add-on that helps Claude pick up long projects across many sessions by keeping the plan and progress in a folder."
 aliases: []

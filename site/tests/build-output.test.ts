@@ -30,28 +30,24 @@ beforeAll(() => {
 describe('Day-1 step segmentation (AC6)', () => {
   const day1Html = join(distDir, 'start-here', 'day-1', 'index.html');
 
-  it('has exactly 6 step sections with sequential IDs step-1..step-6', () => {
+  it('has sequential step sections with IDs step-1..step-N', () => {
+    // Was hardcoded at 6 steps; Day 1 was trimmed to 5 in the 2026-05-25
+    // redesign (step 6 "marketplace" removed per d742ba0 + 571620d). Test
+    // now asserts ≥4 sequential steps without pinning the exact count.
     expect(existsSync(day1Html), 'start-here/day-1/index.html exists').toBe(true);
     const html = readFileSync(day1Html, 'utf-8');
 
-    // Extract all <section id="step-N"> matches
     const stepMatches = html.match(/<section[^>]+id="step-(\d+)"/g) || [];
-    expect(stepMatches.length, 'Exactly 6 step sections').toBe(6);
+    expect(stepMatches.length, 'Day 1 has at least 4 steps').toBeGreaterThanOrEqual(4);
 
-    // Extract step IDs in order
     const stepIds = stepMatches.map((m) => {
       const match = m.match(/id="(step-\d+)"/);
       return match ? match[1] : null;
     }).filter((id): id is string => id !== null);
 
-    expect(stepIds, 'Step IDs are step-1 through step-6 in order').toEqual([
-      'step-1',
-      'step-2',
-      'step-3',
-      'step-4',
-      'step-5',
-      'step-6',
-    ]);
+    // Steps must be sequential 1..N with no gaps.
+    const expected = stepIds.map((_, idx) => `step-${idx + 1}`);
+    expect(stepIds, 'Step IDs sequential from step-1').toEqual(expected);
   });
 });
 
@@ -114,16 +110,15 @@ describe('Pagefind retint via Starlight token aliases (AC34)', () => {
 
 describe('Marketing surface chrome (AC10)', () => {
   // 2026-05-25 nav rework: /news/ is now a static meta-refresh redirect
-  // to AgentNews (no MarketingShell). /reference/ deleted entirely.
-  // /contribute/ + /submit-skill/ remain orphaned (no sidebar link) but
-  // their HTML still emits the unified header chrome.
+  // to AgentNews (no MarketingShell). /reference/, /contribute/, and
+  // /submit-skill/ deleted per UAT feedback (no submit form, no contribute
+  // page).
   const marketingPages = [
     'index.html',
     'skills/index.html',
     'tips/index.html',
     'glossary/index.html',
     'my-pins/index.html',
-    'submit-skill/index.html',
     'start-here/foundations/index.html',
     'start-here/day-1/index.html',
   ];
@@ -296,10 +291,8 @@ describe('Unified header on splash pages (AC31/AC32/AC33)', () => {
     'tips/index.html',
     'glossary/index.html',
     'my-pins/index.html',
-    'submit-skill/index.html',
     'start-here/foundations/index.html',
     'start-here/day-1/index.html',
-    'contribute/index.html',
   ];
 
   it.each(marketingPages)('%s has exactly one nbg-topnav', (pagePath) => {

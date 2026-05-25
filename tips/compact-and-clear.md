@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Don't carry irrelevant history. Use `/compact` to summarise the conversation when staying on-task, `/clear` to wipe and start fresh when switching tasks.
 ---
 

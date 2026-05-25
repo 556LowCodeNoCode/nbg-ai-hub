@@ -135,6 +135,15 @@ export default defineConfig({
         // SocialIconsOverride internally short-circuits and renders nothing
         // because AuthControls + SignInModal are mounted by SplashAwareHeader.
         SocialIcons: './src/components/SocialIconsOverride.astro',
+        // Theme overrides (2026-05-25 late-evening): collapse Starlight's
+        // 3-option (auto/light/dark) <select> down to a 2-option toggle
+        // (light/dark) with light as the default. See the override files
+        // for the full rationale; tl;dr is that the bank-colleague audience
+        // benefits from a single consistent surface, and respecting OS
+        // `prefers-color-scheme` (the upstream default) caused dark-mode-OS
+        // visitors to land on the dark variant against project direction.
+        ThemeProvider: './src/components/overrides/ThemeProvider.astro',
+        ThemeSelect: './src/components/overrides/ThemeSelect.astro',
       },
       // 2026-05-25 navigation rework: flatten the sidebar to one entry per
       // pillar. Removed: Start Here group (collapsed into single

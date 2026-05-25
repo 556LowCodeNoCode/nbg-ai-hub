@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Scaffolds the team's standard `CLAUDE.md` template into the current project — project description, tech stack, ports, folder structure, rules, glossary. Run it once when starting a new project.
 install_command: "/plugin install claudemd@556LowCodeNoCode-skills"
 skill_id: claudemd

@@ -49,12 +49,30 @@
       ]
     },
     {
+      "slug": "permission-modes",
+      "title": "Permission modes — what Shift+Tab toggles",
+      "audience": "beginner",
+      "topics": [
+        "survival",
+        "workflow"
+      ]
+    },
+    {
       "slug": "prompt-bad-vs-good-openers",
       "title": "Bad vs. good openers",
       "audience": "beginner",
       "topics": [
         "prompting",
         "examples"
+      ]
+    },
+    {
+      "slug": "prompt-briefing-template",
+      "title": "Brief Claude like a colleague (the 5-line template)",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "fundamentals"
       ]
     },
     {

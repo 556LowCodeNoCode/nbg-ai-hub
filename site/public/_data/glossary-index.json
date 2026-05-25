@@ -121,6 +121,15 @@
       ]
     },
     {
+      "slug": "github",
+      "title": "GitHub",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
+      ]
+    },
+    {
       "slug": "gsd",
       "title": "GSD (Get Shit Done) framework",
       "audience": "advanced",
@@ -274,6 +283,15 @@
       "topics": [
         "skills",
         "automation"
+      ]
+    },
+    {
+      "slug": "slash-command",
+      "title": "Slash command",
+      "audience": "beginner",
+      "topics": [
+        "claude-code",
+        "fundamentals"
       ]
     },
     {

@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A parallel line of work. You branch off `main`, make changes without disturbing anyone, then merge back via a Pull Request when it's ready.
 ---
 

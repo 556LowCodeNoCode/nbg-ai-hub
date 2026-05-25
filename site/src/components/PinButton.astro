@@ -43,6 +43,12 @@ const { type, slug } = Astro.props;
    * aria-label) and DOM selectors (.nbg-pin, .nbg-pin__icon, .nbg-pin__label)
    * are preserved bit-for-bit (AC23). Visual surface mirrors Button "ghost". */
   @layer nbg.components {
+    /* Explicit [hidden] override — .nbg-pin's `display: inline-flex` would
+       otherwise win specificity against the UA's `[hidden] { display: none }`
+       default. Required so signed-out users see no "Sign in to pin" noise
+       per UAT feedback #13. */
+    .nbg-pin[hidden] { display: none !important; }
+
     .nbg-pin {
       display: inline-flex;
       align-items: center;
@@ -136,7 +142,10 @@ const { type, slug } = Astro.props;
   }
 
   function setSignedOut(btn: HTMLButtonElement): void {
-    btn.hidden = false;
+    // When signed-out, hide per-card pin buttons entirely — the header's
+    // top-level Sign in CTA is the single sign-in surface for the site.
+    // Showing "Sign in to pin" on every card is visual noise and a nag.
+    btn.hidden = true;
     btn.disabled = false;
     btn.setAttribute('aria-pressed', 'false');
     btn.setAttribute('aria-label', 'Sign in to pin');

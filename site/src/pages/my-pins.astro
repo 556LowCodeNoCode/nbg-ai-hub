@@ -18,12 +18,6 @@
 // bit-for-bit (AC23 + AC34). See project-design.md §S.13.10.10.
 
 import MarketingShell from '../components/MarketingShell.astro';
-import Stack from '../components/primitives/Stack.astro';
-import Cluster from '../components/primitives/Cluster.astro';
-import Card from '../components/primitives/Card.astro';
-import Eyebrow from '../components/primitives/Eyebrow.astro';
-import Display from '../components/primitives/Display.astro';
-import Lede from '../components/primitives/Lede.astro';
 
 // Pin-type label map — used by client JS via a JSON data island so we have
 // one source of truth for type → display label.
@@ -40,18 +34,29 @@ const PIN_TYPE_LABELS = {
   title="My Pins"
   description="Your personal pinned-items dashboard. Pins live in your own GitHub gist (unlisted) — they are not shared with the team."
   surfaceId="my-pins"
-  width="default"
+  width="full"
+  hero="none"
 >
-  <Stack slot="hero" gap="4">
-    <Eyebrow tone="accent">Personal</Eyebrow>
-    <Display level={1} size="lg">My Pins</Display>
-    <Lede size="lg">
-      Your personal pinned-items dashboard. Pins live in your own GitHub gist
-      (unlisted) — they are not shared with the team.
-    </Lede>
-  </Stack>
+  {/* 2026-05-25 — hero matches /start-here/foundations/ (UAT image #17):
+      `.hero hero--stack` is the full-width single-column hero used by the
+      reader-mode marketing pages. Larger serif title, lede directly below,
+      no 2-column split. */}
+  <section class="hero hero--stack">
+    <div class="wrap">
+      <div class="hero__intro">
+        <h1 class="hero__title">My <em>Pins</em></h1>
+        <p class="hero__lede">
+          Your personal pinned-items dashboard. Pins live in your own GitHub
+          gist (unlisted) — they are not shared with the team.
+        </p>
+      </div>
+    </div>
+  </section>
 
-  <Stack gap="10">
+  {/* No `.section` wrapper — that class injects 3.5rem padding-block which
+      created the gigantic empty gap UAT image #18 flagged. Plain wrapper. */}
+  <div class="my-pins__body">
+    <div class="wrap" style="display: grid; gap: 1.5rem;">
     {/* Loading state — visible by default, hidden by the script once auth
         state is determined. Plain wrapper (no Section chrome) so [hidden]
         collapses the whole block to zero height; the .my-pins__loading[hidden]
@@ -63,34 +68,93 @@ const PIN_TYPE_LABELS = {
       <p class="sr-only">Loading your pins…</p>
     </div>
 
-    {/* Anonymous panel — shown when readToken() returns null. */}
+    {/* Anonymous panel — 2-column layout (UAT image #18 redesign):
+        LEFT  = headline, lede, primary CTA, "no account?" footnote
+        RIGHT = four FAQ mini-cards with numeric markers
+        Single-column on narrow viewports. */}
     <section
       class="my-pins__anonymous"
       data-my-pins-anonymous
       hidden
       aria-labelledby="my-pins-anon-heading"
     >
-      <Card variant="feature">
-        <Stack gap="4">
-          <Eyebrow tone="accent">Sign in</Eyebrow>
+      <div class="my-pins__anon-grid">
+        <div class="my-pins__anon-main">
+          <span class="my-pins__anon-eyebrow">Sign in</span>
           <h2 id="my-pins-anon-heading" class="my-pins__anon-heading">
             Sign in to see your pins
           </h2>
-          <Lede>
-            Pinning is per-user and stored in a private gist on your GitHub
-            account. Sign in to view, add, or remove pins.
-          </Lede>
-          <Cluster gap="3">
-            <button
-              type="button"
-              class="my-pins__signin-btn"
-              data-my-pins-signin
-            >
-              Sign in
-            </button>
-          </Cluster>
-        </Stack>
-      </Card>
+          <p class="my-pins__anon-lede">
+            Pinning is per-user and lives in your own private GitHub gist —
+            never on our server, never shared with the team.
+          </p>
+          <button
+            type="button"
+            class="my-pins__signin-btn"
+            data-my-pins-signin
+          >
+            Sign in with a GitHub PAT
+          </button>
+          <p class="my-pins__anon-foot">
+            No GitHub account? Pinning is optional — you can browse,
+            search, and read everything on the site without signing in.
+          </p>
+        </div>
+
+        <aside class="my-pins__anon-faq" aria-labelledby="my-pins-faq-heading">
+          <h3 id="my-pins-faq-heading" class="my-pins__anon-faq-heading">
+            First time? Here's what's going on
+          </h3>
+          <div class="my-pins__faq-list">
+            <div class="my-pins__faq-item">
+              <span class="my-pins__faq-num" aria-hidden="true">01</span>
+              <div class="my-pins__faq-body">
+                <h4>What's a PAT?</h4>
+                <p>
+                  A <strong>Personal Access Token</strong> — a long string
+                  that lets a site act on your behalf without your password.
+                  Like an app-specific password you can revoke any time.
+                </p>
+              </div>
+            </div>
+            <div class="my-pins__faq-item">
+              <span class="my-pins__faq-num" aria-hidden="true">02</span>
+              <div class="my-pins__faq-body">
+                <h4>Why does this site need one?</h4>
+                <p>
+                  So your pins live in <em>your own</em> gist — not on our
+                  server. Nothing about you is stored centrally.
+                </p>
+              </div>
+            </div>
+            <div class="my-pins__faq-item">
+              <span class="my-pins__faq-num" aria-hidden="true">03</span>
+              <div class="my-pins__faq-body">
+                <h4>Is it safe?</h4>
+                <p>
+                  Token is scoped to <code>gist</code> only — it can't see
+                  your code, repos, or settings. Revoke any time at
+                  <a
+                    href="https://github.com/settings/tokens"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >github.com/settings/tokens</a>.
+                </p>
+              </div>
+            </div>
+            <div class="my-pins__faq-item">
+              <span class="my-pins__faq-num" aria-hidden="true">04</span>
+              <div class="my-pins__faq-body">
+                <h4>Where does it live?</h4>
+                <p>
+                  In your browser's local storage. It never leaves your
+                  machine except when the site talks to GitHub's API.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </section>
 
     {/* Signed-in panel — populated by the script. One unified grid of pin
@@ -104,27 +168,24 @@ const PIN_TYPE_LABELS = {
     >
       <h2 id="my-pins-signed-in-heading" class="sr-only">Your pinned items</h2>
 
-      <Stack gap="6">
-        {/* Filter chip row — emitted by JS based on pin counts. Click a
-            chip to filter the grid; the "All" chip is the default. */}
+      <div style="display: grid; gap: 1.5rem;">
+        {/* Filter chip row — emitted by JS based on pin counts. */}
         <div class="my-pins__filters" data-my-pins-filters role="tablist" aria-label="Filter pins by type" hidden></div>
 
         {/* Empty state — friendly invite when the gist has zero favourites. */}
         <div data-my-pins-empty hidden class="my-pins__empty">
-          <Stack gap="4">
-            <p class="my-pins__empty-headline">
-              You haven't pinned anything yet.
-            </p>
-            <p class="my-pins__empty-body">
-              Click the pin button on any item across the site to save it here.
-              A good place to start:
-            </p>
-            <Cluster gap="2">
-              <a class="my-pins__empty-chip" href="/skills/">Skills</a>
-              <a class="my-pins__empty-chip" href="/tips/">Tips</a>
-              <a class="my-pins__empty-chip" href="/glossary/">Glossary</a>
-            </Cluster>
-          </Stack>
+          <p class="my-pins__empty-headline">
+            You haven't pinned anything yet.
+          </p>
+          <p class="my-pins__empty-body">
+            Click the pin button on any item across the site to save it here.
+            A good place to start:
+          </p>
+          <div class="my-pins__empty-chips">
+            <a class="my-pins__empty-chip" href="/skills/">Skills</a>
+            <a class="my-pins__empty-chip" href="/tips/">Tips</a>
+            <a class="my-pins__empty-chip" href="/glossary/">Glossary</a>
+          </div>
         </div>
 
         <p
@@ -136,7 +197,7 @@ const PIN_TYPE_LABELS = {
 
         {/* Unified pin grid — JS appends <li class="my-pins__card"> here. */}
         <ul class="my-pins__grid" data-pin-list aria-live="polite"></ul>
-      </Stack>
+      </div>
     </section>
 
     {/* Privacy footer — single quiet line at the bottom of the page. */}
@@ -148,7 +209,8 @@ const PIN_TYPE_LABELS = {
         rel="noopener noreferrer"
       >Manage tokens</a> to revoke access.
     </p>
-  </Stack>
+    </div>
+  </div>
 </MarketingShell>
 
 <script
@@ -215,19 +277,149 @@ const PIN_TYPE_LABELS = {
       .my-pins__skeleton { animation: none; opacity: 0.65; }
     }
 
-    /* Anonymous-state heading — mirrors Display level=2 size=sm look, but is
-       a real <h2 id> so the surrounding section can use aria-labelledby
-       without a Display-primitive prop forwarding change. */
+    /* Body wrapper — small breath above the body content, no large
+       section-padding gap. */
+    .my-pins__body {
+      padding-block: 2rem 4rem;
+    }
+
+    /* 2-column anonymous card: CTA panel on the left, FAQ aside on the
+       right. Single column under 880px. */
+    .my-pins__anon-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 2rem;
+      align-items: stretch;
+      padding: 2.25rem;
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+      border-radius: var(--nbg-r-lg, 12px);
+      background: var(--nbg-bg, #fff);
+      box-shadow: 0 1px 2px rgba(10, 20, 40, 0.02);
+    }
+    @media (max-width: 880px) {
+      .my-pins__anon-grid { grid-template-columns: 1fr; padding: 1.5rem; }
+    }
+
+    /* LEFT — primary CTA panel */
+    .my-pins__anon-main {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      padding-right: 0.5rem;
+    }
+    .my-pins__anon-eyebrow {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--nbg-accent, #0a8a7d);
+    }
     .my-pins__anon-heading {
       margin: 0;
-      font-family: var(--nbg-type-display);
-      font-size: var(--nbg-fs-display-sm);
-      font-weight: var(--nbg-fw-bold);
-      letter-spacing: var(--nbg-ls-tight);
-      line-height: var(--nbg-lh-display);
-      color: var(--nbg-color-fg-primary);
-      font-variation-settings: 'opsz' var(--nbg-opsz-display);
+      font-family: var(--nbg-ff-serif, Georgia, serif);
+      font-size: clamp(1.4rem, 2vw, 1.75rem);
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: var(--nbg-ink, #1a2030);
       text-wrap: balance;
+    }
+    .my-pins__anon-lede {
+      margin: 0;
+      font-size: 0.9375rem;
+      line-height: 1.55;
+      color: var(--nbg-muted, #6b7280);
+    }
+    .my-pins__anon-foot {
+      margin: 0;
+      padding-top: 1rem;
+      border-top: 1px solid var(--nbg-hairline, #e1e6ed);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--nbg-muted, #6b7280);
+    }
+
+    /* RIGHT — FAQ mini-cards. Numeric markers (01/02/03/04) instead of
+       icons; uniform, calm, doesn't pull focus from the CTA. */
+    .my-pins__anon-faq {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding-left: 2rem;
+      border-left: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    @media (max-width: 880px) {
+      .my-pins__anon-faq {
+        padding-left: 0;
+        padding-top: 1.5rem;
+        border-left: 0;
+        border-top: 1px solid var(--nbg-hairline, #e1e6ed);
+      }
+    }
+    .my-pins__anon-faq-heading {
+      margin: 0 0 0.25rem;
+      font-family: var(--nbg-ff-body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--nbg-ink, #1a2030);
+      letter-spacing: -0.005em;
+    }
+    .my-pins__faq-list {
+      display: grid;
+      gap: 0.85rem;
+    }
+    .my-pins__faq-item {
+      display: grid;
+      grid-template-columns: 2.4rem 1fr;
+      gap: 0.5rem;
+      align-items: start;
+    }
+    .my-pins__faq-num {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--nbg-accent, #0a8a7d);
+      padding-top: 0.15rem;
+    }
+    .my-pins__faq-body { display: grid; gap: 0.15rem; }
+    .my-pins__faq-body h4 {
+      margin: 0;
+      font-family: var(--nbg-ff-body);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--nbg-ink, #1a2030);
+      letter-spacing: -0.003em;
+    }
+    .my-pins__faq-body p {
+      margin: 0;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--nbg-muted, #6b7280);
+    }
+    .my-pins__faq-body code {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.75rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--nbg-surface-2, #f6f8fa);
+      border: 1px solid var(--nbg-hairline, #e1e6ed);
+    }
+    .my-pins__faq-body a {
+      color: var(--nbg-accent, #0a8a7d);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--nbg-accent, #0a8a7d) 40%, transparent);
+    }
+    .my-pins__faq-body a:hover {
+      border-bottom-color: var(--nbg-accent, #0a8a7d);
+    }
+
+    .my-pins__empty-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
     }
 
     /* Group heading — single quiet mono eyebrow label. The previous design
@@ -245,26 +437,30 @@ const PIN_TYPE_LABELS = {
       border-bottom: 1px solid var(--nbg-hairline, var(--nbg-color-border-subtle, #e1e6ed));
     }
 
-    /* Anonymous-state sign-in button — token-driven primary CTA. Plain
-       <button> rather than the Button primitive because the script reads
-       its `data-my-pins-signin` attribute via querySelector. */
+    /* PAT explainer — quiet "what / why / safe / don't have" block on the
+       anonymous-state card. Hairline border + muted background so it sits
+       under the headline like a footnote, not a competing CTA. */
+    /* Sign-in button — sized to fit the new 2-column layout. align-self
+       keeps it left-aligned in the flex column. */
     .my-pins__signin-btn {
+      align-self: flex-start;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: var(--nbg-sp-2);
-      padding: var(--nbg-sp-3) var(--nbg-sp-6);
+      padding: 0.75rem 1.25rem;
       border: 1px solid var(--nbg-color-accent-strong);
       border-radius: var(--nbg-r-md);
       background: var(--nbg-color-accent-strong);
       color: var(--nbg-color-fg-on-accent);
       font-family: var(--nbg-type-body);
-      font-size: var(--nbg-fs-lg);
+      font-size: 0.9375rem;
       font-weight: var(--nbg-fw-semibold);
       letter-spacing: var(--nbg-ls-normal);
       line-height: 1;
       cursor: pointer;
       user-select: none;
+      margin-top: 0.25rem;
       transition: background-color var(--nbg-dur-fast) var(--nbg-ease-out),
                   border-color     var(--nbg-dur-fast) var(--nbg-ease-out),
                   transform        var(--nbg-dur-fast) var(--nbg-ease-out);

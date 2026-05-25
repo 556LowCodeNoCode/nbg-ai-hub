@@ -151,7 +151,7 @@
     --nbg-fs-display-xl:  5rem;      /* 80px — hero h1 desktop wide */
     --nbg-fs-display-2xl: 6.5rem;    /* 104px — reserved oversized hero */
     /* AgentNews fluid display clamps (new) */
-    --nbg-fs-hero:        clamp(2.5rem, 5vw, 4rem);     /* 40-64px */
+    --nbg-fs-hero:        clamp(1.75rem, 5vw, 4rem);    /* 28-64px (down from 40-64; mobile overflow fix) */
     --nbg-fs-feature:     clamp(1.75rem, 3vw, 2.5rem);  /* 28-40px */
 
     /* Weights — Inter Variable axis 100..900 */

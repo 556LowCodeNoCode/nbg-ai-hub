@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: A six-step walkthrough for someone who just got Claude Code access — install, first session, survival keys, CLAUDE.md, skills marketplace, where to go tomorrow. Designed to be done in under an hour.
 ---
 

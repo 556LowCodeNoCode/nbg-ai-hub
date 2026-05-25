@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-25"
 last_reviewed: "2026-05-25"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Press Shift+Tab in the prompt to cycle Claude's permission mode between default (confirm everything), auto-accept edits (just watch), and plan mode (read-only). Saves dozens of confirmations once you trust the plan.
 ---
 

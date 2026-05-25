@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: null
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Two ways to use an LLM — at build time (Claude helps you create a tool once, then the tool runs without an LLM) versus runtime (the tool calls an LLM on every execution). Picking the right one matters for cost and data residency.
 tldr: "Build time = Claude helps you make a tool once, then you run the tool yourself. Runtime = the tool itself calls an AI every time it runs."
 aliases: []

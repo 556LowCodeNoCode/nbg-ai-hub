@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Reviews your unstaged changes, splits them into logical commits, and writes clear commit messages (Conventional Commits where appropriate). Stops you from shipping one 47-file "wip" commit.
 install_command: "/plugin install commit-work@556LowCodeNoCode-skills"
 skill_id: commit-work

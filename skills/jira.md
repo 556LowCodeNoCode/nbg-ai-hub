@@ -7,7 +7,7 @@ internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
 external_link: "https://github.com/556LowCodeNoCode/Skills"
-deeper_link: "https://556lowcodenocode.github.io/Onboarding/"
+deeper_link: null
 ai_summary: Talk to JIRA in plain English from Claude Code — create tickets, search issues, transition status, plan sprints, manage epics — without leaving the terminal.
 install_command: "/plugin install jira@556LowCodeNoCode-skills"
 skill_id: jira
