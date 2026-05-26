@@ -504,9 +504,13 @@ const base = import.meta.env.BASE_URL;
     }
     /* Hide the ⌘K keyboard hint inside the search trigger.
        The hint reads as Mac-only and as visual noise for non-developers.
-       The button still opens Pagefind on click; the shortcut still works. */
-    .nbg-topnav__search :global(button[data-open-modal] > kbd) {
-      display: none;
+       The button still opens Pagefind on click; the shortcut still works.
+       Fully-global selector (Astro `:global(…)` wrapping the whole chain,
+       plus `!important`) so the rule still beats Starlight's display:flex
+       on the kbd in the production CSS bundle. Locally the dev CSS load
+       order was kind to the partially-scoped form; prod was not. */
+    :global(.nbg-topnav__search button[data-open-modal] > kbd) {
+      display: none !important;
     }
 
     /* ── Theme toggle — icon-only ─────────────────────────────────────
