@@ -6,6 +6,16 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-05-27 (overnight, follow-up) — Day 1 Step 4: add GitHub commit/push subsection
+
+**Decision:** Added a new "Want to share your work? Push it to GitHub" subsection at the end of Step 4. Explains the local-vs-shared pivot, points back to `gh auth login` from Step 3, gives the two prompts ("create a GitHub repo for this folder and push it" / "commit and push"), and provides the two-word commit/push definitions. Also tweaked the Step 5 "Without `CLAUDE.md`" bullet ("two completely different reports" → "different reports every time you run it") per UAT.
+
+**Why:** Day 1 was teaching first-session usage but leaving readers stranded at the local-folder boundary — no bridge to "now share it with your team". The new subsection closes that loop using only the `gh` tooling they already set up in Step 3 (no MCP, no extra setup).
+
+**Refs:** current commit. Tests: site 310/310. Live: <https://chomovazuzana.github.io/NbgAiHub/start-here/day-1/#d4>.
+
+---
+
 ## 2026-05-27 (overnight) — Day 1 public-safe content overhaul + CLAUDE.md before/after figure + Starlight `article + article` round 3
 
 **Decision:**

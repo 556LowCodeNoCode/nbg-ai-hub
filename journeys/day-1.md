@@ -203,13 +203,34 @@ Yes, the flag name is alarming. It just means "don't ask permission for every si
 
 To resume a previous session: `claude --continue` (or `claude -c`).
 
+### Want to share your work? Push it to GitHub
+
+Everything above happens in a folder on your machine. That's fine forever — you don't need GitHub to *use* Claude Code.
+
+When you do want to share, back up, or collaborate on a folder, the mechanism is GitHub. And since you ran `gh auth login` back in Step 3, **Claude can already talk to GitHub on your behalf** — you don't have to memorise the `git` and `gh` commands. Just ask:
+
+> *"create a GitHub repo for this folder and push it"*
+
+Claude runs the four-step plumbing (`git init` → `git add` → `git commit` → `gh repo create --source=. --push`) and the folder lands on github.com under your account.
+
+From then on, every time you want to publish your latest changes:
+
+> *"commit and push"*
+
+**The two-word logic:**
+
+- **Commit** = save a local snapshot of your changes, with a short label describing what changed. Lives on your machine only.
+- **Push** = upload your accumulated commits to GitHub, where teammates can see them.
+
+Commits are cheap; you can make ten of them before pushing once. Push when you actually want the work to leave your laptop.
+
 ---
 
 ## Step 5 — Write your `CLAUDE.md`
 
 **The story that sells it.** Two folders, identical spreadsheet inside — say, a list of loan applications. Same one-line prompt typed in each: *"analyse this and give me a report."*
 
-- **Without `CLAUDE.md`** — you get two completely different reports. Different categories, different structure, different level of detail. Every run reinvents the wheel, and each one takes a while.
+- **Without `CLAUDE.md`** — you get different reports every time you run it. Different categories, different structure, different level of detail. Every run reinvents the wheel, and each one takes a while.
 - **With `CLAUDE.md`** — naming the columns, defining the statuses and risk indicators, and spelling out what "a report" should contain — re-run the same prompt and you get the same output, every time.
 
 That's `CLAUDE.md`.
