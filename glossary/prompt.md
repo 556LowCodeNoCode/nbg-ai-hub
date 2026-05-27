@@ -9,11 +9,13 @@ last_reviewed: "2026-05-24"
 external_link: null
 deeper_link: null
 ai_summary: The text you give a language model as input. Anything you type into Claude Code is a prompt. The system prompt is the always-loaded instruction layer underneath. Good prompting is half the productivity gain — be specific, set constraints, give examples.
-tldr: "Whatever you type to an AI to ask it something. Better prompts get better answers — clarity, examples, and context all help."
+tldr: "Whatever you type to an AI as input. Prompt in, completion out — that is the whole vocabulary."
 aliases: ["prompts", "prompting"]
 ---
 
-A **prompt** is the text you give a [language model](/glossary/#large-language-model) as input. Anything you type into Claude Code is a prompt. The model's response is conditioned on the prompt plus whatever else is in the [context window](/glossary/#context-window): conversation history, files it has read, the system prompt, [CLAUDE.md](/glossary/#claudemd), and any [skills](/glossary/#skill) currently active.
+A **prompt** is the text you give a [language model](/glossary/#large-language-model) as input. Anything you type into Claude Code is a prompt. The model's response back is the *completion*. **Prompt in, completion out — that's the whole vocabulary.**
+
+The model's response is conditioned on the prompt plus whatever else is in the [context window](/glossary/#context-window): conversation history, files it has read, the system prompt, [CLAUDE.md](/glossary/#claudemd), and any [skills](/glossary/#skill) currently active.
 
 **Three layers of prompting in Claude Code:**
 

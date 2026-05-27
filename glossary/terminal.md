@@ -9,7 +9,7 @@ last_reviewed: "2026-05-27"
 external_link: null
 deeper_link: null
 ai_summary: The window where you type commands instead of clicking. Claude Code runs inside one — your prompt, Claude's output, and any commands it runs all live here.
-tldr: "The text-only window where you type commands instead of clicking icons. Claude Code lives inside a terminal — that is where you type prompts and read responses."
+tldr: "The window on your computer that takes typed commands instead of clicks. Terminal is the window; the shell is the brain inside it."
 aliases: ["terminals", "terminal window", "terminal app"]
 ---
 

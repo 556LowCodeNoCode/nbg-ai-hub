@@ -9,7 +9,7 @@ last_reviewed: "2026-05-25"
 external_link: null
 deeper_link: null
 ai_summary: A CLI is a text-only program you operate by typing commands into a terminal rather than clicking buttons in a window. Claude Code is a CLI — that's why you launch it from a terminal with `claude` and not from an icon in your dock. Most developer tooling lives at the command line because text is composable, scriptable, and survives version control.
-tldr: "Software you control by typing commands instead of clicking buttons. Faster once you know it. Claude Code is one."
+tldr: "Any program you run by typing rather than clicking — CLI is anything you type instead of click. Git is one; Claude Code is one."
 aliases: ["CLI", "command-line interface", "command line interface", "command line"]
 ---
 

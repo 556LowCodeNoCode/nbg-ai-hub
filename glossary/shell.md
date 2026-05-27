@@ -9,7 +9,7 @@ last_reviewed: "2026-05-27"
 external_link: null
 deeper_link: null
 ai_summary: The program inside the terminal that reads what you type and runs it. Bash is the most common one on macOS and Linux; PowerShell is the Windows default; zsh is the modern macOS default. Claude Code uses your shell to run commands.
-tldr: "The program inside a terminal that reads what you type and runs it. Bash and zsh on Mac/Linux; PowerShell on Windows."
+tldr: "The program inside the terminal that reads what you type and runs it. Terminal is the window; shell is the brain."
 aliases: ["shells"]
 ---
 

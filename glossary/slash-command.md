@@ -9,7 +9,7 @@ last_reviewed: "2026-05-25"
 external_link: "https://docs.claude.com/en/docs/claude-code/slash-commands"
 deeper_link: null
 ai_summary: A command you trigger inside Claude Code by typing `/` followed by a name — like `/model`, `/compact`, or `/clear`. Built-in shortcuts plus every installed skill show up this way. Type `/` on its own to see the menu of what's available in the current session.
-tldr: "A command you trigger in Claude Code by typing / followed by a name — like /model to switch models or /clear to start fresh."
+tldr: "A shortcut inside a CLI tool — type / followed by a name (/clear, /compact, /help). Triggers a built-in action, different from a normal prompt."
 aliases: ["slash command", "slash commands"]
 ---
 

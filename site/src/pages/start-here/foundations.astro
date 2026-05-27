@@ -1,17 +1,23 @@
 ---
 /**
- * /start-here/foundations — AgentNews-aesthetic foundations layer.
+ * /start-here/foundations — docs-style scrollable layout.
  *
- * Renders the journeys/foundations.md markdown via segment splitting on
- * `## Step N — Title` headings (same pattern as day-1.astro), interleaved
- * with curated external-resource panels per section.
+ * Renders journeys/foundations.md as six full-bleed sections with a sticky
+ * left-rail TOC. Replaces the prior accordion-per-section model (2026-05-27
+ * UAT — accordions deflated the script's voice and hid content). New
+ * structure rewards linear reading; the sticky TOC keeps the skeleton
+ * visible without the click-to-reveal friction.
  *
- * The resource list is co-located in this file — each item has a title,
- * author/channel, kind, duration, URL, and a one-line "why" string.
- * Resources are matched to step numbers; rendered in a sub-section after
- * each step's body.
+ * Per-section visuals:
+ *   F2 — animated glass-of-water (the metaphor the script leans on hardest)
+ *   F3 — side-by-side chatbot/agent comparison
+ *   F4–F6 — prose only (table inside F5/F6 markdown is sufficient)
  *
- * Related: docs/refined-requests/beginner-foundations.md.
+ * Resources move from "behind the expand" into a visible card row at the
+ * end of each section. Discoverable without clicking.
+ *
+ * Active-section tracking: IntersectionObserver toggles `data-active` on
+ * matching TOC links as sections scroll into view.
  */
 import { getEntry, getCollection } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
@@ -19,9 +25,6 @@ import MarketingShell from '../../components/MarketingShell.astro';
 import remarkGlossaryLink from '../../plugins/remark-glossary-link.ts';
 import { linkGlossaryTerms } from '../../lib/glossary-link-string';
 
-// UAT T15 V2 — read the glossary collection length at build time so
-// foundations + day-1 never drift apart again. Previously a hardcoded
-// "Thirty-six" / "Thirty-four" pair caused a visible inconsistency.
 const glossaryCount = (await getCollection('glossary')).length;
 
 const entry = await getEntry('journeys', 'foundations');
@@ -72,17 +75,6 @@ function splitSteps(body: string): { intro: string; steps: ParsedStep[] } {
 
 const { intro, steps } = splitSteps(rawBody);
 
-// §S.14.5 — pass the glossary auto-link plugin into the manual processor
-// so segmented steps go through the same auto-linking pipeline as the
-// content-collection render() path. Cast: `createMarkdownProcessor`'s
-// `remarkPlugins` is typed against unified's generic Plugin shape, while
-// our factory returns the narrower `Plugin<[], Root, Root>` — the runtime
-// contract is identical, the type widening here is purely a TS workaround.
-// §S.14.5 — pass the glossary auto-link plugin into the manual processor
-// so segmented steps go through the same auto-linking pipeline as the
-// content-collection render() path. Cast: `createMarkdownProcessor`'s
-// `remarkPlugins` is typed against unified's generic Plugin shape, while
-// our factory returns the narrower `Plugin<[RemarkGlossaryLinkOptions], Root, Root>`.
 const processor = await createMarkdownProcessor({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   remarkPlugins: [
@@ -100,9 +92,16 @@ const renderedSteps = await Promise.all(
 );
 const introHtml = intro.length > 0 ? (await processor.render(intro)).code : '';
 
-// ─── Curated resources ────────────────────────────────────────────────
-// One bucket per step. Each resource hand-picked + verified live as of
-// 2026-05-24. Authors/durations as published at fetch time.
+// TOC labels — shortened from the full step titles to fit the sidebar.
+// Order must match the step order in journeys/foundations.md.
+const tocLabels: Record<number, string> = {
+  1: 'What is an LLM?',
+  2: 'Context windows',
+  3: 'Agent vs chatbot',
+  4: 'What is Claude Code?',
+  5: 'vs Claude.ai, API, ChatGPT',
+  6: 'Why Claude Code?',
+};
 
 interface Resource {
   step: number;
@@ -114,55 +113,63 @@ interface Resource {
   why: string;
 }
 
+// 2026-05-27 reshuffle: step order is concept → product → choice.
+// Resource step keys remapped to match. Old → new step number mapping:
+//   1 (Claude Code)  → 4
+//   2 (vs ChatGPT)   → 5
+//   3 (LLM)          → 1
+//   4 (Context)      → 2
+//   5 (Agent)        → 3
+//   6 (Why CC)       → 6  (unchanged)
 const resources: Resource[] = [
-  // F1 — What is Claude Code?
-  { step: 1, kind: 'course', title: 'Claude Code 101', author: 'Anthropic (official)',
-    url: 'https://anthropic.skilljar.com/claude-code-101',
-    why: 'Anthropic\'s own beginner course — installation through advanced customisation. The most authoritative starting point. Free.' },
-  { step: 1, kind: 'video', title: 'Claude Code — Full Tutorial for Beginners', author: 'Tech with Tim', duration: '~45 min',
-    url: 'https://www.youtube.com/watch?v=ntDIxaeo3Wg',
-    why: 'Hands-on walkthrough of the actual CLI experience. Watch this before you install if you want to see what you\'re signing up for.' },
-  { step: 1, kind: 'video', title: 'How Anthropic Employees ACTUALLY Use Claude Code', author: 'Anthropic', duration: '~25 min',
-    url: 'https://www.youtube.com/watch?v=pRfIWmddRsE',
-    why: 'Non-technical Anthropic staff showing real workflows. Useful for non-developers who want to see the breadth of use cases.' },
-
-  // F2 — Claude product disambiguation
-  { step: 2, kind: 'article', title: 'Claude, Claude API, and Claude Code: What\'s the Difference?', author: '16x.engineer',
-    url: 'https://eval.16x.engineer/blog/claude-vs-claude-api-vs-claude-code',
-    why: 'Clearest single-page disambiguation of the three surfaces. Read this if the names are blurring together.' },
-  { step: 2, kind: 'article', title: '5 Claude Products: Which One Do You Actually Need?', author: 'RSL/A',
-    url: 'https://rsla.io/blog/anthropic-claude-products-guide',
-    why: 'Covers the full product family including Desktop and Cowork. Decision-tree shaped — match your job to the right surface.' },
-
-  // F3 — What is an LLM
-  { step: 3, kind: 'video', title: 'Large Language Models Explained Briefly', author: '3Blue1Brown', duration: '~10 min',
+  // F1 — What is an LLM
+  { step: 1, kind: 'video', title: 'Large Language Models Explained Briefly', author: '3Blue1Brown', duration: '~10 min',
     url: 'https://www.youtube.com/watch?v=LPZh9BOjkQs',
     why: 'The single best 10-minute explainer ever produced. Visual, accurate, no jargon. If you only watch one thing on this page, watch this.' },
-  { step: 3, kind: 'video', title: '[1hr Talk] Intro to Large Language Models', author: 'Andrej Karpathy', duration: '~60 min',
+  { step: 1, kind: 'video', title: '[1hr Talk] Intro to Large Language Models', author: 'Andrej Karpathy', duration: '~60 min',
     url: 'https://www.youtube.com/watch?v=zjkBMFhNj_g',
     why: 'Andrej Karpathy was at OpenAI and Tesla. This is the deeper version. Covers what LLMs are, where they\'re going, security implications. Generally considered required watching in the field.' },
-  { step: 3, kind: 'article', title: 'Transformers, the tech behind LLMs — Chapter 5', author: '3Blue1Brown',
+  { step: 1, kind: 'article', title: 'Transformers, the tech behind LLMs — Chapter 5', author: '3Blue1Brown',
     url: 'https://www.3blue1brown.com/lessons/gpt/',
     why: 'If the 10-minute version left you wanting more — this is the visual deep-dive into how transformers actually work.' },
 
-  // F4 — Context windows
-  { step: 4, kind: 'docs', title: 'What is a context window?', author: 'IBM Think',
+  // F2 — Context windows
+  { step: 2, kind: 'docs', title: 'What is a context window?', author: 'IBM Think',
     url: 'https://www.ibm.com/think/topics/context-window',
     why: 'Vendor-neutral, technically careful explanation. Defines the term, explains the trade-offs, links to deeper reading.' },
-  { step: 4, kind: 'article', title: 'Context Window Limits: Why Your LLM Still Hallucinates', author: 'Perivitta Rajendran',
+  { step: 2, kind: 'article', title: 'Context Window Limits: Why Your LLM Still Hallucinates', author: 'Perivitta Rajendran',
     url: 'https://pr-peri.github.io/llm/2026/02/13/why-hallucination-happens.html',
     why: 'Connects the context-window mechanic directly to hallucination behaviour — the practical "why does Claude start making things up?" answer.' },
-  { step: 4, kind: 'article', title: 'When More Becomes Less — Why LLMs Hallucinate in Long Contexts', author: 'Rishabh Bhandari (Bootcamp / Medium)',
+  { step: 2, kind: 'article', title: 'When More Becomes Less — Why LLMs Hallucinate in Long Contexts', author: 'Rishabh Bhandari (Bootcamp / Medium)',
     url: 'https://medium.com/design-bootcamp/when-more-becomes-less-why-llms-hallucinate-in-long-contexts-fc903be6f025',
     why: 'Covers the "lost in the middle" phenomenon — why even large context windows don\'t solve forgetting cleanly.' },
 
-  // F5 — Agent vs chatbot
-  { step: 5, kind: 'article', title: 'What Is An AI Agent? And Is It the Same as a Chatbot?', author: 'Forethought',
+  // F3 — Agent vs chatbot
+  { step: 3, kind: 'article', title: 'What Is An AI Agent? And Is It the Same as a Chatbot?', author: 'Forethought',
     url: 'https://forethought.ai/blog/what-is-an-ai-agent',
     why: 'Plain-English breakdown of agent autonomy + tool use vs scripted chatbot decision trees. Good for non-technical readers.' },
-  { step: 5, kind: 'article', title: 'What Is the Claude Agent SDK? How It Differs from the Claude API', author: 'MindStudio',
+  { step: 3, kind: 'article', title: 'What Is the Claude Agent SDK? How It Differs from the Claude API', author: 'MindStudio',
     url: 'https://www.mindstudio.ai/blog/what-is-claude-agent-sdk-vs-claude-api',
     why: 'Maps the agent-loop concept onto Anthropic\'s specific products. Explains why Claude Code "feels different" from calling the API yourself.' },
+
+  // F4 — What is Claude Code?
+  { step: 4, kind: 'course', title: 'Claude Code 101', author: 'Anthropic (official)',
+    url: 'https://anthropic.skilljar.com/claude-code-101',
+    why: 'Anthropic\'s own beginner course — installation through advanced customisation. The most authoritative starting point. Free.' },
+  { step: 4, kind: 'video', title: 'Claude Code — Full Tutorial for Beginners', author: 'Tech with Tim', duration: '~45 min',
+    url: 'https://www.youtube.com/watch?v=ntDIxaeo3Wg',
+    why: 'Hands-on walkthrough of the actual CLI experience. Watch this before you install if you want to see what you\'re signing up for.' },
+  { step: 4, kind: 'video', title: 'How Anthropic Employees ACTUALLY Use Claude Code', author: 'Anthropic', duration: '~25 min',
+    url: 'https://www.youtube.com/watch?v=pRfIWmddRsE',
+    why: 'Non-technical Anthropic staff showing real workflows. Useful for non-developers who want to see the breadth of use cases.' },
+
+  // F5 — Claude product disambiguation
+  { step: 5, kind: 'article', title: 'Claude, Claude API, and Claude Code: What\'s the Difference?', author: '16x.engineer',
+    url: 'https://eval.16x.engineer/blog/claude-vs-claude-api-vs-claude-code',
+    why: 'Clearest single-page disambiguation of the three surfaces. Read this if the names are blurring together.' },
+  { step: 5, kind: 'article', title: '5 Claude Products: Which One Do You Actually Need?', author: 'RSL/A',
+    url: 'https://rsla.io/blog/anthropic-claude-products-guide',
+    why: 'Covers the full product family including Desktop and Cowork. Decision-tree shaped — match your job to the right surface.' },
 
   // F6 — Why Claude Code specifically
   { step: 6, kind: 'article', title: 'Every AI Coding CLI in 2026: The Complete Map (30+ Tools Compared)', author: 'DEV Community',
@@ -226,45 +233,130 @@ function resourceKindTone(kind: Resource['kind']): string {
     </section>
   )}
 
-  {/* UAT T1 V2 (2026-05-27) — six steps render as default-collapsed
-      <details> accordions. Step 1 opens by default; readers see the full
-      six-section skeleton at a glance and choose which to expand, instead
-      of facing one wall of long-form prose. The expand-all toggle below
-      gives the linear-reader audience a one-click escape hatch. */}
-  <div class="wrap" style="display:flex; justify-content:flex-end; gap:0.75rem; padding-block: 1rem 0;">
-    <button type="button" class="foundation-toggle-all" data-foundation-expand-all>
-      Expand all
-    </button>
-  </div>
+  {/* Two-column main: sticky TOC | scrollable sections */}
+  <div class="foundation-layout wrap">
+    <aside class="foundation-toc" aria-label="Foundations sections">
+      <div class="foundation-toc__inner">
+        <span class="foundation-toc__eyebrow">Sections</span>
+        <nav>
+          <ol class="foundation-toc__list">
+            {renderedSteps.map((step) => (
+              <li>
+                <a href={`#f${step.n}`} data-toc-target={`f${step.n}`}>
+                  <span class="foundation-toc__label">{tocLabels[step.n] ?? step.title}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <a class="foundation-toc__skip" href="/start-here/day-1/">→ Skip to Day 1</a>
+      </div>
+    </aside>
 
-  {renderedSteps.map((step) => {
-    const stepResources = resources.filter((r) => r.step === step.n);
-    const isFirst = step.n === 1;
-    return (
-      <section
-        class="section"
-        id={`f${step.n}`}
-        data-step={step.n}
-        aria-label={`Foundation ${step.n}: ${step.title}`}
-      >
-        <div class="wrap">
-          <details class="foundation-details" open={isFirst}>
-            <summary class="foundation-details__summary">
-              <div class="section__head foundation-details__head">
-                <h2>F{step.n} / {renderedSteps.length}</h2>
-                <span class="count">{step.title}</span>
-              </div>
-              <span class="foundation-details__chevron" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </span>
-            </summary>
+    <div class="foundation-main">
+      {renderedSteps.map((step) => {
+        const stepResources = resources.filter((r) => r.step === step.n);
+        return (
+          <section
+            class="foundation-section"
+            id={`f${step.n}`}
+            data-step={step.n}
+            aria-label={`Foundation ${step.n}: ${step.title}`}
+          >
+            <header class="foundation-section__head">
+              <h2 class="foundation-section__title">{step.title}</h2>
+            </header>
+
+            {/* F2 — glass-of-water visual. Three glasses, increasing
+                fill, mapping to the metaphor's three states. */}
+            {step.n === 2 && (
+              <figure class="glass-figure" aria-label="Three glasses of water at increasing fill levels, illustrating how a context window fills up over a session.">
+                <div class="glass-row">
+                  <div class="glass-cell">
+                    <svg class="glass-svg" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <defs>
+                        <clipPath id="g1-clip"><path d="M14 8 L66 8 L60 110 L20 110 Z" /></clipPath>
+                      </defs>
+                      <rect class="glass-water" x="14" y="80" width="52" height="30" clip-path="url(#g1-clip)" />
+                      <path class="glass-outline" d="M14 8 L66 8 L60 110 L20 110 Z" />
+                      <line class="glass-rim" x1="14" y1="8" x2="66" y2="8" />
+                    </svg>
+                    <span class="glass-label">~30% full</span>
+                    <span class="glass-caption">Start of session. Plenty of room.</span>
+                  </div>
+                  <div class="glass-cell">
+                    <svg class="glass-svg" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <defs>
+                        <clipPath id="g2-clip"><path d="M14 8 L66 8 L60 110 L20 110 Z" /></clipPath>
+                      </defs>
+                      <rect class="glass-water" x="14" y="40" width="52" height="70" clip-path="url(#g2-clip)" />
+                      <path class="glass-outline" d="M14 8 L66 8 L60 110 L20 110 Z" />
+                      <line class="glass-rim" x1="14" y1="8" x2="66" y2="8" />
+                    </svg>
+                    <span class="glass-label glass-label--warn">~70% full</span>
+                    <span class="glass-caption">Trust nothing past here without re-reading.</span>
+                  </div>
+                  <div class="glass-cell">
+                    <svg class="glass-svg" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <defs>
+                        <clipPath id="g3-clip"><path d="M14 8 L66 8 L60 110 L20 110 Z" /></clipPath>
+                      </defs>
+                      <rect class="glass-water" x="14" y="14" width="52" height="96" clip-path="url(#g3-clip)" />
+                      <path class="glass-outline" d="M14 8 L66 8 L60 110 L20 110 Z" />
+                      <line class="glass-rim" x1="14" y1="8" x2="66" y2="8" />
+                      <circle class="glass-drop" cx="10" cy="14" r="2" />
+                      <circle class="glass-drop" cx="70" cy="18" r="1.5" />
+                      <circle class="glass-drop" cx="8" cy="22" r="1.5" />
+                    </svg>
+                    <span class="glass-label glass-label--bad">~100% full</span>
+                    <span class="glass-caption">Oldest water spills. The model "forgets".</span>
+                  </div>
+                </div>
+                <figcaption class="glass-figcaption">
+                  <code>/compact</code> squeezes the conversation into a summary.
+                  <code>/clear</code> empties the glass entirely. When in doubt, clear.
+                </figcaption>
+              </figure>
+            )}
 
             <div class="foundation-step">
-              <h3 class="foundation-step__title">{step.title}</h3>
               <div class="foundation-step__body sl-markdown-content" set:html={step.html} />
             </div>
+
+            {/* F3 — side-by-side flow comparison. Two columns, aligned
+                step-by-step so the divergence reads at a glance. */}
+            {step.n === 3 && (
+              <div class="foundation-compare" aria-label="Side-by-side comparison: chatbot flow vs agent flow.">
+                <article class="foundation-compare__col foundation-compare__col--chatbot">
+                  <header>
+                    <span class="foundation-compare__eyebrow">Chatbot flow</span>
+                    <h3>ChatGPT-style — you're the integrator</h3>
+                  </header>
+                  <ol class="foundation-compare__steps">
+                    <li>You paste your code into the chat tab</li>
+                    <li>The model proposes a fix</li>
+                    <li>You copy the fix back into your editor</li>
+                    <li>You run the test — it fails</li>
+                    <li>You paste the error message back into chat</li>
+                    <li>It forgets your project next time you open the tab</li>
+                  </ol>
+                </article>
+                <article class="foundation-compare__col foundation-compare__col--agent">
+                  <header>
+                    <span class="foundation-compare__eyebrow">Agent flow</span>
+                    <h3>Claude Code-style — you supervise</h3>
+                  </header>
+                  <ol class="foundation-compare__steps">
+                    <li>You describe what you want, in plain English</li>
+                    <li>The model reads the relevant files itself</li>
+                    <li>It edits the files directly, with your approval</li>
+                    <li>It runs the test, sees the failure</li>
+                    <li>It iterates on its own — usually fixes it</li>
+                    <li>It remembers via <code>CLAUDE.md</code> next time</li>
+                  </ol>
+                </article>
+              </div>
+            )}
 
             {stepResources.length > 0 && (
               <div class="foundation-resources">
@@ -295,68 +387,72 @@ function resourceKindTone(kind: Resource['kind']): string {
                 </div>
               </div>
             )}
-          </details>
-        </div>
-      </section>
-    );
-  })}
+          </section>
+        );
+      })}
+    </div>
+  </div>
 
-  <script is:inline>
-    (function () {
-      const btn = document.querySelector('[data-foundation-expand-all]');
-      if (!btn) return;
-      const allDetails = Array.from(
-        document.querySelectorAll('.foundation-details'),
-      );
-      function isAllOpen() {
-        return allDetails.every(function (d) {
-          return d.open;
-        });
-      }
-      function update() {
-        btn.textContent = isAllOpen() ? 'Collapse all' : 'Expand all';
-      }
-      btn.addEventListener('click', function () {
-        const target = !isAllOpen();
-        allDetails.forEach(function (d) {
-          d.open = target;
-        });
-        update();
-      });
-      allDetails.forEach(function (d) {
-        d.addEventListener('toggle', update);
-      });
-      update();
-    })();
-  </script>
-
-  <section class="section" id="next">
+  {/* Prominent Day 1 handoff — the single most important link on this page. */}
+  <section class="foundation-next" id="next">
     <div class="wrap">
-      <div class="section__head">
-        <h2>Where next</h2>
-      </div>
-      <div class="grid-2">
-        <article class="card card--text">
-          <div class="card__body">
-            <div class="card__meta"><span class="eyebrow eyebrow--accent">Day 1</span></div>
-            <h3 class="card__title"><a href="/start-here/day-1/">Your first session</a></h3>
-            <p class="card__summary" set:html={linkGlossaryTerms("You've got the mental models. Now install Claude Code and run your first session — six steps, about thirty minutes, productive by the end of it.")} />
+      <article class="foundation-next__card">
+        <div class="foundation-next__body">
+          <span class="foundation-next__eyebrow">Next →</span>
+          <h2 class="foundation-next__title">Day 1 — your first session</h2>
+          <p class="foundation-next__lede" set:html={linkGlossaryTerms("You've got the mental models. Now install Claude Code and run your first session — five concrete steps, about thirty minutes, productive by the end of it.")} />
+          <div class="foundation-next__actions">
+            <a class="foundation-next__cta foundation-next__cta--primary" href="/start-here/day-1/">
+              Open Day 1 →
+            </a>
+            <a class="foundation-next__cta foundation-next__cta--secondary" href="/glossary/">
+              Or look up a term ({glossaryCount} in the glossary)
+            </a>
           </div>
-        </article>
-        <article class="card card--text">
-          <div class="card__body">
-            <div class="card__meta"><span class="eyebrow eyebrow--accent">Glossary</span></div>
-            <h3 class="card__title"><a href="/glossary/">Look up terms</a></h3>
-            <p class="card__summary" set:html={linkGlossaryTerms(`${glossaryCount} terms in plain English — what they mean, when they matter. Use it as a reference, not a reading list.`)} />
-          </div>
-        </article>
-      </div>
+        </div>
+      </article>
     </div>
   </section>
 </MarketingShell>
 
+<script is:inline>
+  // Active-section tracking: highlight the TOC link whose target section
+  // is currently centred-ish in the viewport. rootMargin pushes the
+  // "active band" to ~30% from the top so a section becomes active when
+  // its heading is in the upper third of the viewport.
+  (function () {
+    const links = Array.from(document.querySelectorAll('.foundation-toc [data-toc-target]'));
+    if (!links.length) return;
+    const byId = new Map();
+    links.forEach(function (a) {
+      byId.set(a.getAttribute('data-toc-target'), a);
+    });
+    function setActive(id) {
+      links.forEach(function (a) {
+        if (a.getAttribute('data-toc-target') === id) a.setAttribute('data-active', '');
+        else a.removeAttribute('data-active');
+      });
+    }
+    const sections = Array.from(document.querySelectorAll('.foundation-section[id]'));
+    if (!sections.length) return;
+    // Initial: first section active.
+    setActive(sections[0].id);
+    if (!('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(function (entries) {
+      // Find the entry closest to the top edge of the viewport that's
+      // intersecting. Falls back to the last-known section.
+      const visible = entries
+        .filter(function (e) { return e.isIntersecting; })
+        .sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+      if (visible.length) setActive(visible[0].target.id);
+    }, { rootMargin: '-25% 0px -60% 0px', threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  })();
+</script>
+
 <style>
   @layer nbg.components {
+    /* ─── Hero / intro (unchanged from prior layout) ───────────── */
     .journey-intro {
       color: var(--nbg-ink-2);
       font-size: 1.125rem;
@@ -365,98 +461,151 @@ function resourceKindTone(kind: Resource['kind']): string {
     .journey-intro :global(p) {
       margin: 0 0 1rem 0;
     }
-    .foundation-step {
-      max-width: 56rem;
-      scroll-margin-top: 5rem;
-    }
 
-    /* UAT T1 V2 — accordion chrome. Steps render inside <details> so the
-       reader sees the whole six-section skeleton at a glance and chooses
-       which to expand. */
-    .foundation-details {
-      border-top: 1px solid var(--nbg-hairline);
-      padding-block: 0.75rem;
+    /* ─── Two-column main layout ────────────────────────────────── */
+    .foundation-layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 3rem;
+      padding-block: 2rem 3rem;
+      align-items: start;
     }
-    .foundation-details > .foundation-details__summary {
-      list-style: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding-block: 0.25rem;
-    }
-    .foundation-details > .foundation-details__summary::-webkit-details-marker {
-      display: none;
-    }
-    .foundation-details__head {
-      flex: 1;
-      margin: 0;
-    }
-    .foundation-details__chevron {
-      flex-shrink: 0;
-      width: 32px;
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      color: var(--nbg-muted);
-      background: transparent;
-      transition: transform 200ms ease, background 200ms ease, color 200ms ease;
-    }
-    .foundation-details[open] .foundation-details__chevron {
-      transform: rotate(180deg);
-      color: var(--nbg-accent);
-    }
-    .foundation-details:hover .foundation-details__chevron {
-      background: var(--nbg-surface-2);
-      color: var(--nbg-ink);
-    }
-    .foundation-details[open] > .foundation-step,
-    .foundation-details[open] > .foundation-resources {
-      margin-top: 1.25rem;
-    }
-    .foundation-toggle-all {
-      padding: 0.5rem 0.875rem;
-      font-family: var(--nbg-type-body);
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--nbg-ink);
-      background: var(--nbg-surface);
-      border: 1px solid var(--nbg-border);
-      border-radius: var(--nbg-r-md, 8px);
-      cursor: pointer;
-      transition: background 120ms ease, border-color 120ms ease;
-    }
-    .foundation-toggle-all:hover {
-      background: var(--nbg-surface-2);
-      border-color: var(--nbg-accent);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .foundation-details__chevron {
-        transition: none;
+    @media (max-width: 960px) {
+      .foundation-layout {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
       }
     }
-    .foundation-step__title {
-      font-family: var(--nbg-ff-serif);
+
+    /* ─── Sticky TOC sidebar ───────────────────────────────────── */
+    .foundation-toc {
+      position: sticky;
+      top: 5rem;
+      align-self: start;
+    }
+    @media (max-width: 960px) {
+      .foundation-toc {
+        position: static;
+        border: 1px solid var(--nbg-hairline);
+        border-radius: var(--nbg-r-md, 8px);
+        padding: 1rem;
+        background: var(--nbg-surface);
+      }
+    }
+    .foundation-toc__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .foundation-toc__eyebrow {
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--nbg-muted);
       font-weight: 500;
-      font-size: var(--nbg-fs-feature);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
+    }
+    .foundation-toc__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      border-left: 2px solid var(--nbg-hairline);
+    }
+    .foundation-toc__list a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      margin-left: -2px;
+      border-left: 2px solid transparent;
+      color: var(--nbg-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      line-height: 1.35;
+      transition: color 120ms ease, border-color 120ms ease;
+    }
+    .foundation-toc__list a:hover {
       color: var(--nbg-ink);
-      margin: 0 0 1rem 0;
+    }
+    .foundation-toc__list a[data-active] {
+      color: var(--nbg-accent);
+      border-left-color: var(--nbg-accent);
+      font-weight: 600;
+    }
+    .foundation-toc__skip {
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.75rem;
+      color: var(--nbg-accent);
+      text-decoration: none;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--nbg-hairline);
+      letter-spacing: 0.04em;
+    }
+    .foundation-toc__skip:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── Main column sections ─────────────────────────────────── */
+    .foundation-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+      min-width: 0;
+    }
+    @media (max-width: 960px) {
+      .foundation-main {
+        gap: 3rem;
+      }
+    }
+    .foundation-section {
+      padding: 0;
+      scroll-margin-top: 5rem;
+    }
+    .foundation-section__head {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--nbg-hairline);
+    }
+    /* !important required — Starlight .sl-markdown-content h2 cascade
+       beats class-only selectors. Newsreader serif, modest display size. */
+    .foundation-section .foundation-section__title {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.875rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: -0.015em !important;
+      color: var(--nbg-ink) !important;
+      margin: 0 !important;
+    }
+
+    /* ─── Body prose: 48rem measure, justified ──────────────────── */
+    .foundation-step {
+      max-width: 48rem !important;
+      scroll-margin-top: 5rem;
     }
     .foundation-step__body {
       color: var(--nbg-ink);
       font-size: 1rem;
       line-height: 1.7;
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      word-spacing: 0;
     }
     .foundation-step__body :global(p) {
       margin: 0 0 1rem 0;
     }
     .foundation-step__body :global(p:last-child) {
       margin-bottom: 0;
+    }
+    .foundation-step__body :global(ul),
+    .foundation-step__body :global(ol),
+    .foundation-step__body :global(table),
+    .foundation-step__body :global(pre),
+    .foundation-step__body :global(blockquote) {
+      text-align: start;
+      hyphens: manual;
     }
     .foundation-step__body :global(ul),
     .foundation-step__body :global(ol) {
@@ -506,18 +655,266 @@ function resourceKindTone(kind: Resource['kind']): string {
       color: var(--nbg-ink);
       font-weight: 600;
     }
-    .foundation-resources {
-      margin-top: 3rem;
-      padding-top: 2rem;
+
+    /* ─── F2 glass-of-water visual ─────────────────────────────── */
+    .glass-figure {
+      margin: 0 0 1.5rem 0;
+      padding: 1.5rem;
+      background: var(--nbg-surface);
+      border: 1px solid var(--nbg-hairline);
+      border-radius: var(--nbg-r-md, 8px);
+    }
+    .glass-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      align-items: end;
+    }
+    @media (max-width: 560px) {
+      .glass-row { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+    .glass-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .glass-svg {
+      width: 64px;
+      height: 96px;
+    }
+    .glass-outline {
+      fill: none;
+      stroke: var(--nbg-ink);
+      stroke-width: 1.5;
+      stroke-linejoin: round;
+    }
+    .glass-rim {
+      stroke: var(--nbg-ink);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    .glass-water {
+      fill: var(--nbg-accent);
+      opacity: 0.78;
+    }
+    .glass-drop {
+      fill: var(--nbg-accent);
+      opacity: 0.55;
+    }
+    .glass-label {
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--nbg-accent);
+    }
+    .glass-label--warn { color: #b8860b; }
+    .glass-label--bad  { color: #b3261e; }
+    .glass-caption {
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      color: var(--nbg-muted);
+      max-width: 14rem;
+    }
+    .glass-figcaption {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
       border-top: 1px solid var(--nbg-hairline);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      color: var(--nbg-ink-2);
+      text-align: center;
+    }
+    .glass-figcaption code {
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.85em;
+      background: var(--nbg-surface-2);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+    }
+
+    /* ─── F3 side-by-side compare ──────────────────────────────── */
+    .foundation-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      max-width: 48rem;
+    }
+    @media (max-width: 720px) {
+      .foundation-compare { grid-template-columns: 1fr; }
+    }
+    .foundation-compare__col {
+      padding: 1.25rem 1.25rem 1.5rem;
+      border: 1px solid var(--nbg-hairline);
+      border-radius: var(--nbg-r-md, 8px);
+      background: var(--nbg-surface);
+    }
+    .foundation-compare__col--agent {
+      background: color-mix(in srgb, var(--nbg-accent) 5%, var(--nbg-surface));
+      border-color: color-mix(in srgb, var(--nbg-accent) 25%, var(--nbg-hairline));
+    }
+    .foundation-compare__col header {
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--nbg-hairline);
+    }
+    .foundation-compare__eyebrow {
+      display: block;
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--nbg-muted);
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .foundation-compare__col--agent .foundation-compare__eyebrow {
+      color: var(--nbg-accent);
+    }
+    .foundation-compare__col h3 {
+      margin: 0;
+      font-family: var(--nbg-ff-body, inherit);
+      font-weight: 600;
+      font-size: 0.9375rem;
+      line-height: 1.4;
+      color: var(--nbg-ink);
+    }
+    .foundation-compare__steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      counter-reset: cmp-step;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .foundation-compare__steps li {
+      counter-increment: cmp-step;
+      position: relative;
+      padding-left: 1.875rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--nbg-ink-2);
+    }
+    .foundation-compare__steps li::before {
+      content: counter(cmp-step, decimal-leading-zero);
+      position: absolute;
+      left: 0;
+      top: 0.1em;
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: var(--nbg-muted);
+      letter-spacing: 0.04em;
+    }
+    .foundation-compare__col--agent .foundation-compare__steps li::before {
+      color: var(--nbg-accent);
+    }
+    .foundation-compare__steps li code {
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.95em;
+      background: var(--nbg-surface-2);
+      padding: 0.05em 0.3em;
+      border-radius: 3px;
+    }
+
+    /* ─── Resources block (inline, no longer behind accordion) ─── */
+    .foundation-resources {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px dashed var(--nbg-hairline);
     }
     .foundation-resources__head {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+
+    /* ─── Day 1 next card ──────────────────────────────────────── */
+    .foundation-next {
+      padding-block: 3rem 4rem;
+    }
+    .foundation-next__card {
+      padding: 2.5rem;
+      border: 1px solid color-mix(in srgb, var(--nbg-accent) 30%, var(--nbg-hairline));
+      border-radius: var(--nbg-r-lg, 12px);
+      background: color-mix(in srgb, var(--nbg-accent) 5%, var(--nbg-surface));
+      box-shadow: 0 12px 36px -24px color-mix(in srgb, var(--nbg-accent) 35%, transparent);
+    }
+    .foundation-next__eyebrow {
+      display: inline-block;
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--nbg-accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .foundation-next .foundation-next__title {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 2rem !important;
+      line-height: 1.15 !important;
+      letter-spacing: -0.015em !important;
+      color: var(--nbg-ink) !important;
+      margin: 0 0 0.75rem 0 !important;
+    }
+    .foundation-next__lede {
+      margin: 0 0 1.5rem 0;
+      max-width: 48rem;
+      font-size: 1.0625rem;
+      line-height: 1.55;
+      color: var(--nbg-ink-2);
+    }
+    .foundation-next__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .foundation-next__cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: background 120ms ease, border-color 120ms ease, filter 120ms ease;
+    }
+    .foundation-next__cta--primary {
+      background: var(--nbg-accent);
+      color: #ffffff;
+      border: 1px solid var(--nbg-accent);
+    }
+    .foundation-next__cta--primary:hover {
+      filter: brightness(1.05);
+    }
+    .foundation-next__cta--secondary {
+      background: transparent;
+      color: var(--nbg-accent);
+      border: 1px solid color-mix(in srgb, var(--nbg-accent) 40%, var(--nbg-hairline));
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    .foundation-next__cta--secondary:hover {
+      background: color-mix(in srgb, var(--nbg-accent) 8%, transparent);
+    }
+
+    /* prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .foundation-toc__list a,
+      .foundation-next__cta {
+        transition: none;
+      }
     }
   }
 </style>

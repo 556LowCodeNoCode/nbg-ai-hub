@@ -13,6 +13,8 @@ ai_summary: A five-step walkthrough for someone who just got Claude Code access 
 
 You just got Claude Code. Here's the path that takes you from "installed" to "actually productive" in under an hour. Five steps. Don't skip any.
 
+**You don't need to write code to use this.** If your job is reading requirements, summarising documents, drafting user stories, querying data, sanity-checking artefacts — all of that is text in, text out, and Claude Code reads files directly. Specs, exports, meeting notes, JIRA dumps. The Day 1 path below is the same whether you write code or not.
+
 > **2026-05-27 — sequence change:** the GitHub account step moved up from Step 5 to Step 2. The clone-a-repo reference in Step 3 needs an account to point at, so the account comes first now.
 
 ---
@@ -20,6 +22,15 @@ You just got Claude Code. Here's the path that takes you from "installed" to "ac
 ## Step 1 — Install and pick a terminal
 
 Claude Code is a CLI tool, so you need a terminal it runs well in.
+
+> **Quick vocabulary check — four words you'll see throughout.**
+>
+> - **Terminal** — the window on your computer that takes typed commands instead of clicks. Black background, blinking cursor.
+> - **Shell** — the program running *inside* the terminal that interprets what you type. Bash and zsh are the common ones.
+> - **CLI** — command-line interface. Any program you run by typing rather than clicking. `git` is a CLI. Claude Code is a CLI.
+> - **Slash command** — a shortcut inside Claude Code. You type `/`, then a name (`/clear`, `/compact`, `/help`). Built-in actions, different from a normal prompt.
+>
+> One line: *Terminal is the window. Shell is the brain. CLI is anything you type instead of click. Slash command is a shortcut inside a CLI tool.*
 
 ### If you're on a Mac
 
