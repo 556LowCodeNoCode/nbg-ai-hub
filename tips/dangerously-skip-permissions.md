@@ -2,7 +2,7 @@
 type: tip
 title: "`--dangerously-skip-permissions` — what it actually does"
 audience: beginner
-topics: [survival, permissions, fundamentals]
+topics: [control, permissions, fundamentals]
 internal: false
 authored: "2026-05-27"
 last_reviewed: "2026-05-27"

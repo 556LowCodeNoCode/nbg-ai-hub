@@ -6,6 +6,68 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-05-29 — Tips: overhaul (UX rethink, content expansion 18→27, "Survival keys" → "Control keys")
+
+**Decision:**
+- **Filter UX rethink** — unified AudienceFilter + TopicFilter into one chip vocabulary (label-above-chips column layout, accent-teal active state regardless of chip count). Replaced `T1 / 4` mono section heads with serif `.listing-section__title` + quiet lede (Foundations vocabulary). Filters dispatch `nbg:filters-changed`; a per-page coordinator hides empty cluster sections (`.is-empty`) and reveals a "No tips match" aside with one-click Clear. Hero→content gap tightened ~88px → ~40px via `.hero--stack:has(.hero__filter)`. Double-hairline between sections fixed by dropping redundant `border-top` (the agentnews `.section { border-bottom }` already separates them).
+- **Compact row variant** (`.listing-list--compact`, tips-only) — dropped redundant `TIP · CLUSTER` eyebrow, shrank title 1.35rem → 1.0625rem, clamped summary to 2 lines, tightened padding to 0.7rem. Row height 161px → 90px. Two Starlight unlayered-cascade gotchas patched in-place with `!important` (per the standing rule in CLAUDE.md). Skills layout untouched.
+- **"Survival keys" → "Control keys"** retired across the site. Reason: bank colleagues new to Claude Code read "survival" as alarmist; "control" is plain and accurate. Touched tip frontmatter (`survival` → `control`), tip titles, Day 1 Step 6 + TOC label, about page, README, CLAUDE.md repo layout, SCOPE.md, plugin tests + fixture.
+- **Content expansion 18 → 27** — deleted `prompt-context-first.md` (overlap absorbed into bad-vs-good-openers). Authored 10 new tips covering plan-first workflow, CLAUDE.md-as-living-memory (Boris Cherny's golden rule), session focus, `claude --continue`, custom `.claude/commands/`, `@`/`!` shortcuts, gh/az CLIs, subagents (advanced), hooks-vs-CLAUDE.md (advanced), think-harder + `/effort`. Added a 5th "Workflow & commands" cluster.
+- **Cluster matcher correctness** — replaced regex substring tests with exact-string topic membership. The old `/model/i` was matching `"trust-model"` and pulling always-review-changes into Prompting cluster.
+- **Topic-chip cleanup** — bundled two redundant pairs in tip frontmatter (`trust-model` ⊂ Safety on same tip; `llm-strategy` ⊂ Data-residency on same tip). 16 chips → 14, no information loss.
+
+**Why:** Mid-session user feedback caught filter inconsistencies + visual noise (oversized cards, double borders, gigantic gaps), "survival" as alarmist for the bank-newcomer audience, and catalog gaps the research surfaced — plan-first workflow, custom commands, hooks vs instructions, subagents, resume sessions, thinking triggers.
+
+**Refs:** `site/src/components/{Audience,Topic}Filter.astro`, `site/src/pages/tips.astro`, `site/src/styles/listing-rows.css`, `tips/*.md` (10 new, 1 deleted, several refined), `journeys/day-1.md`, `site/src/pages/{about,start-here/day-1}.astro`, `plugin/tests/{lib/journeys.test.ts,fixtures/snapshot/journeys/day-1.md}`, `plugin/snapshot/` (rebuilt). Sources for catalog research: Anthropic docs, Boris Cherny's published workflow, awesome-claude-code, dev.to / builder.io / kentgigger guides. Site tests: 310/310.
+
+---
+
+## 2026-05-28 (night) — Use Cases pillar v3: homepage refs, OS toggle, terminal-styled snippets, AudienceFilter parity
+
+**Decision:**
+- **Homepage Use Cases references** — added a third CTA "→ Try a Use Case" to the "Start with Foundations" router card (alongside Foundations + Day 1 setup), promoted Use Cases to the first pill in "Jump straight in", added it to the footer "Start" column. The newcomer card now flexes to wrap three buttons on narrow viewports.
+- **OS toggle on use-case detail pages** — small segmented pair ("YOUR OS · macOS · Windows") rendered in the hero intro. Click switches the page's `<html data-os-prefer>` attribute and persists it to `localStorage.nbgaihub.os-prefer`. CSS rules then hide `[data-os="mac"]` or `[data-os="windows"]` blocks based on the attribute. macOS is the default. The toggle script is inline + runs as early as possible to keep first-paint flicker minimal.
+- **OS-tagged blocks across all 12 markdown files** — every "Open the Terminal app" line now wraps the OS-specific instruction in `<div data-os="mac">` / `<div data-os="windows">` containers. Windows variant points readers at the WSL install in Day 1 if they don't have Ubuntu. mortgage-calculator Step 4 (open-the-file fallback) also got the OS split.
+- **Terminal-styled `pre` blocks** — Shell-command snippets in use-case bodies now render as a fake terminal window: dark teal (`#052329`) background, light cream text, three coloured dots (red/yellow/green) top-left, a "TERMINAL" mono label top-right. Shiki's per-token inline styles overridden with `!important` so the palette reads consistently regardless of light/dark page theme. Inline `code` (not inside a pre) keeps the original subtle teal-on-grey pill.
+- **AudienceFilter added to gallery** — page now stacks two filters in the hero matching the Tips/Skills pattern exactly: SHOW (Everything / For beginners / For experienced) above FILTER BY UNIT (multi-select chips). Cards carry `data-audience`; new coordinator script ANDs the audience-filter `audience-hidden` class with our `unit-hidden` class and listens for `nbg:filters-changed` events.
+
+**Why:** User feedback identified four gaps after the v2 ship — main page didn't reference the new pillar, the gallery filter had a SHOW row missing relative to /tips, terminal-instruction code blocks read as "code" not "command", and Mac/Windows divergent commands forced every reader to mentally filter for their OS every time. All four addressed in one round.
+
+**Refs:** `site/src/pages/index.astro` (3 edits), `site/src/pages/use-cases/index.astro` (AudienceFilter import + filter coordinator), `site/src/pages/use-cases/[slug].astro` (OS toggle + terminal pre styling), 12 `usecases/*.md` files. Astro check: 0 errors / 0 warnings.
+
+---
+
+## 2026-05-28 (late evening) — Use Cases pillar v2: 12 use cases, explicit file-creation steps, filter UI matches Tips/Skills
+
+**Decision:**
+- **Pillar doubled to 12** — 6 new use cases authored covering Risk (credit-memo-tldr), Data (sql-from-question), Accounting (invoice-data-extract), HR (onboarding-checklist), Operations multilingual (document-translator), Process improvement (runbook-from-interview). Together with the original 6 the pillar now spans Retail · Contact center · Compliance · Mortgages · Operations · Process improvement · HR · Risk · Data · Accounting.
+- **Schema enum extended** — `business_unit` in `site/src/content.config.ts` adds `hr`, `risk`, `data`, `accounting`. `BUSINESS_UNIT_LABELS` map mirrored in both `index.astro` and `[slug].astro`.
+- **All 12 use cases rewritten for zero-prior-knowledge file creation.** Every step that creates a file now starts with the explicit Terminal walkthrough — open Terminal app → `mkdir ~/Desktop/folder` → `cd` → `claude` — and then asks Claude to write the markdown/text file with inline content. Reason: feedback from user — readers don't know how to "create a new MD" by hand; assuming they know `nano`/`touch`/TextEdit broke the trust chain.
+- **Filter UI overhauled to match Tips/Skills.** Dropped the bespoke `.unit-filter` markup + the "All" chip (the all-state is implicit when zero chips are pressed — same as TopicFilter on /tips). Now uses `.topic-filter` markup + classes, so chip styling, "Clear" link semantics, label-above-chips column layout, and accent-teal pressed state all inherit from `listing-rows.css`. Inline script ports TopicFilter's multi-select OR logic onto `data-business-unit` cards.
+- **Hero filter breathing room** — `.hero--stack .hero__filter` margin-top bumped 1.5rem → 2.5rem so the filter doesn't feel crammed against the lede.
+- **Splash-page nav** (`SplashAwareHeader.astro`) gained the Use Cases entry between Day 1 and Tips (the earlier `astro.config.mjs` sidebar entry only renders on content-detail pages).
+
+**Why:** Earlier round shipped 6 use cases but skipped the "how do I make a file" gap and used a bespoke filter that didn't match the rest of the site. User feedback caught both — fix is a content rewrite + a small filter swap, not a redesign.
+
+**Refs:** 12 files in `usecases/`. Schema: `site/src/content.config.ts`. Pages: `site/src/pages/use-cases/index.astro` + `[slug].astro`. Splash nav: `site/src/components/SplashAwareHeader.astro`. Astro check: 0 errors / 0 warnings.
+
+---
+
+## 2026-05-28 (evening) — Use Cases pillar: a 6-card gallery + per-case walkthroughs
+
+**Decision:**
+- New `usecases` content collection in `site/src/content.config.ts` — `baseShape('usecase')` + 6 use-case-specific fields (`business_unit` enum, `time_estimate`, `difficulty`, `order`, `outcome`, `inputs[]`). Markdown body uses the same `## Step N — Title` segmentation as journeys/day-1.md and journeys/foundations.md so the existing splitter pattern fits unchanged.
+- Six beginner-friendly worked examples authored under `usecases/`: complaint-heatmap (Contact center), empathic-reply (Retail), policy-diff (Compliance), mortgage-calculator (Mortgages), minute-taker (Operations), regulator-brief (Compliance). Each is ~15–30 min, has a clear input + outcome, includes an explicit compliance/synthetic-data check, and ends with a "save the prompt as a template" Step 5 so the second run takes seconds.
+- Gallery page `site/src/pages/use-cases/index.astro` — 2-column card grid, business-unit chip filter (vocabulary matches /tips), finale card pointing at /tips + /skills.
+- Detail page `site/src/pages/use-cases/[slug].astro` — Day-1-style 2-column docs (240px sticky TOC + scrollable steps), hero with outcome + inputs side-by-side cards, next-use-case CTA at bottom.
+- Sidebar adds "Use Cases" between Day 1 and Tips. Day 1's bottom "Next →" card switched from Tips to Use Cases as primary (Tips demoted to secondary). Foundations hero adds a third skip-link ("→ already installed? Try a Use Case") and the bottom "Next →" card adds a "Or jump to Use Cases" secondary CTA.
+
+**Why:** Foundations + Day 1 left newcomers with mental models + a working install but no concrete first thing to do. Use Cases closes that loop with bank-relevant beginner examples — the same shape used by docs/design/project-design.md's "compress time-to-confidence" goal.
+
+**Refs:** new files under `usecases/`, `site/src/pages/use-cases/`. Schema: `site/src/content.config.ts`. Sidebar: `site/astro.config.mjs`. Cross-refs: `site/src/pages/start-here/foundations.astro`, `site/src/pages/start-here/day-1.astro`.
+
+---
+
 ## 2026-05-27 (overnight, follow-up) — Day 1 Step 4: add GitHub commit/push subsection
 
 **Decision:** Added a new "Want to share your work? Push it to GitHub" subsection at the end of Step 4. Explains the local-vs-shared pivot, points back to `gh auth login` from Step 3, gives the two prompts ("create a GitHub repo for this folder and push it" / "commit and push"), and provides the two-word commit/push definitions. Also tweaked the Step 5 "Without `CLAUDE.md`" bullet ("two completely different reports" → "different reports every time you run it") per UAT.

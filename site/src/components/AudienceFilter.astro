@@ -25,9 +25,9 @@ interface Props {
 const { scope = '[data-audience]' } = Astro.props;
 ---
 
-<form class="audience-filter not-content" data-scope={scope}>
+<form class="audience-filter not-content" data-scope={scope} aria-label="Audience filter">
   <span class="audience-filter__label">Show</span>
-  <div class="audience-filter__group" role="radiogroup" aria-label="Audience filter">
+  <div class="audience-filter__group" role="radiogroup" aria-label="Audience">
     <label class="audience-filter__option">
       <input type="radio" name="audience" value="all" checked />
       <span class="audience-filter__chip">Everything</span>
@@ -45,6 +45,10 @@ const { scope = '[data-audience]' } = Astro.props;
 
 <style>
   @layer nbg.components {
+    /* 2026-05-28 UX rethink: both filters now share one chip vocabulary.
+       Audience drops its inner segmented-pill container and uses the same
+       bordered-chip rest state + accent-teal active state as the topic
+       filter, so the two filters read as a pair on /tips and /skills. */
     .audience-filter {
       display: flex;
       flex-wrap: wrap;
@@ -68,10 +72,6 @@ const { scope = '[data-audience]' } = Astro.props;
       display: inline-flex;
       flex-wrap: wrap;
       gap: var(--nbg-sp-1);
-      padding: var(--nbg-sp-1);
-      background: var(--nbg-color-bg-page);
-      border: 1px solid var(--nbg-color-border-subtle);
-      border-radius: var(--nbg-r-pill);
     }
     .audience-filter__option {
       display: inline-flex;
@@ -91,35 +91,31 @@ const { scope = '[data-audience]' } = Astro.props;
     .audience-filter__chip {
       display: inline-flex;
       align-items: center;
-      /* --nbg-sp-3-5 was a phantom token (never defined in primitives.css);
-       * historically the chip padding-x was 0 and the regression was hidden
-       * by the filter's outer bordered chrome. Now that the outer chrome
-       * is gone (filter integrated into the hero), use real tokens. */
-      padding: 0.4rem 0.9rem;
+      padding: 0.35rem 0.8rem;
       font-family: var(--nbg-type-body);
       font-size: var(--nbg-fs-sm);
       font-weight: var(--nbg-fw-medium);
       line-height: 1.3;
       color: var(--nbg-color-fg-secondary);
-      background: transparent;
+      background: var(--nbg-color-bg-page);
+      border: 1px solid var(--nbg-color-border-subtle);
       border-radius: var(--nbg-r-pill);
       transition:
         background-color var(--nbg-dur-fast) var(--nbg-ease-out),
         color            var(--nbg-dur-fast) var(--nbg-ease-out),
-        transform        var(--nbg-dur-fast) var(--nbg-ease-out);
+        border-color     var(--nbg-dur-fast) var(--nbg-ease-out);
       user-select: none;
     }
     .audience-filter__option:hover .audience-filter__chip {
       color: var(--nbg-color-fg-primary);
       background: var(--nbg-color-bg-surface-hover);
     }
-    /* Active state — high-contrast dark pill so it's unmistakably "selected".
-       Previously a subtle accent-bg tint was used, which was almost invisible
-       in the screenshot and made the user think the filter did nothing. */
+    /* Active state — accent-teal fill matches the topic-filter active state
+       so both filters read as one control vocabulary. */
     .audience-filter__option input[type='radio']:checked + .audience-filter__chip {
-      background: var(--nbg-color-fg-primary);
-      color: var(--nbg-color-bg-page);
-      font-weight: var(--nbg-fw-semibold);
+      color: #ffffff;
+      background: var(--nbg-accent, #007a8a);
+      border-color: var(--nbg-accent, #007a8a);
     }
     .audience-filter__option input[type='radio']:focus-visible + .audience-filter__chip {
       outline: none;
@@ -169,6 +165,8 @@ const { scope = '[data-audience]' } = Astro.props;
           el.classList.toggle('audience-hidden', !visible);
         });
       });
+      // Notify any section-emptiness coordinator that filters changed.
+      document.dispatchEvent(new CustomEvent('nbg:filters-changed'));
     }
 
     function syncRadios(value) {

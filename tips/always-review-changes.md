@@ -2,7 +2,7 @@
 type: tip
 title: Always look at the diff before you accept
 audience: beginner
-topics: [safety, trust-model]
+topics: [safety]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

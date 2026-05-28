@@ -14,13 +14,11 @@
  *   - `[data-mode="reader"] .foundation-step { max-width: 56rem }` is sidestepped
  *     by using a unique class (`.day-section__prose`) instead.
  */
-import { getEntry, getCollection } from 'astro:content';
+import { getEntry } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import MarketingShell from '../../components/MarketingShell.astro';
 import remarkGlossaryLink from '../../plugins/remark-glossary-link.ts';
 import { linkGlossaryTerms } from '../../lib/glossary-link-string';
-
-const glossaryCount = (await getCollection('glossary')).length;
 
 const entry = await getEntry('journeys', 'day-1');
 if (!entry) {
@@ -103,7 +101,7 @@ const tocLabels: Record<number, string> = {
   3: 'GitHub account',
   4: 'First session',
   5: 'Write CLAUDE.md',
-  6: 'Survival keys',
+  6: 'Control keys',
 };
 
 const heroTitle = entry.data.title ?? 'Day 1';
@@ -313,14 +311,14 @@ const heroSummary = entry.data.ai_summary;
       <article class="day-next__card">
         <div class="day-next__body">
           <span class="day-next__eyebrow">Next →</span>
-          <h2 class="day-next__title">Tips &amp; tricks</h2>
-          <p class="day-next__lede" set:html={linkGlossaryTerms("You've installed, signed in, run your first session, and put a CLAUDE.md down. Now the habits that compound — prompting patterns, survival keys, context discipline, the small moves that take a user from working to fast.")} />
+          <h2 class="day-next__title">Try it on something real</h2>
+          <p class="day-next__lede" set:html={linkGlossaryTerms("You've installed, signed in, run your first session, and put a CLAUDE.md down. The fastest way to feel productive is to do one real thing — a complaint heatmap, a policy diff, a one-pager from a regulator PDF. Six beginner-friendly use cases, fifteen to thirty minutes each.")} />
           <div class="day-next__actions">
-            <a class="day-next__cta day-next__cta--primary" href="/tips/">
-              Open Tips →
+            <a class="day-next__cta day-next__cta--primary" href="/use-cases/">
+              Open Use Cases →
             </a>
-            <a class="day-next__cta day-next__cta--secondary" href="/glossary/">
-              Or look up a term ({glossaryCount} in the glossary)
+            <a class="day-next__cta day-next__cta--secondary" href="/tips/">
+              Or browse Tips &amp; tricks
             </a>
           </div>
         </div>

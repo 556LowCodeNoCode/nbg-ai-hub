@@ -2,7 +2,7 @@
 type: tip
 title: 'Real bank data at runtime: Azure OpenAI only'
 audience: advanced
-topics: [compliance, data-residency, llm-strategy]
+topics: [compliance, data-residency]
 internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

@@ -29,38 +29,53 @@ type Tip = CollectionEntry<'tips'>;
 
 const all = await getCollection('tips');
 
-// UAT T8 V1 — distinct topic values across the tips collection. We
-// exclude very-generic ones (the cluster labels themselves and the
-// always-on "fundamentals") so the chip row stays scannable.
+// Distinct topic values across the tips collection. Excludes only the
+// always-on `fundamentals` tag so the chip row stays scannable. Earlier
+// experiments with stricter curation (dropping cluster-name chips, dropping
+// single-tip chips) were too aggressive — kept here as a single exclude set
+// to make future tweaks one-line.
 const TOPIC_EXCLUDE = new Set(['fundamentals']);
 const allTopics = Array.from(
-  new Set(all.flatMap((t) => t.data.topics).filter((t) => !TOPIC_EXCLUDE.has(t))),
+  new Set(all.flatMap((t) => t.data.topics).filter((t) => !TOPIC_EXCLUDE.has(t.toLowerCase()))),
 ).sort();
+
+// 2026-05-28 — exact topic membership instead of substring regex. The previous
+// /prompt|model|opus|sonnet/ pattern was matching "trust-model" as a substring
+// and pulling always-review-changes into Prompting by accident. Tag-based
+// membership is explicit; if a tag isn't listed, the tip falls to Other.
+const hasAny = (topics: string[], wanted: string[]): boolean =>
+  topics.some((t) => wanted.includes(t.toLowerCase()));
 
 const CLUSTERS: Array<{ key: string; label: string; blurb: string; match: (t: Tip) => boolean }> = [
   {
     key: 'prompting',
     label: 'Prompting',
     blurb: 'How to ask — phrasing, structure, what to include.',
-    match: (t) => t.data.topics.some((x: string) => /prompt|model|opus|sonnet/i.test(x)),
+    match: (t) => hasAny(t.data.topics, ['prompting', 'prompt']),
   },
   {
-    key: 'survival',
-    label: 'Survival keys',
-    blurb: 'The keystrokes and modes that save you when something goes wrong.',
-    match: (t) => t.data.topics.some((x: string) => /survival|esc|compact|clear|keyboard/i.test(x)),
+    key: 'control',
+    label: 'Control keys',
+    blurb: 'The keystrokes and modes that put you back in the driver seat — stop, undo, switch what Claude is allowed to do.',
+    match: (t) => hasAny(t.data.topics, ['control']),
+  },
+  {
+    key: 'workflow',
+    label: 'Workflow & commands',
+    blurb: 'How to drive Claude Code — plan-first, slash commands, sessions, subagents, hooks. The shortcuts that compound.',
+    match: (t) => hasAny(t.data.topics, ['workflow', 'commands', 'integrations']),
   },
   {
     key: 'context',
     label: 'Context discipline',
     blurb: 'Keeping Claude focused — what stays in the conversation, what should be cleared.',
-    match: (t) => t.data.topics.some((x: string) => /context|memory|claudemd|claude\.md|file/i.test(x)),
+    match: (t) => hasAny(t.data.topics, ['context', 'memory', 'claudemd', 'claude.md']),
   },
   {
     key: 'compliance',
     label: 'Compliance & safety',
     blurb: 'Working with bank data and external services — what is allowed and what is not.',
-    match: (t) => t.data.topics.some((x: string) => /compliance|safety|trust|review|azure|secrets/i.test(x)),
+    match: (t) => hasAny(t.data.topics, ['compliance', 'safety', 'data-residency']),
   },
 ];
 
@@ -105,17 +120,17 @@ function audienceTooltip(a: string): string {
     </div>
   </section>
 
-  {CLUSTERS.map((cluster, idx) => {
+  {CLUSTERS.map((cluster) => {
     const items = buckets[cluster.key] ?? [];
     if (items.length === 0) return null;
     return (
-      <section class="section section--listing" id={cluster.key}>
+      <section class="section section--listing" id={cluster.key} data-listing-section>
         <div class="wrap">
-          <div class="section__head">
-            <h2>T{idx + 1} / {CLUSTERS.length}</h2>
-            <span class="count">{cluster.label} — {cluster.blurb}</span>
-          </div>
-          <ul class="listing-list" role="list">
+          <header class="listing-section__head">
+            <h2 class="listing-section__title">{cluster.label}</h2>
+            <p class="listing-section__lede">{cluster.blurb}</p>
+          </header>
+          <ul class="listing-list listing-list--compact" role="list">
             {items.map((tip) => (
               <li>
                 <article
@@ -152,12 +167,12 @@ function audienceTooltip(a: string): string {
   })}
 
   {orphans.length > 0 && (
-    <section class="section section--listing" id="other">
+    <section class="section section--listing" id="other" data-listing-section>
       <div class="wrap">
-        <div class="section__head">
-          <h2>T+ / extra</h2>
-          <span class="count">Other — patterns that don't fit neatly elsewhere.</span>
-        </div>
+        <header class="listing-section__head">
+          <h2 class="listing-section__title">Other</h2>
+          <p class="listing-section__lede">Patterns that don't fit neatly elsewhere.</p>
+        </header>
         <ul class="listing-list" role="list">
           {orphans.map((tip) => (
             <li>
@@ -190,4 +205,82 @@ function audienceTooltip(a: string): string {
       </div>
     </section>
   )}
+
+  <section class="section section--listing" data-listing-empty-host>
+    <div class="wrap">
+      <aside class="listing-empty" id="listing-empty" aria-live="polite">
+        <p class="listing-empty__title">No tips match these filters</p>
+        <p class="listing-empty__body">Try a different audience, or clear the topic chips.</p>
+        <button type="button" class="listing-empty__action" data-listing-clear-all>Clear filters</button>
+      </aside>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      // 2026-05-28 UX rethink — section-emptiness coordinator.
+      // Filters add `audience-hidden` / `topic-hidden` to rows; this script
+      // listens for the `nbg:filters-changed` event each filter dispatches,
+      // counts visible rows per section, and toggles `is-empty` on sections
+      // that have zero visible rows. When every section is empty, surfaces
+      // the no-results aside.
+
+      function recompute() {
+        const sections = document.querySelectorAll('[data-listing-section]');
+        let totalVisible = 0;
+        sections.forEach(function (sec) {
+          const rows = sec.querySelectorAll('.listing-row');
+          let visible = 0;
+          rows.forEach(function (r) {
+            if (
+              !r.classList.contains('audience-hidden') &&
+              !r.classList.contains('topic-hidden')
+            ) {
+              visible += 1;
+            }
+          });
+          sec.classList.toggle('is-empty', visible === 0);
+          totalVisible += visible;
+        });
+        const empty = document.getElementById('listing-empty');
+        if (empty) {
+          empty.setAttribute('data-visible', totalVisible === 0 ? 'true' : 'false');
+        }
+        // Hide the host section entirely when there ARE visible rows, so the
+        // empty wrapper doesn't add a phantom border-divider beneath the list.
+        const host = document.querySelector('[data-listing-empty-host]');
+        if (host) {
+          host.classList.toggle('is-empty', totalVisible !== 0);
+        }
+      }
+
+      function init() {
+        // Wire the "Clear filters" button — resets both filters in one click.
+        const clearAll = document.querySelector('[data-listing-clear-all]');
+        if (clearAll) {
+          clearAll.addEventListener('click', function () {
+            // Reset audience radio to "all".
+            const allRadio = document.querySelector(
+              '.audience-filter input[type="radio"][value="all"]'
+            );
+            if (allRadio) {
+              allRadio.checked = true;
+              allRadio.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            // Reset topic chips to unpressed and fire the clear button.
+            const topicClear = document.querySelector('[data-topic-clear]');
+            if (topicClear) topicClear.click();
+          });
+        }
+        document.addEventListener('nbg:filters-changed', recompute);
+        recompute();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
 </MarketingShell>

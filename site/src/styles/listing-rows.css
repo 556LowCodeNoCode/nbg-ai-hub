@@ -17,28 +17,133 @@
   /* Hero — filter integrated into the hero, not its own bordered box. */
   .hero--stack .hero__filter {
     margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
-  /* Drop the chunky bordered chrome around the filter so it merges with the
-     hero rhythm. The segmented pill control inside still carries its own
-     background, so the chip group remains visually clustered. */
-  .hero__filter .audience-filter {
+  /* Drop the chunky bordered chrome around both filters AND force them
+     into a label-above-chips column layout. Without the column override,
+     audience (3 short chips) puts its label inline-left while topic
+     (many chips) wraps the label above — visually inconsistent. */
+  .hero__filter .audience-filter,
+  .hero__filter .topic-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
     background: transparent;
     border: 0;
     padding: 0;
     margin: 0;
   }
 
-  /* Section spacing — listing pages don't want the full ~80px gaps that
-     long-form content uses. Tighten to ~40px so the sections read as parts
-     of one scrollable index rather than separate articles. */
-  .section--listing {
-    padding-block: 2.5rem !important;
+  /* Hero → first listing section gap. Hero ships 48px bottom padding +
+     hairline divider, section--listing ships 40px top padding — combined
+     that's ~88px of dead space below the filter chrome. Tighten when the
+     hero carries filters (only happens on listing pages). */
+  .hero--stack:has(.hero__filter) {
+    padding-bottom: 1.5rem !important;
+    border-bottom: 0 !important;
   }
-  .section--listing + .section--listing {
+  .hero--stack:has(.hero__filter) + .section--listing {
+    padding-block-start: 1.5rem !important;
     border-top: 1px solid var(--nbg-hairline, #ebeff5);
   }
+
+  /* Section spacing — listing pages don't want the full ~80px gaps that
+     long-form content uses. After the row compaction (2026-05-28), the
+     between-cluster gap dominated the page — 2.5rem × 2 sides = 80px
+     of dead air between Prompting and Control keys. Tighten further:
+     1rem each side = 32px between adjacent sections. */
+  .section--listing {
+    padding-block: 1rem !important;
+  }
+  /* 2026-05-29 — removed `.section--listing + .section--listing { border-top }`.
+     The agentnews `.section { border-bottom }` rule already draws a hairline
+     between adjacent sections; the border-top was producing a second parallel
+     hairline ~16px below it (one from prev's bottom, one from next's top). */
   .section--listing .section__head {
     margin-bottom: 1.5rem;
+  }
+
+  /* 2026-05-28 UX rethink — new section head vocabulary for listing pages.
+     Drops the "T1 / 4" mono ordering label and the right-aligned blurb.
+     Title is serif (matches Foundations section heads); blurb sits as a
+     quiet lede below — same vocabulary the rest of the site uses. */
+  .listing-section__head {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .listing-section__title {
+    margin: 0;
+    font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif);
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    color: var(--nbg-ink, #0b1e2e);
+  }
+  .listing-section__lede {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--nbg-ink-2, #1a3148);
+    max-width: 56rem;
+  }
+
+  /* Empty bucket — when filters hide every row in a section, hide the
+     section header too. Coordinator script on each listing page toggles
+     this class after every filter change. */
+  .section--listing.is-empty {
+    display: none !important;
+  }
+  .section--listing.is-empty + .section--listing {
+    border-top: 0;
+  }
+
+  /* "No tips match these filters" empty state — shown when every section
+     hides itself. Coordinator script toggles data-visible="true". */
+  .listing-empty {
+    display: none;
+    text-align: center;
+    padding: 4rem 1.5rem;
+    border: 1px dashed var(--nbg-border, #dce3eb);
+    border-radius: 12px;
+    color: var(--nbg-muted, #5b6b80);
+    margin-block: 2rem;
+  }
+  .listing-empty[data-visible='true'] {
+    display: block;
+  }
+  .listing-empty__title {
+    margin: 0 0 0.4rem;
+    font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif);
+    font-weight: 500;
+    font-size: 1.25rem;
+    color: var(--nbg-ink, #0b1e2e);
+  }
+  .listing-empty__body {
+    margin: 0 0 1rem;
+    font-size: 0.9375rem;
+  }
+  .listing-empty__action {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    font-family: var(--nbg-ff-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--nbg-accent-ink, #00525c);
+    background: transparent;
+    border: 1px solid var(--nbg-accent, #007a8a);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+  }
+  .listing-empty__action:hover {
+    background: var(--nbg-accent, #007a8a);
+    color: #ffffff;
   }
 
   /* List + row chrome. */
@@ -352,6 +457,53 @@
   .listing-intro__body strong {
     color: var(--nbg-ink, #0b1e2e);
     font-weight: 600;
+  }
+
+  /* 2026-05-28 — compact listing variant for /tips.
+     The default row carries an eyebrow (TIP · CLUSTER), a 1.35rem serif title,
+     and a 0.9375rem summary with 1.6 line-height. That's right for /skills
+     (where each row carries a command-chip + meta) but oversized for /tips
+     where each row is just a title + one summary sentence. The eyebrow is
+     pure repetition on /tips because the cluster heading sits right above
+     and the page is /tips by definition. Drop the eyebrow, tighten padding,
+     shrink the title, tighten line-heights — same content, ~half the height.
+     Skills keeps the default sizing via not having .listing-list--compact. */
+  .listing-list--compact {
+    gap: 0.35rem;
+  }
+  .listing-list--compact .listing-row {
+    padding: 0.7rem 1rem;
+    gap: 0.3rem 1rem;
+  }
+  .listing-list--compact .listing-row__main {
+    gap: 0.2rem;
+  }
+  .listing-list--compact .listing-row__eyebrow {
+    display: none;
+  }
+  /* !important required to beat .sl-markdown-content h3 { font-size: ... !important }
+     in content-prose.css — same unlayered Starlight cascade gotcha that bites
+     every prose heading on a marketing surface. */
+  .listing-list--compact .listing-row__title {
+    font-size: 1.0625rem !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.008em !important;
+    margin-block: 0 !important;
+  }
+  /* Clamp the summary to 2 lines — long summaries were doubling the row
+     height. Two lines is enough to convey the gist; readers click through
+     for the rest. Standard `-webkit-line-clamp` ships in every evergreen
+     browser. */
+  .listing-list--compact .listing-row__summary {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    /* Beat .sl-markdown-content p { margin-block: 12px } — same cascade
+       gotcha. Without this the summary adds 24px of phantom vertical air. */
+    margin: 0 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   @media (max-width: 720px) {

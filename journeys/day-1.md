@@ -8,7 +8,7 @@ authored: "2026-05-19"
 last_reviewed: "2026-05-27"
 external_link: null
 deeper_link: null
-ai_summary: A six-step walkthrough for someone who just got Claude Code access — terminal, install, GitHub account, first session, survival keys, CLAUDE.md. Designed to be done in about an hour.
+ai_summary: A six-step walkthrough for someone who just got Claude Code access — terminal, install, GitHub account, first session, control keys, CLAUDE.md. Designed to be done in about an hour.
 ---
 
 You just got Claude Code. Here's the path from "installed" to "actually productive" in about an hour. Six steps. Don't skip any.
@@ -250,7 +250,7 @@ If it gets bigger, don't bloat it — reference other docs from it: scope, out-o
 
 ---
 
-## Step 6 — Learn the survival keys
+## Step 6 — Learn the control keys
 
 You'll need these in your first hour:
 

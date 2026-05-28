@@ -177,13 +177,15 @@ function display(t: string): string {
             } else {
               // OR across selected chips — row is visible if it carries
               // any selected topic. Matches the "show me Prompting OR
-              // Survival" mental model.
+              // Control" mental model.
               visible = selected.some(function (s) {
                 return rowTopics.indexOf(s.toLowerCase()) !== -1;
               });
             }
             el.classList.toggle('topic-hidden', !visible);
           });
+          // Notify any section-emptiness coordinator that filters changed.
+          document.dispatchEvent(new CustomEvent('nbg:filters-changed'));
         }
 
         chips.forEach(function (chip) {

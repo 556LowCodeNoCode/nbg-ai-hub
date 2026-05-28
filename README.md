@@ -24,7 +24,7 @@ Five content pillars: **skills catalog, tips & tricks, curated news, onboarding 
 
 - **News updates automatically** — daily cron triages RSS feeds, auto-publishes high-confidence items straight to the published folder, and prunes anything older than seven days in the same commit. The site picks it up on next build.
 
-- **Newcomer follows Day 1** — lands on the site → walks the six-step Day 1 journey (install → first session → survival keys → CLAUDE.md → skills marketplace → next steps) → installs the plugin → continues inside Claude Code via `/hub-onboard day-1`.
+- **Newcomer follows Day 1** — lands on the site → walks the six-step Day 1 journey (install → first session → control keys → CLAUDE.md → skills marketplace → next steps) → installs the plugin → continues inside Claude Code via `/hub-onboard day-1`.
 
 - **Plugin user pulls fresh content** — `/hub-refresh` does a shallow `git pull` of the latest snapshot into a per-user cache → next `/hub-*` command reflects new content.
 

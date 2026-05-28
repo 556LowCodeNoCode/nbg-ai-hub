@@ -2,7 +2,7 @@
 type: tip
 title: Permission modes — what Shift+Tab toggles
 audience: beginner
-topics: [survival, workflow]
+topics: [control, workflow]
 internal: false
 authored: "2026-05-25"
 last_reviewed: "2026-05-25"
