@@ -144,7 +144,7 @@ This is the part that matters and the part most likely to be wrong. For each row
 
 Tighten one or two and the minutes are ready.
 
-Paste the markdown into Teams (which renders it natively), or copy into Outlook (paste as plain text, then bold the section headers manually). Send to attendees.
+*In real life you'd paste the markdown into Teams (which renders it natively) or Outlook (plain text, bold the headers) and send to attendees. We're pretending here — the file on your Desktop is the deliverable.*
 
 Save the folder. The pattern is now repeatable: every meeting gets its own dated folder with `transcript` + `context.md` + the minutes. After a quarter you have a searchable archive of what was decided where — which is more than most teams have ever had.
 

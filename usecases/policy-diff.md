@@ -142,7 +142,7 @@ The "what this means" Claude wrote might be *"Adds delegation flexibility."* The
 
 For every material change: read Claude's "what this means", and if you'd phrase it differently, rewrite that one line. The structure stays; the judgment is yours.
 
-Then email `policy-diff.md` to the policy author and the committee secretary. (If you prefer PDF, ask Claude: *"Save the same brief as `policy-diff.pdf` too."* — it can do that.) The author gets a structured starting point. The committee gets a one-pager instead of redlines.
+*In real life you'd email `policy-diff.md` to the policy author and the committee secretary. (If you prefer PDF, ask Claude: "Save the same brief as `policy-diff.pdf` too." — it can do that.) We're pretending here — the file on your Desktop is the deliverable.*
 
 The whole loop, including cross-checks, takes 15–25 minutes for a typical 30-page policy. Doing the same review by hand takes most of an afternoon.
 

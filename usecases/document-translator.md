@@ -144,7 +144,7 @@ If you spot a missed nuance, tell Claude:
 
 Iterate until the notes feel honest.
 
-Then paste the markdown into Teams (which renders the table) or copy `translation.md` into Outlook for the Frankfurt senior. Include the Section 3 summary as the first paragraph of the email — that's what they read first.
+*In a real cross-border thread you'd paste `translation.md` into Teams or Outlook for the Frankfurt senior, with the Section 3 summary as the first paragraph. We're pretending here — the file on your Desktop is the deliverable.*
 
 The pattern works in either direction (English → Greek or Greek → English) and for any document type — contracts, internal memos, technical specifications. The structure (side-by-side, notes, one-line summary) stays. Only `context.md` changes.
 

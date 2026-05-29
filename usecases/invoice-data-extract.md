@@ -160,11 +160,9 @@ Iterate. Once the spot-checks pass, you trust the file.
 
 ---
 
-## Step 6 — Import into your accounting tool
+## Step 6 — That CSV is your handoff point
 
-Most accounting tools (SAP, Oracle, smaller ones like Xero / QuickBooks) accept a CSV import. Open your tool → import → point at `~/Desktop/invoices-may/invoices.csv`.
-
-You may need to map the column names to whatever your tool expects (e.g. our `supplier_name` → their `Vendor`). Once mapped, save the mapping — next month's batch reuses it.
+*In real life this is the moment you'd import `invoices.csv` into your accounting tool — SAP, Oracle, Xero, QuickBooks all take a CSV import; you'd map our `supplier_name` to their `Vendor` once and save the mapping for next month. We're pretending here — the CSV on your Desktop is the deliverable.*
 
 The pattern for next month: drop fresh PDFs into the `invoices/` folder, run the same prompt — Claude reads PDFs natively too. Twenty minutes for 30 invoices instead of two hours.
 

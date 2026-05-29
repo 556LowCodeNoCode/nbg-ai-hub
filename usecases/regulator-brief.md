@@ -150,7 +150,7 @@ Iterate until your spot-checks pass.
 
 ## Step 6 — Take it to the team lead
 
-Send `brief.md` (or paste it into Teams — Teams renders markdown natively) with one line: *"My 25-min read of the EBA paper — flagging the SME-lending change as the one that probably needs a real review this week."*
+*In real life you'd send `brief.md` (or paste it into Teams — markdown renders natively) with one line: "My 25-min read of the EBA paper — flagging the SME-lending change as the one that probably needs a real review this week." We're pretending here — the file on your Desktop is the deliverable.*
 
 You've shifted from *"I'll read it and get back to you"* to *"here's the picture, here's the priority"*. That's the work the team lead actually wanted.
 

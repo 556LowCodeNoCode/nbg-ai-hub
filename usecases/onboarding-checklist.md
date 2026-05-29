@@ -144,12 +144,9 @@ Iterate. Three of these revisions usually produce a checklist that lands well.
 
 ---
 
-## Step 6 — Send it the right way
+## Step 6 — How you'd actually deliver it
 
-Don't email it on Friday afternoon as an attachment. Two better options:
-
-1. **Paste into Teams.** Markdown renders natively — checkboxes, bold, headings all work. Send it as a direct message to Anna with a one-liner: *"Looking forward to Monday — this is your first week, designed for you. We'll go through Day 1 together at 10am."*
-2. **Print it.** People who get a printed checklist on day 1 keep it on their desk. People who get a PDF lose it in their inbox.
+*In real life, the two delivery options that land best with new joiners: (1) paste the markdown into Teams as a direct message — checkboxes, bold, headings render natively — with a one-liner like "Looking forward to Monday — this is your first week, designed for you. We'll go through Day 1 together at 10am." (2) Print it — people who get a printed checklist on day 1 keep it on their desk, people who get a PDF lose it in their inbox. We're pretending here — the file on your Desktop is the deliverable.*
 
 Save the folder. The next joiner's checklist reuses the prompt and the team onboarding doc — only `context.md` and the CV change. Twenty minutes becomes five.
 

@@ -167,9 +167,11 @@ Tell Claude:
 >
 > Each one in the form: "Recommendation: [verdict]. Conditions/reasons: [one sentence]."
 
-Pick the one that matches your read. Paste it at the top of `brief.md`. Send to your senior officer.
+Pick the one that matches your read. Paste it at the top of `brief.md`.
 
-You've turned a Tuesday morning of condensing into twenty minutes of triage. The senior officer reads three bullets, scans the risk flags, asks you the open questions — that's exactly the conversation you wanted.
+*In a real Tuesday morning you'd send `brief.md` to your senior officer — we're pretending here, so the file on your Desktop is the deliverable.*
+
+You've turned a Tuesday morning of condensing into twenty minutes of triage. The senior officer (in your head, for now) reads three bullets, scans the risk flags, asks you the open questions — that's exactly the conversation you wanted.
 
 ### Lock the risk-flag rules in `CLAUDE.md`
 

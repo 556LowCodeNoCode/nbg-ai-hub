@@ -164,7 +164,7 @@ They send back tweaks. Open the file (it's in `~/Desktop/runbook-monthend-recon/
 
 Claude edits `runbook.md`. One more pass with the colleague — usually only one — and the runbook is shippable.
 
-Save it to the team SharePoint or wiki. The next time the colleague is on holiday, someone else runs the process from the runbook. The first time that happens, you'll know whether the runbook is actually good. (It will need one more revision after that first real-world use. That's normal.)
+*In real life this is where you'd put `runbook.md` on the team SharePoint or wiki so the next person can find it. We're pretending here — the file on your Desktop is the deliverable.* The next time the colleague is on holiday, someone else runs the process from the runbook. The first time that happens, you'll know whether the runbook is actually good. (It will need one more revision after that first real-world use. That's normal.)
 
 The deeper win: you've now done one process. The pattern works for every other single-person-of-failure process in the team. Once the team sees one runbook land, the second one gets easier to schedule.
 
