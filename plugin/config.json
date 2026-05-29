@@ -1,7 +1,7 @@
 {
   "productionUrl": "https://556lowcodenocode.github.io/NbgAiHub",
   "devUrl": "http://localhost:4321",
-  "devMode": true,
+  "devMode": false,
   "search": {
     "weights": {
       "title": 5,

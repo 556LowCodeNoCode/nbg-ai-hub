@@ -59,9 +59,6 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 4. **Confirm by-role journey slug spellings (OQ4)** (low / content-prep).
     Decide canonical slugs (`backend` vs `backend-dev`; `data-scientist` vs `data-science`; `ml-engineer` vs `mle`) so `/hub-onboard <slug>` and `/hub-open <slug>` resolve predictably once content is authored.
 
-3. **Flip `devMode: false` in `plugin/config.json`** (low / one-line edit).
-    Now that the site is live at https://556lowcodenocode.github.io/NbgAiHub, `/hub-open` should default to the public URL not localhost. Edit, rebuild, republish.
-
 2. **Refactor `z.string().url()` → `z.url()` in `content.config.ts`** (low / cosmetic).
     `astro check` flags 4 Zod 4 deprecation hints (lines 46, 47, 69, 76). Old form still works; refactor when next touching the schema.
 
@@ -72,6 +69,7 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 
 One-liners only. Full context in DECISIONS.md or git log.
 
+- **#3** Flip `devMode: false` in `plugin/config.json` ✓ 2026-05-29 — site live at https://556lowcodenocode.github.io/NbgAiHub; `/hub-open` now resolves the public URL, hub-open e2e test green (130/130). Plugin dist/ still needs `npm run build` to bundle the new config for users on `/hub-refresh`.
 - **#21** Day 1 TerminalDemo mocks ✓ 2026-05-27 (overnight) — removed entirely during Day 1 content overhaul; no replacement needed. See DECISIONS 2026-05-27 (overnight).
 - **#18** Site `base` env-driven for GH Pages deploy ✓ 2026-05-26 — `PUBLIC_BASE` env + postbuild rewrite + base-aware logo/brand. See DECISIONS 2026-05-26 (afternoon).
 - **#17** `/glossary/` catalog page didn't auto-link cross-references ✓ 2026-05-25 — rewrote `glossary.astro` to use `createMarkdownProcessor({ remarkPlugins })` per entry.

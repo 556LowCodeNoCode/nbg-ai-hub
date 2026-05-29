@@ -80,9 +80,9 @@ describe("config.json (plugin/config.json)", () => {
     expect(typeof config.repoUrl).toBe("string");
   });
 
-  it("devMode is a boolean (defaults true until GH Pages deploy)", () => {
+  it("devMode is a boolean (false now that the site is live at the org URL)", () => {
     expect(typeof config.devMode).toBe("boolean");
-    expect(config.devMode).toBe(true);
+    expect(config.devMode).toBe(false);
   });
 
   it("search weights match design H.4 (title 5 / topics 3 / body 1)", () => {
