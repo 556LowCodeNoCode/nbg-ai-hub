@@ -6,6 +6,24 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-05-29 — Repo migration to 556LowCodeNoCode/NbgAiHub
+
+**Trigger:** repo graduated from the personal `chomovazuzana` account into the team org. User transferred ownership directly; this work captures every in-repo identity reference so Pages republishes cleanly and `/plugin marketplace add` resolves under the new owner.
+
+**Decision:**
+- **Live code + config (commit `2c03a0c`)** — repo URL `chomovazuzana/NbgAiHub` → `556LowCodeNoCode/NbgAiHub` and Pages host `chomovazuzana.github.io` → `556lowcodenocode.github.io` across 10 files: `site/astro.config.mjs` (site URL + comment), `.github/workflows/deploy-pages.yml` (URL comment; `PUBLIC_BASE=/NbgAiHub` unchanged since repo name stays), `site/src/lib/submission.ts` (GitHub web-editor URL + Contents-API endpoint), `site/src/pages/about.astro` (`REPO_URL` constant), `plugin/config.json` (`productionUrl` + `repoUrl`), `plugin/src/hub-onboard.ts` (contribute link), `plugin/README.md` (install command), `plugin/.claude-plugin/plugin.json` (`author.url`), `.claude-plugin/marketplace.json` (`owner.url`), `pipeline/src/fetch.ts` (User-Agent `+URL`).
+- **Tests + fixtures (commit `4e777a9`)** — mirrored URL changes in 4 files: `pipeline/tests/validators/fixtures/{valid-skill,bad-category}.md` (install_command), `site/tests/submission.test.ts` (form default), `plugin/tests/manifest.test.ts` (author.url assertion). pipeline 205/205, site 310 + 1 unrelated skip, plugin manifest 11/11. Pre-existing `hub-open` e2e failure stayed red (depends on local dev server + `devMode:true`; tracked as Issue #3).
+- **State docs (this commit)** — CLAUDE.md (5 refs incl. visibility "private" → "public", "personal account" → "556LowCodeNoCode org"), SCOPE.md (Last-updated line, repo+hosting block, hub-plugin install command, demo-checklist install commands, open-question marketplace path), `Issues - Pending Items.md` (#3 site URL, #5 install command), SECRETS.md (Reddit-app About URL on line 52). DECISIONS.md prior entries untouched. Historical docs under `docs/refined-requests/`, `docs/design/`, `docs/reference/`, and `UAT-*.md` left as-is — they're dated reports of what was true at the time.
+- **Site-internal redirects** — only redirect in `site/astro.config.mjs` is `/news/` → external AgentNews; not migration-related.
+- **Old repo** — transferred (not deleted), so GitHub's automatic redirect from `chomovazuzana/NbgAiHub` → `556LowCodeNoCode/NbgAiHub` handles legacy `git remote` URLs. No redirect-stub repo needed.
+- **Secrets** — operator-managed; not touched in code. The four `AZURE_OPENAI_*` (and optional `REDDIT_CLIENT_*`) secrets must be present on the new repo under the same names; operator handles that out-of-band.
+
+**Why:** repo is no longer "personal-account bootstrap mode" — bank-relevant content now lives where the team owns it, and the `/plugin marketplace add 556LowCodeNoCode/NbgAiHub` install path matches the org-owned reality. Site needs to keep working without a hosting handover; the only thing that changes for visitors is the URL.
+
+**Refs:** commits `2c03a0c` (runtime), `4e777a9` (tests), this commit (docs). Issues #3 (devMode flip — now genuinely actionable) and #5 (manual marketplace-install verify against the new org) gain urgency from this entry.
+
+---
+
 ## 2026-05-29 (use-cases v4) — Self-sufficient, skip-permissions default, OS picker in Step 1, CLAUDE.md teaching
 
 **Trigger:** all 12 use cases assumed real bank-system artefacts (CSV exports, real memos, Teams transcripts, supplier PDFs). A newbie following them without access would stall on Step 1. User also flagged that the small hero OS toggle was being overlooked, and that CLAUDE.md — the most powerful concept in Claude Code — was missing from every use case.

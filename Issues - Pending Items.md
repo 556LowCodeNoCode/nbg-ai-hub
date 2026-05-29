@@ -54,13 +54,13 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
     Drift-test ensures byte-identical. Dedupe when monorepo tooling lands (folds in #7).
 
 5. **Manual marketplace-install verification** (medium / pre-release).
-    Run `/plugin marketplace add chomovazuzana/NbgAiHub` against a fresh Claude Code session; verify marketplace.json + plugin.json resolve, all 11 commands appear, env vars set. Tests cover parse-time; install-time end-to-end is the gap. Block on this before publishing the marketplace publicly.
+    Run `/plugin marketplace add 556LowCodeNoCode/NbgAiHub` against a fresh Claude Code session; verify marketplace.json + plugin.json resolve, all 11 commands appear, env vars set. Tests cover parse-time; install-time end-to-end is the gap. Block on this before publishing the marketplace publicly.
 
 4. **Confirm by-role journey slug spellings (OQ4)** (low / content-prep).
     Decide canonical slugs (`backend` vs `backend-dev`; `data-scientist` vs `data-science`; `ml-engineer` vs `mle`) so `/hub-onboard <slug>` and `/hub-open <slug>` resolve predictably once content is authored.
 
 3. **Flip `devMode: false` in `plugin/config.json`** (low / one-line edit).
-    Now that the site is live at https://chomovazuzana.github.io/NbgAiHub, `/hub-open` should default to the public URL not localhost. Edit, rebuild, republish.
+    Now that the site is live at https://556lowcodenocode.github.io/NbgAiHub, `/hub-open` should default to the public URL not localhost. Edit, rebuild, republish.
 
 2. **Refactor `z.string().url()` → `z.url()` in `content.config.ts`** (low / cosmetic).
     `astro check` flags 4 Zod 4 deprecation hints (lines 46, 47, 69, 76). Old form still works; refactor when next touching the schema.

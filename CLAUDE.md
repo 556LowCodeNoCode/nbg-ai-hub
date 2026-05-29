@@ -2,8 +2,8 @@
 
 A curated Claude Code knowledge hub for bank colleagues, framed around *"what I wish I knew a year ago."* Skills catalog, tips & tricks, curated news, onboarding journeys, glossary — accessible both as a web UI (host TBD) and as a `/hub-*` skill inside Claude Code.
 
-**Repo:** `github.com/chomovazuzana/NbgAiHub` (**private**, personal account, bootstrap mode).
-**Constraint:** repo lives on a personal account — bank-confidential content should go through compliance review before being stored here, even though the repo is not world-readable.
+**Repo:** `github.com/556LowCodeNoCode/NbgAiHub` (**public**, 556LowCodeNoCode org).
+**Constraint:** repo lives on GitHub.com under the 556LowCodeNoCode org (not on bank-managed infrastructure) — bank-confidential content should still go through compliance review before being stored here.
 
 ## Project state files
 
@@ -71,7 +71,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 │   ├── scripts/build-snapshot.mjs ← mirrors repo's glossary/tips/skills/news/journeys into snapshot/
 │   ├── dist/                  ← esbuild output (gitignored except .gitkeep)
 │   └── tests/                 ← 13 test files, 130 tests (12 lib + manifest + e2e entry-script smoke)
-├── .claude-plugin/            ← repo-root marketplace manifest for /plugin marketplace add chomovazuzana/NbgAiHub
+├── .claude-plugin/            ← repo-root marketplace manifest for /plugin marketplace add 556LowCodeNoCode/NbgAiHub
 │   └── marketplace.json       ← lists nbg-ai-hub with source: "./plugin"
 ├── .github/workflows/
 │   ├── rss-triage.yml         ← daily cron 05:00 UTC = 08:00 Athens (DST) + workflow_dispatch
@@ -124,7 +124,7 @@ These four files (`SCOPE.md`, `DECISIONS.md`, `Issues - Pending Items.md`, `CLAU
 
 ## Naming
 
-Final name: **NbgAiHub**. Repo: `github.com/chomovazuzana/NbgAiHub`.
+Final name: **NbgAiHub**. Repo: `github.com/556LowCodeNoCode/NbgAiHub`.
 
 ## Ports
 
@@ -143,7 +143,7 @@ Per docs/design/project-design.md §S.13 — the UI redesign that landed 2026-05
 
 ## Starlight cascade gotcha — read before styling any prose page
 
-Starlight (and `agentnews-layout.css`) ship CSS **unlayered** — their rules beat our `@layer nbg.components` rules in production, even though they "win" locally because Vite orders CSS differently in dev. Symptom: visual regressions appear only on the deployed Pages site (https://chomovazuzana.github.io/NbgAiHub/). Default posture for new components: `!important` on every layout/spacing/typography property that must win, avoid the `.section` and `.wrap` class names (already claimed by agentnews with `!important` rules baked in). Full incident log + fix pattern: `docs/reference/starlight-cascade-gotcha.md`.
+Starlight (and `agentnews-layout.css`) ship CSS **unlayered** — their rules beat our `@layer nbg.components` rules in production, even though they "win" locally because Vite orders CSS differently in dev. Symptom: visual regressions appear only on the deployed Pages site (https://556lowcodenocode.github.io/NbgAiHub/). Default posture for new components: `!important` on every layout/spacing/typography property that must win, avoid the `.section` and `.wrap` class names (already claimed by agentnews with `!important` rules baked in). Full incident log + fix pattern: `docs/reference/starlight-cascade-gotcha.md`.
 
 ## Glossary auto-link + tooltips
 
