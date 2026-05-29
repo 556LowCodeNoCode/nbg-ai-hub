@@ -5,9 +5,18 @@
    never receive Astro's scoped-class hash. */
 
 .tip-preview {
+  /* Redefine font-size tokens used by .sl-markdown-content cascade so the
+     inherited h1-h4 rules from content-prose.css resolve to our preview-scale
+     values instead of the marketing-scale ones. Cleaner than specificity
+     escalation — the rules in content-prose.css all read from these tokens. */
+  --nbg-fs-2xl: 1rem;        /* h2 */
+  --nbg-fs-xl: 1.0625rem;    /* h3 (and our .tip-preview__title) */
+  --nbg-fs-lg: 0.9375rem;    /* h4 */
+  --sl-text-h2: 1rem;
+  --sl-text-h3: 1.0625rem;
   position: fixed;
   z-index: 1000;
-  width: min(900px, calc(100vw - 32px));
+  width: min(820px, calc(100vw - 32px));
   max-height: 70vh;
   overflow-y: auto;
   background: var(--nbg-surface, #ffffff);
@@ -43,47 +52,56 @@
   text-transform: uppercase;
   color: var(--nbg-accent, #007a8a);
 }
-.tip-preview__title {
-  margin: 0;
-  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif);
-  font-weight: 500;
-  font-size: 1.2rem;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
-  color: var(--nbg-ink, #0b1e2e);
+/* Compound selector required to beat
+   `.sl-markdown-content h3 { font-size: var(--nbg-fs-xl) !important }` from
+   content-prose.css — that rule has specificity (0,1,1) and ours needs to
+   exceed it. `.tip-preview .tip-preview__title` = (0,2,0). Same gotcha that
+   bit the compact listing title (Starlight unlayered cascade). */
+.tip-preview .tip-preview__title {
+  margin: 0 !important;
+  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif) !important;
+  font-weight: 500 !important;
+  font-size: 1.0625rem !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.008em !important;
+  color: var(--nbg-ink, #0b1e2e) !important;
 }
 
 /* ─── Body prose (cloned from tip markdown) ──────────────────── */
 .tip-preview__body {
-  font-size: 0.95rem;
-  line-height: 1.65;
+  /* Match the row-summary size on the compact listing
+     (.listing-list--compact .listing-row__summary = 0.875rem). */
+  font-size: 0.875rem;
+  line-height: 1.6;
   color: var(--nbg-ink, #0b1e2e);
 }
 .tip-preview__body p { margin: 0 0 0.9rem 0; }
 .tip-preview__body p:last-child { margin-bottom: 0; }
-.tip-preview__body h2 {
-  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif);
-  font-weight: 500;
-  font-size: 1.1rem;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
-  color: var(--nbg-ink, #0b1e2e);
-  margin: 1.75rem 0 0.6rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--nbg-hairline, #ebeff5);
+/* Same Starlight cascade gotcha — compound selector beats
+   `.sl-markdown-content h2/h3` from content-prose.css. */
+.tip-preview .tip-preview__body h2 {
+  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif) !important;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--nbg-ink, #0b1e2e) !important;
+  margin: 1.5rem 0 0.5rem !important;
+  padding-top: 0.9rem !important;
+  border-top: 1px solid var(--nbg-hairline, #ebeff5) !important;
 }
-.tip-preview__body h2:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
+.tip-preview .tip-preview__body h2:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
 }
-.tip-preview__body h3 {
-  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif);
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: var(--nbg-ink, #0b1e2e);
-  margin: 1.2rem 0 0.4rem;
+.tip-preview .tip-preview__body h3 {
+  font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif) !important;
+  font-weight: 500 !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.3 !important;
+  color: var(--nbg-ink, #0b1e2e) !important;
+  margin: 1rem 0 0.35rem !important;
 }
 .tip-preview__body ul,
 .tip-preview__body ol {
