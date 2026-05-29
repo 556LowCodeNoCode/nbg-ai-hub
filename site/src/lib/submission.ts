@@ -142,7 +142,7 @@ export function buildEditorUrl(
   markdown: string,
 ): { url: string; fitsInUrl: boolean } {
   const base =
-    'https://github.com/chomovazuzana/NbgAiHub/new/main/skills' +
+    'https://github.com/556LowCodeNoCode/NbgAiHub/new/main/skills' +
     `?filename=${encodeURIComponent(slug)}.md` +
     `&value=${encodeURIComponent(markdown)}`;
   return { url: base, fitsInUrl: base.length <= MAX_EDITOR_URL_LENGTH };
@@ -353,7 +353,7 @@ export async function copyToClipboard(markdown: string): Promise<void> {
 export async function checkSlugCollision(
   slug: string,
 ): Promise<'free' | 'collision' | 'unknown'> {
-  const url = `https://api.github.com/repos/chomovazuzana/NbgAiHub/contents/skills/${encodeURIComponent(slug)}.md`;
+  const url = `https://api.github.com/repos/556LowCodeNoCode/NbgAiHub/contents/skills/${encodeURIComponent(slug)}.md`;
   try {
     const res = await fetch(url);
     if (res.status === 200) return 'collision';

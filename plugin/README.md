@@ -7,7 +7,7 @@ Tone: *"what I wish I knew a year ago."*
 ## Install
 
 ```text
-/plugin marketplace add chomovazuzana/NbgAiHub
+/plugin marketplace add 556LowCodeNoCode/NbgAiHub
 /plugin install nbg-ai-hub@nbg-ai-hub-marketplace
 ```
 

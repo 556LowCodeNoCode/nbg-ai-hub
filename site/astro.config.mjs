@@ -8,8 +8,8 @@ import starlight from '@astrojs/starlight';
 import remarkGlossaryLink from './src/plugins/remark-glossary-link.ts';
 
 export default defineConfig({
-  // GitHub Pages — published as a project page under chomovazuzana.
-  // URL: https://chomovazuzana.github.io/NbgAiHub/
+  // GitHub Pages — published as a project page under the 556LowCodeNoCode org.
+  // URL: https://556lowcodenocode.github.io/NbgAiHub/
   // The trailing-slash setting matches Starlight's link generation.
   //
   // `base` is env-aware. Unset locally so the dev server runs at root
@@ -18,7 +18,7 @@ export default defineConfig({
   // resolves under `/NbgAiHub/`. The postbuild rewrite script at
   // `scripts/rewrite-base-paths.mjs` prefixes any hardcoded root-relative
   // links in built HTML to match.
-  site: 'https://chomovazuzana.github.io',
+  site: 'https://556lowcodenocode.github.io',
   base: process.env.PUBLIC_BASE,
   trailingSlash: 'always',
 

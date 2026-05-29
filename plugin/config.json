@@ -1,5 +1,5 @@
 {
-  "productionUrl": "https://chomovazuzana.github.io/NbgAiHub",
+  "productionUrl": "https://556lowcodenocode.github.io/NbgAiHub",
   "devUrl": "http://localhost:4321",
   "devMode": true,
   "search": {
@@ -12,5 +12,5 @@
   },
   "snapshotPath": "./snapshot",
   "refreshCachePath": "~/.cache/nbg-ai-hub/snapshot",
-  "repoUrl": "https://github.com/chomovazuzana/NbgAiHub.git"
+  "repoUrl": "https://github.com/556LowCodeNoCode/NbgAiHub.git"
 }

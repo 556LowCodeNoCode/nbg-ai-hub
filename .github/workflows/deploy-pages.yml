@@ -1,6 +1,6 @@
 # Build the Astro site under `site/` and deploy to GitHub Pages.
 #
-# Published URL: https://chomovazuzana.github.io/NbgAiHub/
+# Published URL: https://556lowcodenocode.github.io/NbgAiHub/
 #
 # Enable once in repo Settings → Pages → Source: "GitHub Actions". Workflow
 # then runs on every push to `main` (and on manual dispatch). The base path

@@ -9,7 +9,7 @@ export const DEFAULT_FETCH_TIMEOUT_MS = 15_000;
 // observed on GitHub Actions runners 2026-05-21. Other feeds (HN/Wired/Verge)
 // don't require this but accept it; setting it uniformly is good citizenship.
 export const FEED_USER_AGENT =
-  "NbgAiHub-RSS-Pipeline/1.0 (+https://github.com/chomovazuzana/NbgAiHub)";
+  "NbgAiHub-RSS-Pipeline/1.0 (+https://github.com/556LowCodeNoCode/NbgAiHub)";
 
 export class FeedFetchError extends Error {
   public readonly url: string;

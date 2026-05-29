@@ -40,7 +40,7 @@ run(() => {
   out.push("");
   if (isPlaceholderBody(entry.parsed.content)) {
     out.push("[content in progress] — this journey is scaffolded but not yet authored.");
-    out.push("Track or contribute via: github.com/chomovazuzana/NbgAiHub/journeys/");
+    out.push("Track or contribute via: github.com/556LowCodeNoCode/NbgAiHub/journeys/");
   } else {
     out.push(entry.parsed.content.trim());
   }
