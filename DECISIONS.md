@@ -530,3 +530,20 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 
 - **RSS pipeline verified operational end-to-end.** Workflow run `26047997638`, 2m46s success, PR #1 with 43 items across 4 of 5 feeds. All 4 Azure secrets + GH Actions PR toggle wired. DoD #12 satisfied.
 - **Astro Starlight site verified operational locally.** `npm run dev` → 200 on localhost:4321. Astro v6.3.5 + Starlight v0.39.2. AC1-AC20 all MET per `docs/reference/integration-verification-astro-site.md`. Production hosting was open until 2026-05-26.
+
+---
+
+## 2026-06-02 — Skills page rework around real `NBG-AI/claude-tools` upstream
+
+**Trigger:** Existing `/skills/` rows weren't clickable, install commands pointed at the fictional `556LowCodeNoCode/Skills` marketplace, `database-schema-designer` and `frontend-design` were misattributed, and there was no surfacing of the actual NBG internal plugin library.
+
+- **Skills rendered like tips.** Every row wraps title in `<a href="/skills/[slug]/">` (with `.listing-row--linked` stretched ::after); new `site/src/pages/skills/[slug].astro` mirrors `tips/[slug].astro` shape, renders body + 4-step install block (Access → Marketplace → Install → Use) in a sticky right-rail.
+- **Featured panel for `NBG-AI/claude-tools`** at the top of the listing — gold accent border + 3-cell grid (Access TBD / Marketplace add / Install template). Internal-origin rows below carry a gold left-border tying them visually to the panel. No "start here" framing — explicit "for engineers actively working on NBG software" + quiet redirect for newcomers to Foundations / Tips / Use cases.
+- **Schema additions** to skills collection (both optional, backward-compatible): `marketplace_command` (the `/plugin marketplace add ...` prerequisite), `access_request` (markdown body for the access panel).
+- **Content corrections:** `frontend-design` repointed to `anthropics/skills` (Anthropic's official); `gsd` repointed to `gsd-build/get-shit-done` (canonical upstream, dropped the open-gsd governance narrative); `database-schema-designer.md` deleted; new `create-sandbox.md` distilled from the actual SKILL.md at `NBG-AI/claude-tools/plugins/create-sandbox` — an 8-capability lifecycle for building TypeScript API sandboxes from C# source or Postman collections, audience `advanced`.
+- **Tip rewrite:** `claudemd-worked-example` distilled from five sources (Anthropic official best-practices, forrestchang/andrej-karpathy-skills, HumanLayer's writing-a-good-claude-md, josix/awesome-claude-md, dev.to maturity-levels piece) with per-section annotation explaining why each block earns its slot.
+- **Listing-page cleanups:** dropped `S1/2` chip on cluster headers (now uses serif title + lede vocabulary matching `/tips/`); cells in the featured grid now bottom-align (flex column + `margin-top: auto`) and start at the same y (explicit `margin: 0` override defeats Starlight's unlayered `:not(*) + :not(*) { margin-top: 1rem }`); row prose spans full card width via absolute-positioned meta on `#internal` / `#community` sections.
+
+**Why:** Newcomer guidance pointed at fictional install paths; the actual internal upstream wasn't surfaced; row bodies were never readable on the site. Visit motion is now: scan listing → click → read full body → see structured install steps.
+
+**References:** Commits in this push; `skills/create-sandbox.md`, `skills/{frontend-design,gsd}.md`, `tips/claudemd-worked-example.md`, `site/src/pages/skills.astro`, `site/src/pages/skills/[slug].astro`, `site/src/content.config.ts`.

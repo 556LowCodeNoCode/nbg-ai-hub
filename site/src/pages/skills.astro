@@ -2,16 +2,21 @@
 /**
  * /skills — single-column reading flow, structural twin of /tips.
  *
- * 2026-05-25 late-night UAT redesign (round 2):
- *   - Hero scale lifted to match Foundations (.hero hero--stack).
- *   - Audience filter integrated into the hero.
- *   - Skills now grouped by `origin` — Internal (built by NBG AI team) /
- *     Community (built by the wider Claude Code community). Gives /skills
- *     the same cluster structure as /tips so the two pages read as a pair.
- *   - Shared `.listing-row` system (styles live in tips.astro is:global block).
- *   - Each row: eyebrow (Skill · Internal | Community), serif title, command
- *     hint with dark teal terminal chip, summary, audience pill bottom-right,
- *     and a hover-revealed pin icon top-right.
+ * 2026-06-02 rework:
+ *   - Every row is now clickable through to /skills/{id}/ via the same
+ *     `listing-row--linked` + `listing-row__title-link` pattern tips uses.
+ *     Skill bodies (which previously rendered nowhere on the site) finally
+ *     surface to readers.
+ *   - New "NBG AI team plugin library" featured panel sits above the
+ *     Internal / Community groups. Different visual treatment (gold accent,
+ *     tinted background) so the team-built upstream reads as recommended,
+ *     not as just another row. Links into the NBG-AI/claude-tools repo plus
+ *     a TBD-during-rollout access-request note.
+ *   - Internal-origin rows carry a gold left border so the cluster feels
+ *     visually tied to the featured panel above.
+ *
+ * Earlier history (2026-05-25): hero scale matched to Foundations,
+ * audience+topic filters integrated into the hero, skills grouped by origin.
  */
 import { getCollection } from 'astro:content';
 import MarketingShell from '../components/MarketingShell.astro';
@@ -23,10 +28,6 @@ import '../styles/listing-rows.css';
 
 const items = await getCollection('skills');
 
-// UAT T8 V1 — distinct topic values across the skills collection. Skills
-// also expose a `category` enum (workflow/code/docs/integration/…). Use
-// category as the chip dimension here since topics on skills is sparse;
-// it's the field a reader actually wants to scope by.
 const allCategories = Array.from(
   new Set(items.map((s) => s.data.category)),
 ).sort();
@@ -87,7 +88,7 @@ const grouped = GROUPS.map((g) => ({
       <div class="hero__intro">
         <h1 class="hero__title">Skills worth <em>installing</em></h1>
         <p class="hero__lede">
-          <Fragment set:html={linkGlossaryTerms("A curated catalog of Claude Code skills and plugins — the ones we keep reaching for. Each entry tells you what the skill does, who it's for, and the slash command you type in Claude.")} />
+          <Fragment set:html={linkGlossaryTerms("A curated catalog of Claude Code skills and plugins — the ones we keep reaching for. Each entry tells you what the skill does, who it's for, the slash command you type in Claude, and how to install it.")} />
         </p>
       </div>
       <div class="hero__filter">
@@ -109,22 +110,58 @@ const grouped = GROUPS.map((g) => ({
             " once and then call with a <strong>" + linkGlossaryTerms("slash command") + "</strong>. " +
             "Skills don't replace Claude — they teach it a specific way of working " +
             "(e.g. how we deploy, how we design schemas, how we run UAT) so you don't repeat the same instructions every session. " +
-            "Install one with the <strong>install command</strong> shown on each entry; call it with the slash command."
+            "Click any entry below for the install steps and a worked scenario."
           }
         />
       </aside>
     </div>
   </section>
 
-  {grouped.map((group, idx) => {
+  {/* ─── Featured: the NBG AI team plugin library ────────────────── */}
+  <section class="section section--listing skills-featured-wrap" style="padding-block: 1.25rem;">
+    <div class="wrap">
+      <article class="skills-featured">
+        <p class="skills-featured__eyebrow">NBG AI team · plugin library</p>
+        <h2 class="skills-featured__title"><code>NBG-AI/claude-tools</code> — the team's developer skill library</h2>
+        <p class="skills-featured__lede">
+          The NBG AI team maintains an internal plugin library at <a href="https://github.com/NBG-AI/claude-tools" target="_blank" rel="noopener"><code>NBG-AI/claude-tools</code></a> — roughly forty skills for <strong>API scaffolding (.NET + NBG conventions), UI features and wireframes, event-driven design, integration discovery, sandbox creation, and test-scenario generation</strong>. These are advanced, technical skills built for engineers actively working on NBG software — not where you start if you're learning Claude Code.
+        </p>
+        <p class="skills-featured__newcomer">
+          <strong>New to Claude Code?</strong> Start at <a href="/start-here/foundations/">Foundations</a> or browse the <a href="/tips/">Tips</a> and <a href="/use-cases/">Use cases</a> — they're shaped for colleagues new to the tool. Come back here once you're comfortable.
+        </p>
+        <div class="skills-featured__grid">
+          <div class="skills-featured__cell">
+            <p class="skills-featured__cell-label">1 — Access</p>
+            <p class="skills-featured__cell-body">
+              <strong>TBD</strong> — the AI team is finalising the access-request process. For now, ping the AI team channel on Teams and they'll add you to the repo.
+            </p>
+          </div>
+          <div class="skills-featured__cell">
+            <p class="skills-featured__cell-label">2 — Add the marketplace <span class="skills-featured__cell-hint">(once per machine)</span></p>
+            <pre class="skills-featured__cmd"><code>/plugin marketplace add NBG-AI/claude-tools</code></pre>
+          </div>
+          <div class="skills-featured__cell">
+            <p class="skills-featured__cell-label">3 — Install any skill from the library</p>
+            <pre class="skills-featured__cmd"><code>/plugin install &lt;name&gt;@claude-tools</code></pre>
+          </div>
+        </div>
+        <p class="skills-featured__cta">
+          The <strong>Built at NBG</strong> cluster below highlights a handful of the skills. The upstream repo has the full set — browse <a href="https://github.com/NBG-AI/claude-tools/tree/main/plugins" target="_blank" rel="noopener">all plugins</a> to see everything available.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  {grouped.map((group) => {
     if (group.items.length === 0) return null;
+    const isInternalGroup = group.origin === 'internal';
     return (
       <section class="section section--listing" id={group.key}>
         <div class="wrap">
-          <div class="section__head">
-            <h2>S{idx + 1} / {GROUPS.length}</h2>
-            <span class="count">{group.label} — {group.blurb}</span>
-          </div>
+          <header class="listing-section__head">
+            <h2 class="listing-section__title">{group.label}</h2>
+            <p class="listing-section__lede">{group.blurb}</p>
+          </header>
           <ul class="listing-list" role="list">
             {group.items.map((entry) => {
               const { command, explanation } = splitTitle(entry.data.title, entry.data.skill_id);
@@ -132,7 +169,7 @@ const grouped = GROUPS.map((g) => ({
                 <li>
                   <article
                     id={`skill-${entry.id}`}
-                    class="listing-row"
+                    class={`listing-row listing-row--linked${isInternalGroup ? ' listing-row--internal' : ''}`}
                     data-audience={entry.data.audience}
                     data-topics={entry.data.category}
                   >
@@ -140,22 +177,14 @@ const grouped = GROUPS.map((g) => ({
                       <p class="listing-row__eyebrow">
                         Skill <span class="listing-row__eyebrow-sep">·</span> {group.label}
                       </p>
-                      <h3 class="listing-row__title">{explanation}</h3>
+                      <h3 class="listing-row__title">
+                        <a href={`/skills/${entry.id}/`} class="listing-row__title-link">{explanation}</a>
+                      </h3>
                       <p class="listing-row__cmd">
                         <span class="listing-row__cmd-label">Type this in Claude</span>
                         <code class="listing-row__cmd-code">{command}</code>
                       </p>
                       <p class="listing-row__summary" set:html={linkGlossaryTerms(entry.data.ai_summary)} />
-                      {entry.data.external_link && (
-                        <p style="margin: 0;">
-                          <a
-                            class="listing-row__source"
-                            href={entry.data.external_link}
-                            target="_blank"
-                            rel="noopener"
-                          >View source ↗</a>
-                        </p>
-                      )}
                     </div>
                     <div class="listing-row__meta">
                       {entry.data.time_saved && (
@@ -181,12 +210,6 @@ const grouped = GROUPS.map((g) => ({
                       <span class="listing-row__when-label">Use this when...</span>
                       <span class="listing-row__when-body" set:html={linkGlossaryTerms(entry.data.when_to_use.replace(/^[Uu]se this when ?/, ''))} />
                     </div>
-                    {entry.data.worked_scenario && (
-                      <div class="listing-row__scenario">
-                        <span class="listing-row__scenario-label">In practice</span>
-                        <p class="listing-row__scenario-body" set:html={linkGlossaryTerms(entry.data.worked_scenario)} />
-                      </div>
-                    )}
                   </article>
                 </li>
               );
@@ -197,3 +220,242 @@ const grouped = GROUPS.map((g) => ({
     );
   })}
 </MarketingShell>
+
+<style>
+  @layer nbg.components {
+    /* ─── Skills-only: let row prose use the full card width.
+       Shared `.listing-row` is a `1fr auto` grid, and the meta column
+       (time-saved pill + audience pill + pin) on skills can be wide
+       enough to eat ~40% of the row — leaving the title, cmd chip, and
+       summary visually stranded on the left. Two-part fix scoped to the
+       cluster sections so /tips/ is untouched:
+         1. Drop the row to a single column so `__main` spans full width.
+         2. Float `__meta` absolutely into the top-right corner; reserve
+            right padding on the eyebrow so they don't collide.
+       The summary's 56rem readability cap is also lifted here, with a
+       touch of right padding so the prose doesn't butt the meta block. */
+    #internal .listing-row,
+    #community .listing-row {
+      grid-template-columns: 1fr !important;
+      position: relative;
+    }
+    #internal .listing-row__meta,
+    #community .listing-row__meta {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      justify-self: unset;
+    }
+    #internal .listing-row__eyebrow,
+    #community .listing-row__eyebrow {
+      padding-right: 22rem;  /* reserve space for the absolute-positioned meta */
+    }
+    #internal .listing-row__summary,
+    #community .listing-row__summary {
+      max-width: none !important;
+      padding-right: 0.25rem;
+    }
+
+    /* ─── Featured panel: NBG AI plugin library ──────────────────── */
+    .skills-featured {
+      padding: 1.5rem 1.75rem 1.75rem;
+      border: 1px solid color-mix(in srgb, #c79a3a 40%, var(--nbg-border, #dce3eb));
+      border-radius: var(--nbg-r-lg, 12px);
+      background: linear-gradient(
+        135deg,
+        color-mix(in srgb, #c79a3a 6%, var(--nbg-surface, #ffffff)) 0%,
+        var(--nbg-surface, #ffffff) 80%
+      );
+      box-shadow: 0 2px 6px rgba(199, 154, 58, 0.08);
+    }
+    .skills-featured__eyebrow {
+      margin: 0 0 0.5rem 0;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8a6a1a;
+      font-weight: 600;
+    }
+    /* Quiet redirect block for newcomers — sits between the lede and the
+       3-step grid. Light tint, no border, smaller type — meant to be
+       skipped past by the target audience (developers) but visible to
+       anyone who shouldn't be here yet. */
+    .skills-featured__newcomer {
+      margin: 0 0 1.1rem 0 !important;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--nbg-r-sm, 6px);
+      background: var(--nbg-surface-2, #f4f6fa);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skills-featured__newcomer :global(strong) {
+      color: var(--nbg-ink, #0b1e2e);
+    }
+    .skills-featured__newcomer :global(a) {
+      color: var(--nbg-accent, #007a8a);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+    }
+    .skills-featured__newcomer :global(a:hover) { text-decoration-thickness: 2px; }
+    .skills-featured__title {
+      font-family: var(--nbg-ff-serif, 'Newsreader', Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.5rem !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.015em !important;
+      color: var(--nbg-ink, #0b1e2e) !important;
+      margin: 0 0 0.6rem 0 !important;
+    }
+    .skills-featured__title :global(code) {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.85em;
+      background: color-mix(in srgb, #c79a3a 15%, transparent);
+      color: #6f5212;
+      padding: 0.08em 0.35em;
+      border-radius: var(--nbg-r-sm, 4px);
+    }
+    .skills-featured__lede {
+      margin: 0 0 1.1rem 0 !important;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skills-featured__lede :global(code) {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.88em;
+      background: var(--nbg-surface-2, #f4f6fa);
+      padding: 0.08em 0.32em;
+      border-radius: var(--nbg-r-sm, 4px);
+    }
+    .skills-featured__lede :global(a) {
+      color: #8a6a1a;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+    }
+    .skills-featured__lede :global(a:hover) { text-decoration-thickness: 2px; }
+    .skills-featured__grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      /* Force every cell to the height of the tallest in the row. Default
+         grid behaviour is `align-items: stretch`, but Starlight's unlayered
+         cascade has been known to inject a row-level reset; setting it
+         explicitly here protects against that. */
+      align-items: stretch !important;
+      gap: 0.85rem;
+      margin: 0 0 1rem 0;
+    }
+    @media (max-width: 800px) {
+      .skills-featured__grid { grid-template-columns: 1fr; }
+    }
+    .skills-featured__cell {
+      padding: 0.85rem 0.95rem;
+      border: 1px solid color-mix(in srgb, #c79a3a 25%, var(--nbg-hairline, #ebeff5));
+      border-radius: var(--nbg-r-sm, 6px);
+      background: var(--nbg-surface, #ffffff);
+      /* Flex column so the label sits at the top and the command/body
+         bottom-aligns across all three cells, no matter how the label
+         wraps. */
+      display: flex;
+      flex-direction: column;
+      /* Belt-and-braces: force the cell to fill its grid track. Without
+         this, some browsers + cascade edge cases let the cell collapse to
+         its content height even with align-items: stretch on the parent. */
+      height: 100% !important;
+      align-self: stretch !important;
+      /* Starlight ships an unlayered `:not(...) + :not(...) { margin-top: 1rem }`
+         rule that bleeds into our grid and pushes cells 2 and 3 down by 16px,
+         visually offsetting them from cell 1. Same trap that listing-rows.css
+         documents for <li>. Reset it explicitly. */
+      margin: 0 !important;
+    }
+    .skills-featured__cell-label {
+      margin: 0 0 0.4rem 0 !important;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.7rem;
+      line-height: 1.45;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--nbg-ink, #0b1e2e);
+      font-weight: 600;
+      /* Reserve space for a two-line label so the single-line "ACCESS"
+         label doesn't pull its body up above the wrapping labels in cells
+         2 and 3. Combined with `margin-top: auto` on the body/cmd below
+         this guarantees the dark command pills bottom-align cleanly. */
+      min-height: calc(0.7rem * 1.45 * 2);
+    }
+    .skills-featured__cell-hint {
+      font-size: 0.62rem;
+      color: var(--nbg-muted, #5b6b80);
+      letter-spacing: 0.08em;
+      text-transform: none;
+      font-weight: 400;
+      margin-left: 0.25rem;
+    }
+    .skills-featured__cell-body {
+      margin: 0 !important;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    /* Push the terminating element (text body or `<pre>` command) to the
+       bottom of its cell so they bottom-align across the three columns. */
+    .skills-featured__cell-body,
+    .skills-featured__cmd {
+      margin-top: auto !important;
+    }
+    .skills-featured__cell-body :global(strong) {
+      color: #8a6a1a;
+      font-weight: 700;
+    }
+    .skills-featured__cmd {
+      margin: 0 !important;
+      padding: 0.6rem 0.7rem !important;
+      background: #0b1e2e !important;
+      color: #f0d493 !important;
+      border-radius: var(--nbg-r-sm, 4px) !important;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace) !important;
+      font-size: 0.75rem !important;
+      line-height: 1.4 !important;
+      overflow-x: auto;
+    }
+    .skills-featured__cmd :global(code) {
+      background: transparent !important;
+      color: inherit !important;
+      padding: 0 !important;
+    }
+    .skills-featured__cta {
+      margin: 0 !important;
+      padding-top: 0.85rem;
+      border-top: 1px solid color-mix(in srgb, #c79a3a 20%, var(--nbg-hairline, #ebeff5));
+      font-size: 0.9rem;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skills-featured__cta :global(a) {
+      color: #8a6a1a;
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+    }
+    .skills-featured__cta :global(code) {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.9em;
+      background: color-mix(in srgb, #c79a3a 12%, transparent);
+      padding: 0.08em 0.35em;
+      border-radius: var(--nbg-r-sm, 4px);
+    }
+
+    /* ─── Internal-origin row accent (gold left edge so the cluster
+           visually ties back to the featured panel above) ──────── */
+    .listing-row--internal {
+      border-left: 3px solid #c79a3a !important;
+    }
+    .listing-row--internal:hover {
+      border-left-color: #c79a3a !important;
+    }
+  }
+</style>

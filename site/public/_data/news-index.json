@@ -3,484 +3,6 @@
   "type": "news",
   "items": [
     {
-      "slug": "100-tips-tricks-for-building-your-own-personal-ai-agent",
-      "title": "100 Tips & Tricks for Building Your Own Personal AI Agent /LONG POST/",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "agent-design",
-        "prompt-engineering",
-        "claudecode",
-        "field-report",
-        "best-practices"
-      ]
-    },
-    {
-      "slug": "after-a-year-in-claude-code-the-thing-slowing-me-down",
-      "title": "After a year in Claude Code, the thing slowing me down turned out to be me",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "automation",
-        "productivity",
-        "agent-parallelization"
-      ]
-    },
-    {
-      "slug": "andrej-karpathy-joins-anthropic-returning-to-r-d-and-pre",
-      "title": "🏢 Andrej Karpathy Joins Anthropic - Returning to R&D and Pre-training",
-      "audience": "both",
-      "topics": [
-        "personnel-move",
-        "model-launch",
-        "industry-news"
-      ]
-    },
-    {
-      "slug": "anthropic-just-bought-the-company-that-generates-most",
-      "title": "Anthropic just bought the company that generates most production MCP servers",
-      "audience": "advanced",
-      "topics": [
-        "mcp",
-        "platform-news",
-        "enterprise-use",
-        "acquisition"
-      ]
-    },
-    {
-      "slug": "everything-announced-at-google-i-o-2026-gemini-search-smart",
-      "title": "Everything Announced at Google I/O 2026: Gemini, Search, Smart Glasses",
-      "audience": "both",
-      "topics": [
-        "model-launch",
-        "multimodal",
-        "agentic-ai",
-        "platform-news"
-      ]
-    },
-    {
-      "slug": "gemini-3-5-flash",
-      "title": "Gemini 3.5 Flash",
-      "audience": "both",
-      "topics": [
-        "model-launch",
-        "api",
-        "capability-breakthrough"
-      ]
-    },
-    {
-      "slug": "mistral-ai-acquires-emmi-ai",
-      "title": "Mistral AI acquires Emmi AI",
-      "audience": "both",
-      "topics": [
-        "industry-news",
-        "acquisition",
-        "mistral-ai"
-      ]
-    },
-    {
-      "slug": "tested-the-orchestrator-pattern-with-opus-4-7-the-task",
-      "title": "Tested the orchestrator pattern with Opus 4.7. The task decomposition quality is noticeably better on complex multi-step work.",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "model-selection",
-        "multi-agent",
-        "opus"
-      ]
-    },
-    {
-      "slug": "anthropic-is-paying-spacex-15-billion-per-year",
-      "title": "Anthropic is paying SpaceX $15 billion per year",
-      "audience": "both",
-      "topics": [
-        "compute-deal",
-        "industry-news",
-        "partnership",
-        "infrastructure"
-      ]
-    },
-    {
-      "slug": "claude-has-extreme-anxiety-about-filling-up-context-windows",
-      "title": "Claude has extreme anxiety about filling up context windows",
-      "audience": "both",
-      "topics": [
-        "field-report",
-        "context-window",
-        "model-behavior"
-      ]
-    },
-    {
-      "slug": "enterprise-solutions-architect-14-years-claude-in",
-      "title": "enterprise solutions architect 14 years. claude in enterprise consulting projects. what's working + what regulators are about to break.",
-      "audience": "advanced",
-      "topics": [
-        "enterprise-use",
-        "regulated-industries",
-        "compliance",
-        "workflow",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "i-kept-hitting-claude-limits-every-day-here-s-what-was",
-      "title": "I kept hitting Claude limits every day. Here's what was actually wrong in my workflow.",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "usage-limits",
-        "session-management",
-        "prompt-engineering"
-      ]
-    },
-    {
-      "slug": "i-used-claude-code-to-build-while-delegating-coding-to",
-      "title": "I used Claude Code to build while delegating coding to Mistral/DeepSeek - 10 days, 57M tokens saved, over 90% costs savings, Claude quality result",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "cost-optimization",
-        "model-selection",
-        "delegation",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "karpathy-joins-anthropic",
-      "title": "Karpathy joins Anthropic",
-      "audience": "both",
-      "topics": [
-        "industry-news",
-        "personnel-move",
-        "anthropic"
-      ]
-    },
-    {
-      "slug": "openai-to-confidentially-file-for-ipo-as-soon-as-friday",
-      "title": "OpenAI to confidentially file for IPO as soon as Friday",
-      "audience": "both",
-      "topics": [
-        "industry-news",
-        "strategic-moves",
-        "openai",
-        "ipo"
-      ]
-    },
-    {
-      "slug": "running-claude-code-agents-in-parallel",
-      "title": "Running Claude Code Agents In Parallel.",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "agent-orchestration",
-        "parallel-processing",
-        "error-handling",
-        "tool-integration"
-      ]
-    },
-    {
-      "slug": "setting-up-a-project-for-claude-code-a-blueprint-that-works",
-      "title": "Setting Up a Project for Claude Code: A Blueprint That Works For Me",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "project-setup",
-        "claudemd",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "after-3-months-of-switching-between-claude-sonnet-4-6-gpt-5",
-      "title": "After 3 months of switching between Claude Sonnet 4.6, GPT-5.5, and Gemini 3.1 daily — here's my actual routing",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "model-selection",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "anthropic-officially-launched-13-free-ai-courses-with",
-      "title": "Anthropic officially launched 13+ FREE AI courses with certificates (Including Agentic AI and Claude Code!)",
-      "audience": "both",
-      "topics": [
-        "training",
-        "claudecode",
-        "agentic-ai",
-        "mcp",
-        "api",
-        "cloud-architecture",
-        "productivity"
-      ]
-    },
-    {
-      "slug": "claude-code-dropped-workflows",
-      "title": "Claude Code dropped /workflows",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "multi-agent-systems",
-        "claudecode",
-        "platform-news"
-      ]
-    },
-    {
-      "slug": "claude-status-update-elevated-error-rate-on-2026-05-22t04",
-      "title": "Claude Status Update : Elevated error rate on 2026-05-22T04:16:42.000Z",
-      "audience": "both",
-      "topics": [
-        "platform-news",
-        "outage",
-        "status-update"
-      ]
-    },
-    {
-      "slug": "deepseek-makes-the-v4-pro-price-discount-permanent",
-      "title": "DeepSeek makes the V4 Pro price discount permanent",
-      "audience": "both",
-      "topics": [
-        "model-launch",
-        "pricing",
-        "platform-news"
-      ]
-    },
-    {
-      "slug": "do-you-actually-use-hooks-in-claude-code",
-      "title": "Do you actually use hooks in Claude Code?",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "hooks",
-        "automation",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "domain-camouflaged-injection-attacks-evade-detection-in",
-      "title": "Domain-Camouflaged Injection Attacks Evade Detection in Multi-Agent LLM Systems",
-      "audience": "advanced",
-      "topics": [
-        "security",
-        "llm-systems",
-        "injection-attacks",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "i-see-a-lot-of-claude-design-hate-here-lately-but-for",
-      "title": "I see a lot of claude design hate here lately. but for animated slide videos it's actually really good",
-      "audience": "both",
-      "topics": [
-        "workflow",
-        "claude-design",
-        "prompt-engineering",
-        "video-production"
-      ]
-    },
-    {
-      "slug": "my-experience-using-claude-code-with-local-llm-and-full",
-      "title": "My experience using Claude code with Local Llm, and full guide on how to set it up",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "local-llm",
-        "field-report",
-        "performance-tuning"
-      ]
-    },
-    {
-      "slug": "project-glasswing-an-initial-update",
-      "title": "Project Glasswing: An Initial Update",
-      "audience": "advanced",
-      "topics": [
-        "model-launch",
-        "research-update",
-        "anthropic"
-      ]
-    },
-    {
-      "slug": "round-3-claude-opus-4-7-1m-vs-opus-4-7-vs-opus-4-6-legacy",
-      "title": "Round 3: Claude Opus 4.7 1M vs Opus 4.7 vs Opus 4.6 Legacy vs Sonnet 4.6 across effort levels on the same real React feature-build task",
-      "audience": "advanced",
-      "topics": [
-        "model-comparison",
-        "workflow",
-        "field-report",
-        "claudecode",
-        "performance-benchmark"
-      ]
-    },
-    {
-      "slug": "deterministic-multi-subagent-orchestration-what-s-new-in-cc",
-      "title": "Deterministic multi-subagent orchestration - what's new in CC 2.1.146 (+4,755 tokens)",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "multi-agent-orchestration",
-        "agent-prompting",
-        "structured-output",
-        "token-budgeting",
-        "concurrency",
-        "plan-mode"
-      ]
-    },
-    {
-      "slug": "my-experience-using-claude-code-with-local-llm-and-full",
-      "title": "My experience using Claude code with Local Llm, and full guide on how to set it up",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "local-llm",
-        "field-report",
-        "setup",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "usage-limit-reached-but-it-s-not",
-      "title": "Usage Limit Reached...but it's not?",
-      "audience": "both",
-      "topics": [
-        "platform-news",
-        "usage-limits",
-        "bug-report"
-      ]
-    },
-    {
-      "slug": "cache-miss-in-claude-code-costs-12-5-more-than-a-hit-here",
-      "title": "Cache miss in Claude Code costs 12.5× more than a hit. Here are 5 things you do mid session that quietly trigger it",
-      "audience": "advanced",
-      "topics": [
-        "prompt-caching",
-        "cost-optimization",
-        "workflow",
-        "cache-invalidation",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "claude-code-v2-1-150-now-allows-anthropic-to-perform-remote",
-      "title": "Claude Code v2.1.150 now allows Anthropic to perform remote system prompt injection",
-      "audience": "advanced",
-      "topics": [
-        "security",
-        "system-prompt-injection",
-        "platform-news",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "constraint-decay-the-fragility-of-llm-agents-in-back-end",
-      "title": "Constraint Decay: The Fragility of LLM Agents in Back End Code Generation",
-      "audience": "advanced",
-      "topics": [
-        "field-report",
-        "model-behavior",
-        "code-generation",
-        "llm-agents"
-      ]
-    },
-    {
-      "slug": "deepseek-to-make-permanent-75-discount-on-flagship-ai-model",
-      "title": "DeepSeek to Make Permanent 75% Discount on Flagship AI Model",
-      "audience": "both",
-      "topics": [
-        "model-launch",
-        "pricing",
-        "platform-news"
-      ]
-    },
-    {
-      "slug": "how-i-ran-a-9-hour-autonomous-goal-session-with-claude-code",
-      "title": "How I ran a 9-hour autonomous /goal session with Claude Code and what it taught me about AI agents",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "field-report",
-        "autonomous-agents",
-        "goal-command",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "mythos-is-being-prepared-for-a-release-on-claude-code-and",
-      "title": "Mythos is being prepared for a release on Claude Code and Claude Security.",
-      "audience": "both",
-      "topics": [
-        "model-launch",
-        "claudecode",
-        "claudesecurity",
-        "platform-news"
-      ]
-    },
-    {
-      "slug": "skills-for-small-businesses-officially-released-by-anthropic",
-      "title": "🚀 Skills for small businesses, officially released by Anthropic",
-      "audience": "both",
-      "topics": [
-        "skills",
-        "workflow",
-        "automation",
-        "setup",
-        "enterprise-use"
-      ]
-    },
-    {
-      "slug": "b2b-sales-consultant-6-yrs-solo-an-honest-critique-of",
-      "title": "B2B sales consultant 6 yrs solo. an honest critique of claude after 9 months of daily use.",
-      "audience": "both",
-      "topics": [
-        "field-report",
-        "limitations",
-        "workflow"
-      ]
-    },
-    {
-      "slug": "how-i-ship-features-with-a-7-agent-claude-code-team-that",
-      "title": "how i ship features with a 7-agent claude code team that reviews its own code and talk to each other",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "multi-agent-system",
-        "code-review",
-        "collaboration",
-        "claudecode"
-      ]
-    },
-    {
-      "slug": "i-checked-which-of-my-claude-code-skills-actually-fire-half",
-      "title": "I checked which of my Claude Code skills actually fire. Half never had, and they were burning 23k tokens every session",
-      "audience": "advanced",
-      "topics": [
-        "workflow",
-        "skill-management",
-        "token-optimization",
-        "field-report"
-      ]
-    },
-    {
-      "slug": "i-stress-tested-kimi-k2-6-against-claude-opus-4-7-on-a",
-      "title": "I stress-tested Kimi K2.6 against Claude Opus 4.7 on a quick coding-agent task",
-      "audience": "advanced",
-      "topics": [
-        "field-report",
-        "workflow",
-        "coding-agent",
-        "model-comparison"
-      ]
-    },
-    {
-      "slug": "opus-4-6-4-7-substantial-degradation-as-of-yesterday",
-      "title": "Opus 4.6 / 4.7 substantial degradation as of yesterday",
-      "audience": "both",
-      "topics": [
-        "model-performance",
-        "opus",
-        "regression",
-        "field-report"
-      ]
-    },
-    {
       "slug": "claude-in-excel-using-stale-data-from-previous-sessions",
       "title": "Claude in Excel using stale data from previous sessions, after introduction of chat history.",
       "audience": "advanced",
@@ -536,6 +58,590 @@
         "setup",
         "claudecode",
         "collaboration"
+      ]
+    },
+    {
+      "slug": "anthropic-just-confirmed-why-90-of-non-coding-ai-agents",
+      "title": "Anthropic just confirmed why 90% of non-coding AI agents fail in production",
+      "audience": "both",
+      "topics": [
+        "field-report",
+        "enterprise-use",
+        "agent-deployment",
+        "data-quality"
+      ]
+    },
+    {
+      "slug": "claude-design-now-shares-usage-limits-with-claude-ai-and",
+      "title": "Claude Design now shares usage limits with Claude.ai and Claude Code",
+      "audience": "both",
+      "topics": [
+        "platform-news",
+        "usage-limits"
+      ]
+    },
+    {
+      "slug": "i-made-claude-review-claude-it-got-personal",
+      "title": "I made Claude review Claude. It got personal.",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "field-report",
+        "code-review",
+        "claudecode"
+      ]
+    },
+    {
+      "slug": "margin-lab-detects-statistically-significant-degradation",
+      "title": "Margin Lab detects statistically significant degradation starting May 22nd continuing to today in Claude Opus 4.7 (15% lower pass rate)",
+      "audience": "both",
+      "topics": [
+        "field-report",
+        "model-degradation",
+        "performance-monitoring"
+      ]
+    },
+    {
+      "slug": "open-source-playbook-for-working-with-claude-code-28",
+      "title": "Open-source playbook for working with Claude Code — 28 chapters, MIT, written for engineers and non-engineers",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "architecture",
+        "skills",
+        "parallel-worktrees",
+        "ship-pr",
+        "tool-neutral"
+      ]
+    },
+    {
+      "slug": "running-multiple-claude-code-sessions-in-parallel-with-git",
+      "title": "Running multiple Claude Code sessions in parallel with git worktrees - my approach",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "git-worktree",
+        "parallel-sessions",
+        "claudecode"
+      ]
+    },
+    {
+      "slug": "self-hosted-sandboxes-and-mcp-tunnels-for-claude-managed",
+      "title": "Self-hosted sandboxes and MCP tunnels for Claude Managed Agents are now in public beta.",
+      "audience": "advanced",
+      "topics": [
+        "claudemd",
+        "platform-news",
+        "security",
+        "deployment"
+      ]
+    },
+    {
+      "slug": "1-in-4-agent-skills-had-vulnerabilities-this-is-the-local",
+      "title": "1 in 4 agent skills had vulnerabilities. This is the local check I wish I had before installing random AI tooling",
+      "audience": "advanced",
+      "topics": [
+        "security",
+        "agent-skills",
+        "vulnerabilities",
+        "workflow",
+        "tooling"
+      ]
+    },
+    {
+      "slug": "anthropic-raises-65b-in-series-h-funding-at-965b-post-money",
+      "title": "Anthropic raises $65B in Series H funding at $965B post-money valuation",
+      "audience": "both",
+      "topics": [
+        "funding",
+        "industry-news",
+        "anthropic"
+      ]
+    },
+    {
+      "slug": "anthropic-s-own-research-says-multi-agent-burns-15x-the",
+      "title": "Anthropic's own research says multi-agent burns 15x the tokens. Opus 4.8's headline feature runs hundreds of subagents at once.",
+      "audience": "advanced",
+      "topics": [
+        "model-launch",
+        "multi-agent",
+        "token-usage",
+        "opus"
+      ]
+    },
+    {
+      "slug": "claude-opus-4-8",
+      "title": "Claude Opus 4.8",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "claudemd",
+        "capability-update"
+      ]
+    },
+    {
+      "slug": "claude-s-new-model-is-more-honest-when-it-messes-up",
+      "title": "Claude’s new model is more ‘honest’ when it messes up",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "honesty",
+        "claudemd",
+        "capability-improvement"
+      ]
+    },
+    {
+      "slug": "illinois-lawmakers-just-passed-america-s-strongest-ai",
+      "title": "Illinois Lawmakers Just Passed America’s Strongest AI Safety Bill",
+      "audience": "both",
+      "topics": [
+        "policy",
+        "ai-safety",
+        "regulation"
+      ]
+    },
+    {
+      "slug": "introducing-claude-opus-4-8",
+      "title": "Introducing Claude Opus 4.8",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "claudecode",
+        "platform-news",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "introducing-dynamic-workflows-in-claude-code",
+      "title": "Introducing dynamic workflows in Claude Code",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "claudecode",
+        "platform-news",
+        "automation"
+      ]
+    },
+    {
+      "slug": "mythos-class-models-opus-5-soon",
+      "title": "Mythos-class models (Opus 5) soon",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "opus-5",
+        "mythos-class"
+      ]
+    },
+    {
+      "slug": "mythos-level-opus-5-soon",
+      "title": "Mythos-level (Opus 5) soon",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "claudemd",
+        "platform-news"
+      ]
+    },
+    {
+      "slug": "one-full-session-now-only-uses-10-of-the-weekly-limit",
+      "title": "One full session now only uses 10% of the weekly limit (compared to 20% before)",
+      "audience": "both",
+      "topics": [
+        "platform-news",
+        "usage-limits"
+      ]
+    },
+    {
+      "slug": "opus-4-8-errors-thinking-or-redacted-thinking-blocks-in-the",
+      "title": "opus 4.8 errors - `thinking` or `redacted_thinking` blocks in the latest assistant message cannot be modified.",
+      "audience": "both",
+      "topics": [
+        "opus",
+        "error",
+        "model-behavior",
+        "debugging"
+      ]
+    },
+    {
+      "slug": "opus-4-8-weekly-limit-reset",
+      "title": "Opus 4.8 + Weekly Limit Reset",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "rate-limits",
+        "platform-news"
+      ]
+    },
+    {
+      "slug": "so-opus-isn-t-the-top-anymore-mythos-is-apparently-rolling",
+      "title": "so Opus isn't the top anymore.... Mythos is apparently rolling out to the public",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "claudemd",
+        "platform-news"
+      ]
+    },
+    {
+      "slug": "here-s-100-evals-on-opus-4-8",
+      "title": "Here's 100+ evals on Opus 4.8",
+      "audience": "advanced",
+      "topics": [
+        "model-evaluation",
+        "opus",
+        "performance-analysis",
+        "benchmarking"
+      ]
+    },
+    {
+      "slug": "introducing-claude-opus-4-8",
+      "title": "Introducing Claude Opus 4.8",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "workflow",
+        "platform-news",
+        "claudecode"
+      ]
+    },
+    {
+      "slug": "liquid-ai-reveals-8b-a1b-moe-trained-on-38t",
+      "title": "Liquid AI reveals 8B-A1B MoE trained on 38T",
+      "audience": "advanced",
+      "topics": [
+        "model-launch",
+        "moe",
+        "large-language-models",
+        "training-data"
+      ]
+    },
+    {
+      "slug": "psa-opus-4-8-redefines-the-effort-scale",
+      "title": "PSA: Opus 4.8 Redefines the effort scale",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "performance",
+        "cost",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "careful-with-the-new-ultracode-it-s-a-mega-token-eater-and",
+      "title": "Careful with the new UltraCode, it's a mega token eater, and it's buggy. ~1.7 million tokens used with no output. There are no refunds for this.",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "bug",
+        "token-usage",
+        "cost",
+        "ultracode"
+      ]
+    },
+    {
+      "slug": "i-logged-my-claude-code-agent-s-self-governance-for-a-week",
+      "title": "I logged my Claude Code agent's self-governance for a week - progressive disclosure experiments",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "agent-governance",
+        "workflow",
+        "progressive-disclosure",
+        "guardrails"
+      ]
+    },
+    {
+      "slug": "insane-safety-guardrails-and-false-positives-or-just-me",
+      "title": "Insane Safety Guardrails and False Positives, or Just Me?",
+      "audience": "both",
+      "topics": [
+        "field-report",
+        "safety-guardrails",
+        "false-positives",
+        "model-behavior"
+      ]
+    },
+    {
+      "slug": "opus-4-6-vs-4-7-vs-4-8",
+      "title": "opus 4.6 vs 4.7 vs 4.8",
+      "audience": "both",
+      "topics": [
+        "model-comparison",
+        "opus",
+        "workflow",
+        "field-report"
+      ]
+    },
+    {
+      "slug": "opus-is-becoming-increasingly-frustrating-for-every-day-use",
+      "title": "Opus is becoming increasingly frustrating for every day use",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "model-behavior",
+        "workflow",
+        "code-quality"
+      ]
+    },
+    {
+      "slug": "same-prompt-i-ve-used-100-times-opus-4-8-did-something",
+      "title": "Same prompt I've used 100 times. Opus 4.8 did something different.",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "field-report",
+        "opus",
+        "context-awareness"
+      ]
+    },
+    {
+      "slug": "tampering-warning-from-claude-code",
+      "title": "Tampering warning from Claude Code",
+      "audience": "advanced",
+      "topics": [
+        "security",
+        "field-report",
+        "toolchain-compromise",
+        "mcp",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "the-claude-code-shortcuts-most-people-never-discover-all",
+      "title": "The Claude Code shortcuts most people never discover (all verified against the docs)",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "shortcuts",
+        "tips-and-tricks"
+      ]
+    },
+    {
+      "slug": "tuto-how-to-create-demo-video-with-claude-code",
+      "title": "Tuto: how to create demo video with Claude code",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "playwright-mcp",
+        "video-rendering",
+        "html-animation",
+        "prompt-engineering"
+      ]
+    },
+    {
+      "slug": "4-7-and-4-8-refuses-to-do-subjective-judgement-work-and",
+      "title": "4.7 and 4.8 refuses to do subjective/judgement work - and actively makes excuses for not doing it",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "model-behavior",
+        "subjective-judgement",
+        "version-comparison"
+      ]
+    },
+    {
+      "slug": "a-year-of-using-claude-in-my-investing-workflow-what-it-s",
+      "title": "A year of using Claude in my investing workflow: what it's brilliant at, where it falls over",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "workflow",
+        "investment-analysis",
+        "limitations"
+      ]
+    },
+    {
+      "slug": "asked-claude-code-for-a-deep-search-in-ultracode-mode-it",
+      "title": "Asked Claude Code for a \"deep search\" in ultracode mode — it spun up ~70 agents across a 4-phase pipeline on its own",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "ultracode",
+        "agent-orchestration",
+        "cost-considerations",
+        "field-report"
+      ]
+    },
+    {
+      "slug": "chatgpt-for-google-sheets-exfiltrates-workbooks",
+      "title": "ChatGPT for Google Sheets Exfiltrates Workbooks",
+      "audience": "both",
+      "topics": [
+        "security",
+        "data-exfiltration",
+        "workflow",
+        "field-report"
+      ]
+    },
+    {
+      "slug": "differences-between-opus-4-7-and-opus-4-8-on-minebench",
+      "title": "Differences Between Opus 4.7 and Opus 4.8 on MineBench",
+      "audience": "advanced",
+      "topics": [
+        "model-launch",
+        "performance-comparison",
+        "cost-efficiency",
+        "field-report"
+      ]
+    },
+    {
+      "slug": "long-claude-chats-slowly-get-worse-slower-repetitive",
+      "title": "Long Claude chats slowly get worse - slower, repetitive, forgetful. Here's the \"context handoff\" trick that resets it without losing anything (prompt inside)",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "prompt-engineering",
+        "field-report"
+      ]
+    },
+    {
+      "slug": "opus-4-8-is-constantly-paranoid-about-prompt-injections",
+      "title": "Opus 4.8 is constantly paranoid about prompt injections, keeps re-reading files, and goes in silently thinking and wasting tokens mode - major regression",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "prompt-injection",
+        "workflow",
+        "debugging",
+        "model-behavior"
+      ]
+    },
+    {
+      "slug": "p-s-to-all-those-having-issues-with-opus-4-8-s-tool-calls",
+      "title": "P.S. to all those having issues with Opus 4.8's tool calls",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "workflow",
+        "model-compatibility",
+        "bug-workaround"
+      ]
+    },
+    {
+      "slug": "psa-if-claude-has-been-acting-up-this-week-it-s-a-real",
+      "title": "PSA: if Claude has been \"acting up\" this week, it's a real harness regression in 2.1.154–2.1.158, not the model. Workaround exists but has a real cost (you give up Opus 4.8).",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "bug",
+        "regression",
+        "tool-channel",
+        "workaround"
+      ]
+    },
+    {
+      "slug": "remember-to-deny-claude-from-reading-your-env",
+      "title": "Remember to deny Claude from reading your .env",
+      "audience": "both",
+      "topics": [
+        "security",
+        "permissions",
+        "workflow",
+        "setup"
+      ]
+    },
+    {
+      "slug": "why-4-8-feels-broken-if-you-re-not-running-dynamic-workflows",
+      "title": "Why 4.8 feels broken if you're not running dynamic workflows",
+      "audience": "advanced",
+      "topics": [
+        "field-report",
+        "workflow",
+        "model-behavior",
+        "enterprise"
+      ]
+    },
+    {
+      "slug": "anthropic-confidentially-files-for-what-could-be-the",
+      "title": "Anthropic Confidentially Files for What Could Be the Largest IPO Ever",
+      "audience": "both",
+      "topics": [
+        "ipo",
+        "anthropic",
+        "industry-news",
+        "corporate-strategy"
+      ]
+    },
+    {
+      "slug": "anthropic-confidentially-submits-draft-s-1-to-the-sec",
+      "title": "Anthropic confidentially submits draft S-1 to the SEC",
+      "audience": "both",
+      "topics": [
+        "company-news",
+        "ipo",
+        "industry-impact"
+      ]
+    },
+    {
+      "slug": "anthropic-finally-going-public-with-ipo",
+      "title": "Anthropic finally going public with IPO",
+      "audience": "both",
+      "topics": [
+        "model-launch",
+        "industry-news",
+        "corporate-strategy"
+      ]
+    },
+    {
+      "slug": "anthropic-has-officially-filed-to-go-public",
+      "title": "Anthropic has officially filed to go public",
+      "audience": "both",
+      "topics": [
+        "industry-news",
+        "company-ipo",
+        "anthropic"
+      ]
+    },
+    {
+      "slug": "claude-status-update-degraded-performance-for-claude-sonnet-2",
+      "title": "Claude Status Update : Degraded performance for Claude Sonnet 4.6 on 2026-06-01T19:06:53.000Z",
+      "audience": "both",
+      "topics": [
+        "platform-news",
+        "incident-report",
+        "claudemd"
+      ]
+    },
+    {
+      "slug": "claude-status-update-degraded-performance-for-claude-sonnet",
+      "title": "Claude Status Update : Degraded performance for Claude Sonnet 4.6 on 2026-06-01T18:28:42.000Z",
+      "audience": "both",
+      "topics": [
+        "platform-news",
+        "incident-report",
+        "claudemd"
+      ]
+    },
+    {
+      "slug": "florida-sues-openai-and-sam-altman-over-ai-risks",
+      "title": "Florida sues OpenAI and Sam Altman over AI risks",
+      "audience": "both",
+      "topics": [
+        "policy",
+        "legal",
+        "ai-risk",
+        "regulation"
+      ]
+    },
+    {
+      "slug": "psa-check-your-claude-md-after-switching-to-opus-4-8",
+      "title": "PSA: Check your CLAUDE.md after switching to Opus 4.8",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "model-update",
+        "configuration",
+        "opus"
+      ]
+    },
+    {
+      "slug": "what-do-you-do-about-token-optimizing-what-do-you-do-my",
+      "title": "What do you do about token optimizing? What do you do (my life changed when I found out 95% of my Claude tokens were pure - kinda useless - replay)",
+      "audience": "advanced",
+      "topics": [
+        "token-optimization",
+        "workflow",
+        "field-report"
       ]
     }
   ]

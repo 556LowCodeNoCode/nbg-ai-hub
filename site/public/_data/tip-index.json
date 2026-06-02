@@ -7,8 +7,7 @@
       "title": "Always look at the diff before you accept",
       "audience": "beginner",
       "topics": [
-        "safety",
-        "trust-model"
+        "safety"
       ]
     },
     {
@@ -17,8 +16,7 @@
       "audience": "advanced",
       "topics": [
         "compliance",
-        "data-residency",
-        "llm-strategy"
+        "data-residency"
       ]
     },
     {
@@ -53,17 +51,17 @@
       "title": "`--dangerously-skip-permissions` — what it actually does",
       "audience": "beginner",
       "topics": [
-        "survival",
+        "control",
         "permissions",
         "fundamentals"
       ]
     },
     {
       "slug": "esc-to-stop",
-      "title": "Esc to stop Claude mid-action (the survival key)",
+      "title": "Esc to stop Claude mid-action (the control key)",
       "audience": "beginner",
       "topics": [
-        "survival",
+        "control",
         "basics"
       ]
     },
@@ -72,7 +70,7 @@
       "title": "Permission modes — what Shift+Tab toggles",
       "audience": "beginner",
       "topics": [
-        "survival",
+        "control",
         "workflow"
       ]
     },
@@ -92,21 +90,13 @@
       "audience": "beginner",
       "topics": [
         "prompting",
+        "fundamentals",
         "examples"
       ]
     },
     {
       "slug": "prompt-briefing-template",
       "title": "Brief Claude like a colleague (the 5-line template)",
-      "audience": "beginner",
-      "topics": [
-        "prompting",
-        "fundamentals"
-      ]
-    },
-    {
-      "slug": "prompt-context-first",
-      "title": "Context first, ask second",
       "audience": "beginner",
       "topics": [
         "prompting",
@@ -159,12 +149,102 @@
       ]
     },
     {
+      "slug": "prompt-think-harder",
+      "title": "\"think harder\" and `/effort` — turn up the reasoning when it matters",
+      "audience": "both",
+      "topics": [
+        "prompting",
+        "fundamentals"
+      ]
+    },
+    {
       "slug": "prompting-in-greek",
       "title": "Prompt in Greek (or any language) — Claude understands",
       "audience": "beginner",
       "topics": [
         "prompting",
         "fundamentals"
+      ]
+    },
+    {
+      "slug": "workflow-at-and-bang",
+      "title": "`@file` and `!command` — two prompt shortcuts every newcomer misses",
+      "audience": "beginner",
+      "topics": [
+        "workflow",
+        "commands"
+      ]
+    },
+    {
+      "slug": "workflow-claudemd-iterate",
+      "title": "When Claude does something wrong, add a line to CLAUDE.md",
+      "audience": "beginner",
+      "topics": [
+        "workflow",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "workflow-cli-tools",
+      "title": "Install `gh` (and other CLIs) — Claude knows how to use them",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "integrations"
+      ]
+    },
+    {
+      "slug": "workflow-hooks-vs-claudemd",
+      "title": "Hooks for the non-negotiables — CLAUDE.md only asks nicely",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "workflow-keep-sessions-focused",
+      "title": "One session, one task — don't pile work into a long conversation",
+      "audience": "beginner",
+      "topics": [
+        "workflow",
+        "context"
+      ]
+    },
+    {
+      "slug": "workflow-plan-first",
+      "title": "Plan first, then execute — the workflow that pays for itself",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "fundamentals"
+      ]
+    },
+    {
+      "slug": "workflow-resume-session",
+      "title": "Resume yesterday's session instead of starting from scratch",
+      "audience": "beginner",
+      "topics": [
+        "workflow",
+        "commands"
+      ]
+    },
+    {
+      "slug": "workflow-slash-commands",
+      "title": "Custom slash commands — turn repeated workflows into one keystroke",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "commands"
+      ]
+    },
+    {
+      "slug": "workflow-subagents",
+      "title": "Subagents — delegate the file-reading so your main session stays clean",
+      "audience": "advanced",
+      "topics": [
+        "workflow",
+        "advanced"
       ]
     }
   ]

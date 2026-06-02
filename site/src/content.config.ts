@@ -139,6 +139,33 @@ const skills = defineCollection({
     // capability. Optional during the rollout so existing skills don't
     // break the build; ship one with each skill entry as they're authored.
     worked_scenario: z.string().min(1).max(600).optional(),
+    // 2026-06-02 — install-block enrichments so the detail page can render
+    // a complete access → marketplace-add → install → use sequence inline
+    // and the user doesn't have to bounce to GitHub.
+    //
+    // `marketplace_command`: the `/plugin marketplace add ...` step that
+    // must run once before any skill from that marketplace is installable.
+    // Optional because some skills (e.g. those already in the Anthropic
+    // bundled marketplace) don't need it. Same prefix-refine as
+    // `install_command` so authors can't typo it.
+    marketplace_command: z
+      .string()
+      .refine(
+        (cmd) =>
+          cmd.startsWith('/plugin marketplace add ') ||
+          cmd.startsWith('/plugin install '),
+        {
+          message:
+            'marketplace_command must start with `/plugin marketplace add `',
+        },
+      )
+      .optional(),
+    // `access_request`: short markdown explaining how to request access
+    // to the upstream repo, when access isn't automatic. Empty/missing =
+    // "public, no access needed". TBD placeholders are allowed during
+    // rollout (the AI team is still finalising the request process for
+    // NBG-AI/claude-tools).
+    access_request: z.string().min(1).max(800).optional(),
   }),
 });
 

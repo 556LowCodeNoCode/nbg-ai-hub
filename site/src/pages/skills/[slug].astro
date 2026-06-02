@@ -1,0 +1,582 @@
+---
+/**
+ * /skills/[slug] — single-skill detail page.
+ *
+ * 2026-06-02: skill bodies were previously invisible on the site — the listing
+ * (`/skills`) rendered only `ai_summary` + `worked_scenario`, and there was no
+ * detail route. This page closes the loop so the skill body and the
+ * structured install block (Access → Marketplace → Install → Use) surface to
+ * readers. Built as a parallel of `tips/[slug].astro` so the two reading
+ * surfaces feel like one product.
+ *
+ * Install block reads four optional fields off the frontmatter:
+ *   - `access_request` (markdown body — usually a TBD placeholder during
+ *     rollout for the internal NBG-AI/claude-tools repo)
+ *   - `marketplace_command` (`/plugin marketplace add ...`)
+ *   - `install_command` (`/plugin install ...`)
+ *   - `skill_id` (the slash command to type once installed)
+ *
+ * Cascade hardening: same `!important` rule as tips/[slug].astro per the
+ * Starlight-unlayered memory.
+ */
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry } from 'astro:content';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import MarketingShell from '../../components/MarketingShell.astro';
+import remarkGlossaryLink from '../../plugins/remark-glossary-link.ts';
+import { linkGlossaryTerms } from '../../lib/glossary-link-string';
+
+export const getStaticPaths = (async () => {
+  const items = await getCollection('skills');
+  return items.map((s) => ({ params: { slug: s.id } }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+if (!slug) {
+  throw new Error('skills detail page invoked without a slug param');
+}
+
+const entry = await getEntry('skills', slug);
+if (!entry) {
+  throw new Error(`No skills entry found for slug '${slug}'`);
+}
+
+const rawBody: string | undefined = entry.body;
+if (typeof rawBody !== 'string' || rawBody.trim().length === 0) {
+  throw new Error(`skills/${slug}.md has an empty body`);
+}
+
+const processor = await createMarkdownProcessor({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  remarkPlugins: [
+    [
+      remarkGlossaryLink as any,
+      { glossaryDir: '../glossary', excludePaths: ['/news/published/'] },
+    ],
+  ],
+});
+
+const rendered = await processor.render(rawBody);
+const bodyHtml = rendered.code;
+
+// `access_request` is markdown too — render through the same processor so
+// the TBD placeholder can contain bold/links/lists once the AI team finalises
+// the process.
+const accessHtml =
+  typeof entry.data.access_request === 'string' && entry.data.access_request.trim().length > 0
+    ? (await processor.render(entry.data.access_request)).code
+    : null;
+
+function titleToHtml(title: string): string {
+  return title.replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+/** Split "/command — explanation" into the two parts for the hero. */
+function splitTitle(title: string, fallbackId: string): { command: string; explanation: string } {
+  const parts = title.split(' — ');
+  if (parts.length < 2) {
+    return { command: `/${fallbackId}`, explanation: title };
+  }
+  const head = parts[0]!;
+  return {
+    command: head.startsWith('/') ? head : `/${head}`,
+    explanation: parts.slice(1).join(' — '),
+  };
+}
+
+function audienceTooltip(a: string): string {
+  if (a === 'beginner') return 'For colleagues new to Claude Code';
+  if (a === 'advanced') return 'For experienced Claude Code users';
+  return 'Applies to everyone';
+}
+
+function originLabel(o: string): string {
+  if (o === 'internal') return 'Built at NBG';
+  if (o === 'community') return 'From the community';
+  return 'External';
+}
+
+const { command: skillCommand, explanation: skillExplanation } = splitTitle(
+  entry.data.title,
+  entry.data.skill_id,
+);
+
+// Sibling navigation — next skill in alphabetical slug order, same shape as
+// tips/[slug].astro.
+const allSkills = (await getCollection('skills')).sort((a, b) => a.id.localeCompare(b.id));
+const currentIdx = allSkills.findIndex((s) => s.id === entry.id);
+const nextSkill =
+  currentIdx >= 0 && currentIdx < allSkills.length - 1 ? allSkills[currentIdx + 1] : allSkills[0];
+
+const heroSummary = entry.data.ai_summary;
+const isInternal = entry.data.origin === 'internal';
+---
+
+<MarketingShell
+  title={entry.data.title}
+  description={heroSummary}
+  surfaceId={`skill-${entry.id}`}
+  width="full"
+  hero="none"
+  mode="reader"
+>
+  <section class={`hero hero--stack${isInternal ? ' skill-hero--internal' : ''}`}>
+    <div class="wrap">
+      <div class="hero__intro">
+        <p class="skill-hero__crumbs">
+          <a href="/skills/">← Skills</a>
+          <span aria-hidden="true">·</span>
+          <span>{originLabel(entry.data.origin)}</span>
+        </p>
+        <p class="skill-hero__cmd">
+          <span class="skill-hero__cmd-label">Slash command</span>
+          <code class="skill-hero__cmd-code">{skillCommand}</code>
+        </p>
+        <h1 class="hero__title skill-hero__title" set:html={titleToHtml(skillExplanation)} />
+        <p class="hero__lede">
+          <Fragment set:html={linkGlossaryTerms(heroSummary)} />
+        </p>
+        <p class="skill-hero__meta">
+          <span
+            class={`listing-pill listing-pill--audience listing-pill--audience-${entry.data.audience}`}
+            title={audienceTooltip(entry.data.audience)}
+          >
+            {entry.data.audience}
+          </span>
+          {entry.data.time_saved && (
+            <span class="listing-pill listing-pill--time" title="Honest team estimate">
+              ⏱ {entry.data.time_saved}
+            </span>
+          )}
+          {entry.data.external_link && (
+            <a class="skill-hero__external" href={entry.data.external_link} target="_blank" rel="noopener">
+              View source ↗
+            </a>
+          )}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="skill-layout wrap">
+    {entry.data.worked_scenario && (
+      <aside class="skill-scenario">
+        <p class="skill-scenario__label">In practice</p>
+        <p class="skill-scenario__body" set:html={linkGlossaryTerms(entry.data.worked_scenario)} />
+      </aside>
+    )}
+
+    <article class="skill-body sl-markdown-content" set:html={bodyHtml} />
+
+    <aside class={`skill-install${isInternal ? ' skill-install--internal' : ''}`}>
+      <h2 class="skill-install__heading">Get this skill running</h2>
+      <p class="skill-install__intro">
+        Copy-paste into Claude Code. The marketplace + install steps run once per machine; the last one is how you call the skill day-to-day.
+      </p>
+
+      <ol class="skill-install__steps">
+        <li class="skill-install__step">
+          <p class="skill-install__step-label">
+            <span class="skill-install__step-number">1</span> Access
+          </p>
+          {accessHtml ? (
+            <div class="skill-install__step-body skill-install__access" set:html={accessHtml} />
+          ) : (
+            <p class="skill-install__step-body">
+              Public repo — no access request needed.
+            </p>
+          )}
+        </li>
+
+        {entry.data.marketplace_command && (
+          <li class="skill-install__step">
+            <p class="skill-install__step-label">
+              <span class="skill-install__step-number">2</span> Add the marketplace
+              <span class="skill-install__step-hint">— once per machine</span>
+            </p>
+            <pre class="skill-install__cmd"><code>{entry.data.marketplace_command}</code></pre>
+          </li>
+        )}
+
+        <li class="skill-install__step">
+          <p class="skill-install__step-label">
+            <span class="skill-install__step-number">{entry.data.marketplace_command ? 3 : 2}</span> Install the skill
+          </p>
+          <pre class="skill-install__cmd"><code>{entry.data.install_command}</code></pre>
+        </li>
+
+        <li class="skill-install__step">
+          <p class="skill-install__step-label">
+            <span class="skill-install__step-number">{entry.data.marketplace_command ? 4 : 3}</span> Use it
+          </p>
+          <pre class="skill-install__cmd"><code>{skillCommand}</code></pre>
+        </li>
+      </ol>
+    </aside>
+  </div>
+
+  {nextSkill && nextSkill.id !== entry.id && (
+    <section class="skill-next">
+      <div class="wrap">
+        <article class="skill-next__card">
+          <span class="skill-next__eyebrow">Next skill →</span>
+          <h2 class="skill-next__title" set:html={titleToHtml(nextSkill.data.title)} />
+          <p class="skill-next__lede" set:html={linkGlossaryTerms(nextSkill.data.ai_summary)} />
+          <div class="skill-next__actions">
+            <a class="skill-next__cta skill-next__cta--primary" href={`/skills/${nextSkill.id}/`}>
+              Open it →
+            </a>
+            <a class="skill-next__cta skill-next__cta--secondary" href="/skills/">
+              Back to all skills
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+  )}
+</MarketingShell>
+
+<style>
+  @layer nbg.components {
+    /* ─── Hero ─────────────────────────────────────────────────── */
+    .skill-hero__crumbs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin: 0 0 0.75rem 0 !important;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--nbg-muted, #5b6b80);
+    }
+    .skill-hero__crumbs a { color: var(--nbg-accent, #007a8a); text-decoration: none; }
+    .skill-hero__crumbs a:hover { text-decoration: underline; }
+
+    .skill-hero__cmd {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.6rem 0 !important;
+      flex-wrap: wrap;
+    }
+    .skill-hero__cmd-label {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--nbg-muted, #5b6b80);
+    }
+    .skill-hero__cmd-code {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.95rem;
+      background: #0b1e2e;
+      color: #6fe2c5;
+      padding: 0.18em 0.55em;
+      border-radius: var(--nbg-r-sm, 4px);
+    }
+
+    .skill-hero__title :global(code) {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.78em;
+      background: var(--nbg-surface-2, #f4f6fa);
+      padding: 0.1em 0.35em;
+      border-radius: var(--nbg-r-sm, 4px);
+      color: var(--nbg-accent, #007a8a);
+    }
+
+    .skill-hero__meta {
+      display: flex !important;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 1rem 0 0 0 !important;
+      flex-wrap: wrap;
+    }
+    .skill-hero__external {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.75rem;
+      color: var(--nbg-accent, #007a8a);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .skill-hero__external:hover { text-decoration: underline; }
+
+    /* Internal hero tints the very top band so the page reads as "team-built". */
+    .skill-hero--internal {
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, #c79a3a 8%, var(--nbg-surface, #ffffff)) 0%,
+        var(--nbg-surface, #ffffff) 100%
+      );
+    }
+
+    /* ─── Two-column reading layout ────────────────────────────── */
+    .skill-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+      gap: 2.5rem;
+      padding-block: 1.5rem 2.5rem !important;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .skill-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.5rem;
+      }
+    }
+
+    /* In-practice scenario card sits at the top of the prose column. */
+    .skill-scenario {
+      grid-column: 1;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--nbg-accent, #007a8a);
+      background: color-mix(in srgb, var(--nbg-accent, #007a8a) 5%, var(--nbg-surface, #ffffff));
+      border-radius: 0 var(--nbg-r-sm, 4px) var(--nbg-r-sm, 4px) 0;
+      margin: 0 0 1.25rem 0;
+    }
+    .skill-scenario__label {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--nbg-accent, #007a8a);
+      margin: 0 0 0.35rem 0;
+    }
+    .skill-scenario__body {
+      margin: 0 !important;
+      color: var(--nbg-ink-2, #1a3148);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .skill-body {
+      grid-column: 1;
+      color: var(--nbg-ink, #0b1e2e);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+    .skill-body :global(h2) {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.5rem !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.015em !important;
+      color: var(--nbg-ink, #0b1e2e) !important;
+      margin: 2.25rem 0 0.75rem !important;
+      padding-top: 1.5rem !important;
+      border-top: 1px solid var(--nbg-hairline, #ebeff5) !important;
+    }
+    .skill-body :global(h2:first-child) {
+      padding-top: 0 !important;
+      border-top: 0 !important;
+      margin-top: 0 !important;
+    }
+    .skill-body :global(h3) {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.15rem !important;
+      line-height: 1.25 !important;
+      letter-spacing: -0.01em !important;
+      color: var(--nbg-ink, #0b1e2e) !important;
+      margin: 1.5rem 0 0.5rem !important;
+    }
+    .skill-body :global(p) { margin: 0 0 1rem 0 !important; }
+    .skill-body :global(ul),
+    .skill-body :global(ol) {
+      margin: 0 0 1rem 0 !important;
+      padding-left: 1.5rem !important;
+    }
+    .skill-body :global(li) { margin-bottom: 0.4rem !important; }
+    .skill-body :global(strong) {
+      color: var(--nbg-ink, #0b1e2e) !important;
+      font-weight: 600 !important;
+    }
+    .skill-body :global(a) {
+      color: var(--nbg-accent, #007a8a) !important;
+      text-decoration: underline !important;
+      text-decoration-thickness: 1px !important;
+      text-underline-offset: 0.2em !important;
+    }
+    .skill-body :global(a:hover) { text-decoration-thickness: 2px !important; }
+    .skill-body :global(:not(pre) > code) {
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace) !important;
+      font-size: 0.95em !important;
+      background: var(--nbg-surface-2, #f4f6fa) !important;
+      color: var(--nbg-accent, #007a8a) !important;
+      padding: 0.1em 0.35em !important;
+      border-radius: var(--nbg-r-sm, 4px) !important;
+    }
+
+    /* ─── Install panel (right rail on desktop, stacked below on mobile) ─ */
+    .skill-install {
+      grid-column: 2;
+      align-self: start;
+      position: sticky;
+      top: 1.5rem;
+      padding: 1.5rem 1.4rem 1.6rem;
+      border: 1px solid var(--nbg-hairline, #ebeff5);
+      border-radius: var(--nbg-r-lg, 12px);
+      background: var(--nbg-surface, #ffffff);
+      box-shadow: 0 1px 2px rgba(11, 30, 46, 0.04);
+    }
+    @media (max-width: 900px) {
+      .skill-install { grid-column: 1; position: static; }
+    }
+    /* Internal install panel gets the NBG-gold accent so the team-built
+       skills read visually distinct from community ones. */
+    .skill-install--internal {
+      border-color: color-mix(in srgb, #c79a3a 35%, var(--nbg-hairline, #ebeff5));
+      background: color-mix(in srgb, #c79a3a 4%, var(--nbg-surface, #ffffff));
+    }
+    .skill-install__heading {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.15rem !important;
+      margin: 0 0 0.5rem 0 !important;
+      color: var(--nbg-ink, #0b1e2e) !important;
+    }
+    .skill-install__intro {
+      margin: 0 0 1rem 0 !important;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skill-install__steps {
+      list-style: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+    .skill-install__step { margin: 0 !important; }
+    .skill-install__step-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.4rem 0 !important;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--nbg-ink, #0b1e2e);
+    }
+    .skill-install__step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.4rem;
+      height: 1.4rem;
+      border-radius: 50%;
+      background: var(--nbg-accent, #007a8a);
+      color: #ffffff;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .skill-install--internal .skill-install__step-number {
+      background: #c79a3a;
+    }
+    .skill-install__step-hint {
+      font-size: 0.65rem;
+      color: var(--nbg-muted, #5b6b80);
+      letter-spacing: 0.08em;
+      text-transform: none;
+    }
+    .skill-install__step-body {
+      margin: 0 !important;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skill-install__access :global(p) { margin: 0 0 0.6rem 0 !important; }
+    .skill-install__access :global(p:last-child) { margin-bottom: 0 !important; }
+    .skill-install__access :global(strong) {
+      color: #c79a3a;
+      font-weight: 700;
+    }
+    .skill-install__cmd {
+      margin: 0 !important;
+      padding: 0.7rem 0.85rem !important;
+      background: #0b1e2e !important;
+      color: #d9f4ec !important;
+      border-radius: var(--nbg-r-sm, 4px) !important;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace) !important;
+      font-size: 0.82rem !important;
+      line-height: 1.4 !important;
+      overflow-x: auto;
+    }
+    .skill-install__cmd :global(code) {
+      background: transparent !important;
+      color: inherit !important;
+      padding: 0 !important;
+    }
+
+    /* ─── Bottom "Next skill" card (mirrors tip-next) ─────────── */
+    .skill-next { padding-block: 2rem 3.5rem; }
+    .skill-next__card {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 1.75rem 2rem;
+      border: 1px solid color-mix(in srgb, var(--nbg-accent, #007a8a) 30%, var(--nbg-hairline, #ebeff5));
+      border-radius: var(--nbg-r-lg, 12px);
+      background: color-mix(in srgb, var(--nbg-accent, #007a8a) 5%, var(--nbg-surface, #ffffff));
+    }
+    .skill-next__eyebrow {
+      display: inline-block;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--nbg-accent, #007a8a);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .skill-next .skill-next__title {
+      font-family: var(--nbg-ff-serif, Newsreader, Georgia, serif) !important;
+      font-weight: 500 !important;
+      font-size: 1.375rem !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.01em !important;
+      color: var(--nbg-ink, #0b1e2e) !important;
+      margin: 0 0 0.5rem 0 !important;
+    }
+    .skill-next__lede {
+      margin: 0 0 1.1rem 0 !important;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      color: var(--nbg-ink-2, #1a3148);
+    }
+    .skill-next__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .skill-next__cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.6rem 1.05rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .skill-next__cta--primary {
+      background: var(--nbg-accent, #007a8a);
+      color: #ffffff;
+      border: 1px solid var(--nbg-accent, #007a8a);
+    }
+    .skill-next__cta--primary:hover { filter: brightness(1.06); }
+    .skill-next__cta--secondary {
+      background: transparent;
+      color: var(--nbg-accent, #007a8a);
+      border: 1px solid color-mix(in srgb, var(--nbg-accent, #007a8a) 40%, var(--nbg-hairline, #ebeff5));
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+    .skill-next__cta--secondary:hover {
+      background: color-mix(in srgb, var(--nbg-accent, #007a8a) 8%, transparent);
+    }
+  }
+</style>

@@ -3,13 +3,15 @@
   "type": "skill",
   "items": [
     {
-      "slug": "database-schema-designer",
-      "title": "database-schema-designer — robust schema design",
-      "audience": "both",
+      "slug": "create-sandbox",
+      "title": "create-sandbox — build a TypeScript API sandbox from C# or Postman, end-to-end",
+      "audience": "advanced",
       "topics": [
-        "database",
-        "schema",
-        "design"
+        "typescript",
+        "csharp",
+        "postman",
+        "api",
+        "sandbox"
       ]
     },
     {
