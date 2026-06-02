@@ -693,30 +693,46 @@ const PIN_TYPE_LABELS = {
     }
     .my-pins__filters[hidden] { display: none; }
     .my-pins__filter-chip {
-      /* Explicit height guarantees every chip renders identically regardless
-         of its inner content (label-only vs label+count bubble).
-         margin: 0 defeats Starlight's `.sl-markdown-content` vertical-rhythm
-         rule (`:not(a,...) + :not(a,...) { margin-top: 1rem }`) which
-         otherwise adds 16px to every chip after the first, breaking the row
-         alignment. Same pattern as the homepage `.router-grid` fix per
-         DECISIONS 2026-05-25. */
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      height: 2.25rem;
-      margin: 0;
-      padding: 0 0.95rem;
-      border-radius: 999px;
+      /* !important across every dimension property — Starlight ships its
+         own button/chip rules unlayered, which win the cascade in the
+         deployed build (not in dev) per the documented Starlight gotcha.
+         Without these flags the *pressed* state ends up taller + with a
+         larger label and count bubble than the unpressed state, even
+         though both share this class. See docs/reference/starlight-
+         cascade-gotcha.md. Same pattern as the homepage router-grid fix
+         in DECISIONS 2026-05-25. margin: 0 also kills the .sl-markdown-
+         content sibling-margin rule that would push every chip after
+         the first by 16px. */
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      height: 2.25rem !important;
+      min-height: 2.25rem !important;
+      margin: 0 !important;
+      padding: 0 0.95rem !important;
+      border-radius: 999px !important;
       border: 1px solid color-mix(in srgb, var(--nbg-ink, #1a2030) 14%, transparent);
       background: var(--nbg-bg, #fff);
       color: var(--nbg-ink-2, #4a5563);
-      font-family: var(--nbg-ff-body);
-      font-size: 0.8125rem;
-      font-weight: 500;
-      line-height: 1;
+      font-family: var(--nbg-ff-body) !important;
+      font-size: 0.8125rem !important;
+      font-weight: 500 !important;
+      line-height: 1 !important;
       cursor: pointer;
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+    }
+    /* Inner spans must INHERIT the chip's font-size / line-height. Without
+       these guards a Starlight body rule on `button > span` (or markdown
+       content typography) re-asserts its own font-size and the pressed
+       state visually expands. Belt-and-braces with the chip-level
+       !importants above. */
+    .my-pins__filter-chip > span {
+      font-size: inherit !important;
+      font-weight: inherit !important;
+      line-height: inherit !important;
+      letter-spacing: inherit !important;
+      font-family: inherit !important;
     }
     .my-pins__filter-chip:hover {
       background: var(--nbg-surface-2, #eef2f7);
@@ -731,20 +747,23 @@ const PIN_TYPE_LABELS = {
     /* Count badge — sits inside the chip on its own small bubble. Sized so
        it fits comfortably within the chip's fixed 2.25rem height. */
     .my-pins__filter-chip__count {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 1.375rem;
-      height: 1.375rem;
-      padding: 0 0.4rem;
-      border-radius: 999px;
+      /* Count bubble — also locked with !important because the parent
+         span-inherit rule above forces it back to chip font-size
+         otherwise. The count needs its OWN slightly smaller mono size. */
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-width: 1.375rem !important;
+      height: 1.375rem !important;
+      padding: 0 0.4rem !important;
+      border-radius: 999px !important;
       background: color-mix(in srgb, var(--nbg-ink, #1a2030) 8%, transparent);
       color: inherit;
-      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
-      font-size: 0.6875rem;
-      font-weight: 500;
-      line-height: 1;
-      box-sizing: border-box;
+      font-family: var(--nbg-ff-mono, ui-monospace, monospace) !important;
+      font-size: 0.6875rem !important;
+      font-weight: 500 !important;
+      line-height: 1 !important;
+      box-sizing: border-box !important;
     }
     .my-pins__filter-chip[aria-pressed='true'] .my-pins__filter-chip__count {
       background: color-mix(in srgb, var(--nbg-bg, #fff) 20%, transparent);
