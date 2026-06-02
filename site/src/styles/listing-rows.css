@@ -48,16 +48,25 @@
   .listing-filter-bar[data-stuck='true'] {
     box-shadow: 0 6px 14px -12px rgba(11, 30, 46, 0.22);
   }
-  /* Inside the sticky strip, override the hero-variant margin-top so the
-     filter sits flush with the strip's own padding. Use flex-column with
-     a slightly-larger-than-default gap so the SHOW row and the FILTER
-     BY TOPIC row breathe — at default block flow they read as squished
-     together (DECISIONS 2026-06-02 round 2). */
+  /* All chips + labels flow as direct flex items (see `display: contents`
+     rule below). Small column-gap so chips sit close together; a
+     dedicated left-margin on the topic-filter label provides the visual
+     separation between the SHOW and FILTER BY TOPIC clusters. */
   .listing-filter-bar .hero__filter {
     margin-top: 0 !important;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+  }
+  .listing-filter-bar .topic-filter__label {
+    margin-left: 1rem !important;
+  }
+  /* On Use Cases there's only one filter; no left-margin needed. */
+  .listing-filter-bar .hero__filter > .topic-filter:first-child .topic-filter__label,
+  .listing-filter-bar .hero__filter > form.topic-filter:first-of-type .topic-filter__label {
+    margin-left: 0 !important;
   }
 
   /* 2026-06-02 round 3 — production cascade gotcha. The chip styles in
@@ -69,16 +78,18 @@
      Lift the chip vocabulary into the shared sticky-strip rules with
      `!important` so all three pages render identically in production.
      Values mirror the AudienceFilter / TopicFilter component CSS. */
+  /* Flatten the inner wrappers so every chip + label becomes a direct
+     flex item of the outer `.hero__filter`. With `display: contents`
+     the SHOW label, audience chips, FILTER BY TOPIC label, and topic
+     chips all flow inline-wrap as one continuous row of items —
+     instead of being grouped behind invisible boxes that force the
+     whole topic filter to wrap to its own line. */
   .listing-filter-bar .topic-filter,
-  .listing-filter-bar .audience-filter {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.4rem !important;
-    background: transparent !important;
-    border: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  .listing-filter-bar .audience-filter,
+  .listing-filter-bar .topic-filter__group,
+  .listing-filter-bar .audience-filter__group,
+  .listing-filter-bar .audience-filter__option {
+    display: contents !important;
   }
   .listing-filter-bar .topic-filter__label,
   .listing-filter-bar .audience-filter__label {
@@ -88,13 +99,13 @@
     letter-spacing: 0.16em !important;
     text-transform: uppercase !important;
     color: var(--nbg-muted, #5b6b80) !important;
+    white-space: nowrap !important;
   }
-  .listing-filter-bar .topic-filter__group,
-  .listing-filter-bar .audience-filter__group {
-    display: inline-flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.4rem !important;
-  }
+  /* NB: don't add a `display` rule for __group here — it must stay
+     `display: contents` (set earlier) so chips bubble up as direct flex
+     items of `.hero__filter`. A later inline-flex declaration would
+     defeat that and force the chips back into their group's box,
+     breaking the inline label-then-chips flow. */
   .listing-filter-bar .topic-filter__chip,
   .listing-filter-bar .audience-filter__chip {
     padding: 0.35rem 0.8rem !important;

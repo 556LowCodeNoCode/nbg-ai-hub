@@ -563,3 +563,18 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Filter chips were silently scrolling off-screen on long listings; pin overlay was colliding with the duration chip; use-case unit-filter looked like it worked (chips highlighted) but wasn't actually filtering — a worse UX than no filter at all.
 
 **References:** `site/src/scripts/sticky-filter-bar.ts` (new); `site/src/styles/listing-rows.css` (`.listing-filter-bar` block); `site/src/pages/{skills,tips}.astro`, `site/src/pages/use-cases/index.astro`.
+
+---
+
+## 2026-06-02 (round 3) — Filter strip: inline label-then-chips + shorter labels
+
+**Trigger:** Sticky filter strip from round 2 stacked SHOW on one row and FILTER BY TOPIC on another, eating vertical space; topic chips wrapped inside their group instead of flowing alongside the audience chips.
+
+- **Inline single-flow layout.** Inner `.topic-filter`, `.audience-filter`, their `__group` wrappers, and `.audience-filter__option` (which holds the radio + chip) all get `display: contents !important`. Chips and labels bubble up as direct flex items of the outer `.hero__filter`, which is `flex-direction: row; flex-wrap: wrap`. Result: `SHOW [chips] TOPIC [chips]` flows as one continuous wrap-row, instead of label-trapped-with-its-chips on separate rows.
+- **Cascade trap.** The chip-vocabulary block I added in the production-hardening commit also set `display: inline-flex !important` on the `__group` — a later same-layer `!important` declaration that defeated the earlier `display: contents`. Removed the conflict and left a comment so a future drive-by edit doesn't re-introduce it.
+- **Shorter labels.** `For beginners` → `Beginners`, `For experienced` → `Experienced` (AudienceFilter); `Filter by topic` → `Topic` (TopicFilter); `Filter by unit` → `Unit` (use-cases inline). The compact labels free enough horizontal space that on tips (14 topic chips) the audience cluster + the TOPIC label + the first ~8 chips now fit on row 1 — the remaining chips wrap once into row 2 instead of three-rowing.
+- **Production cascade chip-size hotfix (still part of this batch).** The chip vocabulary (padding, font, pill border, active-state teal fill) lives in `listing-rows.css` with `!important` so it beats Starlight's unlayered button defaults on the deployed build. Without it, tips/skills shipped oversized chips on Pages even though local dev rendered correctly.
+
+**Why:** Vertical real estate matters in a sticky strip — the more the bar consumes, the less content below it the user sees while scrolling. The inline flow also reads as "one filter control" instead of two stacked widgets.
+
+**References:** `site/src/styles/listing-rows.css` (`.listing-filter-bar` block); `site/src/components/AudienceFilter.astro`, `site/src/components/TopicFilter.astro`; `site/src/pages/use-cases/index.astro`.
