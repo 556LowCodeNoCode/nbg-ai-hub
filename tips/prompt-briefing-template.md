@@ -2,7 +2,7 @@
 type: tip
 title: Brief Claude like a colleague (the 5-line template)
 audience: beginner
-topics: [prompting, fundamentals]
+topics: [prompting]
 internal: false
 authored: "2026-05-25"
 last_reviewed: "2026-05-25"

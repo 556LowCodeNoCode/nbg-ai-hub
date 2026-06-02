@@ -2,7 +2,7 @@
 type: tip
 title: When Claude does something wrong, add a line to CLAUDE.md
 audience: beginner
-topics: [workflow, fundamentals]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

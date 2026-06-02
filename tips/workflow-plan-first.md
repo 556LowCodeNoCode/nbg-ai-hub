@@ -2,7 +2,7 @@
 type: tip
 title: Plan first, then execute — the workflow that pays for itself
 audience: both
-topics: [workflow, fundamentals]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

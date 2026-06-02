@@ -2,7 +2,7 @@
 type: tip
 title: Correct with 'No, what I meant was…'
 audience: beginner
-topics: [prompting, corrections]
+topics: [prompting]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

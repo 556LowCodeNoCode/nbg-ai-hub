@@ -2,7 +2,7 @@
 type: tip
 title: Resume yesterday's session instead of starting from scratch
 audience: beginner
-topics: [workflow, commands]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

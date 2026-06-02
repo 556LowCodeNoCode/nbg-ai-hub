@@ -6,6 +6,23 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-02 (tips taxonomy) — Closed topic enum + filter click-target fix
+
+**Trigger:** /tips/ chip strip showed 14 topic chips including `Advanced` and `Basics` — both duplicated the SHOW/audience axis — plus six singletons (`safety`, `permissions`, `corrections`, `integrations`, `examples`, `data-residency`) and the half-catalog tag `fundamentals`. Separately, sticky-bar audience chips routed clicks to the wrong radio.
+
+**Decision:**
+- Canonical tip topics pinned to five (`prompting`, `workflow`, `context`, `control`, `safety`) via Zod enum in `site/src/content.config.ts`; build fails on any other value. Mirrors the five cluster headings on /tips/.
+- Re-tagged 24 of 27 tips. Audience-coded labels and singletons folded into the canonical five; `audience: beginner|advanced|both` remains the sole audience axis.
+- `TOPIC_EXCLUDE` set in `tips.astro` deleted (dead now that the schema bounds the values). Cluster `match` synonyms (`compliance`/`data-residency`/`commands`/`integrations`/`memory`/`claudemd`) also removed for the same reason.
+- Sticky-bar CSS: dropped `.audience-filter__option` from the `display: contents` flatten list — the contents element broke `position: relative` anchoring for the radio inside, stretching the invisible click target across the page. Excluded → each option keeps its own `inline-flex` box; radio hitbox matches the visible chip.
+- Skills featured panel slimmed: lede shrunk to one line, "New to Claude Code?" demoted to a quiet single-line link row (no boxed background), trailing "Built at NBG cluster below…" paragraph removed.
+
+**Why:** topic axis duplicating audience axis was the symptom the user surfaced; closed enum is the only way to keep new tips from drifting back. Filter click bug was a `display: contents` foot-gun specific to the option-wraps-absolute-radio pattern.
+
+**Refs:** `site/src/content.config.ts:172-189`, `site/src/pages/tips.astro:128-141`, `site/src/styles/listing-rows.css:81-100`, `docs/reference/authoring-tips.md` topic-vocabulary table.
+
+---
+
 ## 2026-05-29 — Repo migration to 556LowCodeNoCode/NbgAiHub
 
 **Trigger:** repo graduated from the personal `chomovazuzana` account into the team org. User transferred ownership directly; this work captures every in-repo identity reference so Pages republishes cleanly and `/plugin marketplace add` resolves under the new owner.

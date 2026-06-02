@@ -2,7 +2,7 @@
 type: tip
 title: Keep CLAUDE.md clean and your project tidy — why Claude hallucinates without project hygiene
 audience: beginner
-topics: [context, compliance, fundamentals]
+topics: [context, safety]
 internal: false
 authored: "2026-05-27"
 last_reviewed: "2026-05-27"

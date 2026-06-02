@@ -2,7 +2,7 @@
 type: tip
 title: '"think harder" and `/effort` — turn up the reasoning when it matters'
 audience: both
-topics: [prompting, fundamentals]
+topics: [prompting]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

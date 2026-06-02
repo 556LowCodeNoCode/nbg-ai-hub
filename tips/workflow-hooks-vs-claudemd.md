@@ -2,7 +2,7 @@
 type: tip
 title: Hooks for the non-negotiables — CLAUDE.md only asks nicely
 audience: advanced
-topics: [workflow, advanced]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

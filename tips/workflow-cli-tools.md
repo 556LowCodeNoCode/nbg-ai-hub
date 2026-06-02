@@ -2,7 +2,7 @@
 type: tip
 title: Install `gh` (and other CLIs) — Claude knows how to use them
 audience: both
-topics: [workflow, integrations]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

@@ -2,7 +2,7 @@
 type: tip
 title: Subagents — delegate the file-reading so your main session stays clean
 audience: advanced
-topics: [workflow, advanced]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

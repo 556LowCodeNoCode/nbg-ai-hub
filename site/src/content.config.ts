@@ -170,9 +170,24 @@ const skills = defineCollection({
 });
 
 // ─── tips ──────────────────────────────────────────────────────────────
+// Tips share the 10-key base shape but pin `topics` to a closed set of
+// five canonical values. The set mirrors the five cluster headings on
+// `/tips/` (Prompting / Workflow & commands / Context discipline /
+// Control keys / Compliance & safety) so the topic chip strip and the
+// section grouping speak the same vocabulary.
+//
+// Audience-coded values (`advanced`, `basics`, `fundamentals`) and
+// singleton labels (`safety`-vs-`compliance` split, `permissions`,
+// `integrations`, `commands`, `examples`, `corrections`,
+// `data-residency`) were retired 2026-06-02 — they either duplicated
+// the audience filter or fragmented the chip strip with one-tip chips.
+const tipTopicEnum = z.enum(['prompting', 'workflow', 'context', 'control', 'safety']);
 const tips = defineCollection({
   loader: glob({ pattern: '*.md', base: '../tips' }),
-  schema: z.object(baseShape('tip')),
+  schema: z.object({
+    ...baseShape('tip'),
+    topics: z.array(tipTopicEnum).min(1, { message: 'tip must declare at least one topic' }),
+  }),
 });
 
 // ─── glossary ──────────────────────────────────────────────────────────

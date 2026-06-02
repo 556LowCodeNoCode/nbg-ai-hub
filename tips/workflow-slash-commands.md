@@ -2,7 +2,7 @@
 type: tip
 title: Custom slash commands — turn repeated workflows into one keystroke
 audience: both
-topics: [workflow, commands]
+topics: [workflow]
 internal: false
 authored: "2026-05-28"
 last_reviewed: "2026-05-28"

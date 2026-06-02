@@ -83,12 +83,19 @@
      the SHOW label, audience chips, FILTER BY TOPIC label, and topic
      chips all flow inline-wrap as one continuous row of items —
      instead of being grouped behind invisible boxes that force the
-     whole topic filter to wrap to its own line. */
+     whole topic filter to wrap to its own line.
+     IMPORTANT: do NOT flatten `.audience-filter__option`. Its child
+     `<input type="radio">` is `position: absolute; inset: 0` anchored
+     to the option (which is `position: relative` in AudienceFilter.astro).
+     `display: contents` removes the option from the box tree, so the
+     radio escapes to the nearest positioned ancestor and stretches its
+     invisible click target across the page — clicks land on the wrong
+     radio. Leaving the option as its own `inline-flex` box keeps the
+     radio's hit area aligned with the visible chip. */
   .listing-filter-bar .topic-filter,
   .listing-filter-bar .audience-filter,
   .listing-filter-bar .topic-filter__group,
-  .listing-filter-bar .audience-filter__group,
-  .listing-filter-bar .audience-filter__option {
+  .listing-filter-bar .audience-filter__group {
     display: contents !important;
   }
   .listing-filter-bar .topic-filter__label,

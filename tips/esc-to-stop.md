@@ -2,7 +2,7 @@
 type: tip
 title: 'Esc to stop Claude mid-action (the control key)'
 audience: beginner
-topics: [control, basics]
+topics: [control]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

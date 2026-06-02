@@ -2,7 +2,7 @@
 type: tip
 title: '/compact and /clear — context-window discipline'
 audience: both
-topics: [context, basics]
+topics: [context]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

@@ -2,7 +2,7 @@
 type: tip
 title: Describe the business value, not the steps
 audience: beginner
-topics: [prompting, fundamentals]
+topics: [prompting]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

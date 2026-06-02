@@ -81,7 +81,7 @@ Same shape as the existing `tips/*.md` entries. Required keys:
 type: tip
 title: One sharp sentence — verb-first if possible
 audience: beginner | advanced | both
-topics: [prompting, workflow, control, context, compliance, ...]  # 1-4
+topics: [prompting, workflow, context, control, safety]   # 1-2 of the canonical 5; see "Topic vocabulary" below
 internal: false                  # tips are public unless they encode bank-internal policy
 authored: "YYYY-MM-DD"           # quoted
 last_reviewed: "YYYY-MM-DD"      # same as authored on first write
@@ -94,6 +94,22 @@ ai_summary: |
 ```
 
 `audience` is consulted by the `AudienceFilter` component. Be honest — a tip on subagents is `advanced`; a tip on `Esc` is `beginner`.
+
+### Topic vocabulary — closed set of five
+
+The `topics` field is enforced by a Zod enum in `site/src/content.config.ts`. Only these five values pass the build:
+
+| Topic | Use it for | Sample tips |
+|---|---|---|
+| `prompting` | How to ask Claude — phrasing, structure, briefing, corrections | bad-vs-good openers, briefing template, one-thing-per-prompt |
+| `workflow` | Driving Claude Code — plan-first, slash commands, sessions, subagents, hooks, CLI tools | plan-first, slash-commands, subagents, resume-session |
+| `context` | Keeping Claude focused — `/compact`, `/clear`, CLAUDE.md, project hygiene, sessions | compact-and-clear, project-hygiene, claudemd-worked-example |
+| `control` | Putting yourself back in the driver seat — Esc, permission modes, `--dangerously-skip-permissions` | esc-to-stop, permission-modes |
+| `safety` | Bank-data handling, compliance, review-before-accept | azure-openai-for-bank-data, always-review-changes |
+
+Each tip should declare **1-2** topics. Multi-tagging is fine when a tip genuinely lives on the seam (e.g. `permission-modes` carries `[control, workflow]`); the cluster bucket on `/tips/` uses first-match order, the topic chip filter ORs across the array.
+
+**Don't add audience-coded topics** (`basics`, `advanced`, `fundamentals`) — that's what the `audience` field is for. **Don't add singleton labels** (e.g. `permissions`, `corrections`, `commands`, `integrations`) — they fragment the chip strip with one-tip chips. Fold them into the canonical five.
 
 ## Workflow checklist (do this every time)
 

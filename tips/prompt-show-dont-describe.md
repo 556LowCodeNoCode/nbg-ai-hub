@@ -2,7 +2,7 @@
 type: tip
 title: Show, don't describe
 audience: both
-topics: [prompting, fundamentals]
+topics: [prompting]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"

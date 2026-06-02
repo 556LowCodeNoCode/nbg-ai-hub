@@ -125,15 +125,11 @@ for (const tip of all) {
   }
 }
 
-// Distinct topic values across the tips collection. Excludes only the
-// always-on `fundamentals` tag so the chip row stays scannable. Earlier
-// experiments with stricter curation (dropping cluster-name chips, dropping
-// single-tip chips) were too aggressive — kept here as a single exclude set
-// to make future tweaks one-line.
-const TOPIC_EXCLUDE = new Set(['fundamentals']);
-const allTopics = Array.from(
-  new Set(all.flatMap((t) => t.data.topics).filter((t) => !TOPIC_EXCLUDE.has(t.toLowerCase()))),
-).sort();
+// Distinct topic values across the tips collection. The frontmatter
+// schema (`content.config.ts` → `tipTopicEnum`) restricts topics to the
+// canonical five — prompting / workflow / context / control / safety —
+// so this list is bounded by definition and needs no exclusion filter.
+const allTopics = Array.from(new Set(all.flatMap((t) => t.data.topics))).sort();
 
 // 2026-05-28 — exact topic membership instead of substring regex. The previous
 // /prompt|model|opus|sonnet/ pattern was matching "trust-model" as a substring
@@ -142,12 +138,17 @@ const allTopics = Array.from(
 const hasAny = (topics: string[], wanted: string[]): boolean =>
   topics.some((t) => wanted.includes(t.toLowerCase()));
 
+// Cluster order = topic-chip filter ordering on the page body. A tip
+// falls into the FIRST cluster whose `match` returns true, so when a
+// tip carries two canonical topics (e.g. `[control, workflow]`), the
+// ordering here decides which section it appears under. The `match`
+// values mirror the canonical topic enum in `content.config.ts`.
 const CLUSTERS: Array<{ key: string; label: string; blurb: string; match: (t: Tip) => boolean }> = [
   {
     key: 'prompting',
     label: 'Prompting',
     blurb: 'How to ask — phrasing, structure, what to include.',
-    match: (t) => hasAny(t.data.topics, ['prompting', 'prompt']),
+    match: (t) => hasAny(t.data.topics, ['prompting']),
   },
   {
     key: 'control',
@@ -159,19 +160,19 @@ const CLUSTERS: Array<{ key: string; label: string; blurb: string; match: (t: Ti
     key: 'workflow',
     label: 'Workflow & commands',
     blurb: 'How to drive Claude Code — plan-first, slash commands, sessions, subagents, hooks. The shortcuts that compound.',
-    match: (t) => hasAny(t.data.topics, ['workflow', 'commands', 'integrations']),
+    match: (t) => hasAny(t.data.topics, ['workflow']),
   },
   {
     key: 'context',
     label: 'Context discipline',
     blurb: 'Keeping Claude focused — what stays in the conversation, what should be cleared.',
-    match: (t) => hasAny(t.data.topics, ['context', 'memory', 'claudemd', 'claude.md']),
+    match: (t) => hasAny(t.data.topics, ['context']),
   },
   {
     key: 'compliance',
     label: 'Compliance & safety',
     blurb: 'Working with bank data and external services — what is allowed and what is not.',
-    match: (t) => hasAny(t.data.topics, ['compliance', 'safety', 'data-residency']),
+    match: (t) => hasAny(t.data.topics, ['safety']),
   },
 ];
 

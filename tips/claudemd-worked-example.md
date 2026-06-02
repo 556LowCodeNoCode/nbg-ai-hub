@@ -2,7 +2,7 @@
 type: tip
 title: What a real CLAUDE.md looks like (worked example)
 audience: beginner
-topics: [context, fundamentals]
+topics: [context]
 internal: false
 authored: "2026-05-27"
 last_reviewed: "2026-06-02"

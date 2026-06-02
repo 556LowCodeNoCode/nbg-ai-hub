@@ -2,7 +2,7 @@
 type: tip
 title: Prompt in Greek (or any language) — Claude understands
 audience: beginner
-topics: [prompting, fundamentals]
+topics: [prompting]
 internal: false
 authored: "2026-05-27"
 last_reviewed: "2026-05-27"

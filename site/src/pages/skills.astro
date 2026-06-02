@@ -133,10 +133,10 @@ const grouped = GROUPS.map((g) => ({
         <p class="skills-featured__eyebrow">NBG AI team · plugin library</p>
         <h2 class="skills-featured__title"><code>NBG-AI/claude-tools</code> — the team's developer skill library</h2>
         <p class="skills-featured__lede">
-          The NBG AI team maintains an internal plugin library at <a href="https://github.com/NBG-AI/claude-tools" target="_blank" rel="noopener"><code>NBG-AI/claude-tools</code></a> — roughly forty skills for <strong>API scaffolding (.NET + NBG conventions), UI features and wireframes, event-driven design, integration discovery, sandbox creation, and test-scenario generation</strong>. These are advanced, technical skills built for engineers actively working on NBG software — not where you start if you're learning Claude Code.
+          An internal plugin library at <a href="https://github.com/NBG-AI/claude-tools" target="_blank" rel="noopener"><code>NBG-AI/claude-tools</code></a> — ~40 advanced skills for engineers actively working on NBG software.
         </p>
         <p class="skills-featured__newcomer">
-          <strong>New to Claude Code?</strong> Start at <a href="/start-here/foundations/">Foundations</a> or browse the <a href="/tips/">Tips</a> and <a href="/use-cases/">Use cases</a> — they're shaped for colleagues new to the tool. Come back here once you're comfortable.
+          New to Claude Code? Start at <a href="/start-here/foundations/">Foundations</a> or browse the <a href="/tips/">Tips</a> and <a href="/use-cases/">Use cases</a> first.
         </p>
         <div class="skills-featured__grid">
           <div class="skills-featured__cell">
@@ -154,9 +154,6 @@ const grouped = GROUPS.map((g) => ({
             <pre class="skills-featured__cmd"><code>/plugin install &lt;name&gt;@claude-tools</code></pre>
           </div>
         </div>
-        <p class="skills-featured__cta">
-          The <strong>Built at NBG</strong> cluster below highlights a handful of the skills. The upstream repo has the full set — browse <a href="https://github.com/NBG-AI/claude-tools/tree/main/plugins" target="_blank" rel="noopener">all plugins</a> to see everything available.
-        </p>
       </article>
     </div>
   </section>
@@ -290,21 +287,14 @@ const grouped = GROUPS.map((g) => ({
       color: #8a6a1a;
       font-weight: 600;
     }
-    /* Quiet redirect block for newcomers — sits between the lede and the
-       3-step grid. Light tint, no border, smaller type — meant to be
-       skipped past by the target audience (developers) but visible to
-       anyone who shouldn't be here yet. */
+    /* Quiet single-line redirect for newcomers — sits under the lede, no
+       box, smaller muted type. Meant to be skipped past by the target
+       audience (developers) but visible to anyone who shouldn't be here yet. */
     .skills-featured__newcomer {
       margin: 0 0 1.1rem 0 !important;
-      padding: 0.6rem 0.85rem;
-      border-radius: var(--nbg-r-sm, 6px);
-      background: var(--nbg-surface-2, #f4f6fa);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       line-height: 1.5;
-      color: var(--nbg-ink-2, #1a3148);
-    }
-    .skills-featured__newcomer :global(strong) {
-      color: var(--nbg-ink, #0b1e2e);
+      color: var(--nbg-muted, #5b6b80);
     }
     .skills-featured__newcomer :global(a) {
       color: var(--nbg-accent, #007a8a);
@@ -359,7 +349,7 @@ const grouped = GROUPS.map((g) => ({
          explicitly here protects against that. */
       align-items: stretch !important;
       gap: 0.85rem;
-      margin: 0 0 1rem 0;
+      margin: 0;
     }
     @media (max-width: 800px) {
       .skills-featured__grid { grid-template-columns: 1fr; }
@@ -440,28 +430,6 @@ const grouped = GROUPS.map((g) => ({
       color: inherit !important;
       padding: 0 !important;
     }
-    .skills-featured__cta {
-      margin: 0 !important;
-      padding-top: 0.85rem;
-      border-top: 1px solid color-mix(in srgb, #c79a3a 20%, var(--nbg-hairline, #ebeff5));
-      font-size: 0.9rem;
-      color: var(--nbg-ink-2, #1a3148);
-    }
-    .skills-featured__cta :global(a) {
-      color: #8a6a1a;
-      font-weight: 600;
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 0.2em;
-    }
-    .skills-featured__cta :global(code) {
-      font-family: var(--nbg-ff-mono, ui-monospace, monospace);
-      font-size: 0.9em;
-      background: color-mix(in srgb, #c79a3a 12%, transparent);
-      padding: 0.08em 0.35em;
-      border-radius: var(--nbg-r-sm, 4px);
-    }
-
     /* ─── Internal-origin row accent (gold left edge so the cluster
            visually ties back to the featured panel above) ──────── */
     .listing-row--internal {
