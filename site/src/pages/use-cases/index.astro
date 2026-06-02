@@ -117,6 +117,13 @@ const allUnits = Array.from(new Set(items.map((u) => u.data.business_unit))).sor
                 <span class="usecase-card__eyebrow">
                   {BUSINESS_UNIT_LABELS[u.data.business_unit] ?? u.data.business_unit}
                 </span>
+                <span class="usecase-card__time" title="Estimated time end-to-end for a newcomer">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span>{u.data.time_estimate}</span>
+                </span>
               </div>
               <h2 class="usecase-card__title" data-pin-title>{u.data.title}</h2>
               <p class="usecase-card__summary" set:html={linkGlossaryTerms(u.data.ai_summary)} />
@@ -124,12 +131,9 @@ const allUnits = Array.from(new Set(items.map((u) => u.data.business_unit))).sor
                 <span class="usecase-card__outcome-label">You end up with</span>
                 <p class="usecase-card__outcome-body">{u.data.outcome}</p>
               </div>
-              <div class="usecase-card__footer">
-                <span class="usecase-card__cta">
-                  Open the walkthrough <span aria-hidden="true">→</span>
-                </span>
-                <span class="usecase-card__time">{u.data.time_estimate}</span>
-              </div>
+              <span class="usecase-card__cta">
+                Open the walkthrough <span aria-hidden="true">→</span>
+              </span>
             </a>
             {/* Hover-revealed pin button — sits above the anchor, top-right.
                 Mirrors the listing-row__pin pattern on /tips and /skills.
@@ -235,92 +239,12 @@ const allUnits = Array.from(new Set(items.map((u) => u.data.business_unit))).sor
 
 <style>
   @layer nbg.components {
-    /* ─── Hero filter spacing ──────────────────────────────────── */
-    /* listing-rows.css imports `.hero__filter { margin-top: 1.5rem }` so
-       the filter sits below the lede with the same gap as Tips/Skills.
-       Bump to 2.5rem on Use Cases because the hero copy is only two
-       paragraphs (Tips has more lede text); without the extra space the
-       filter felt crammed against the lede. */
-    .hero--stack .hero__filter {
-      margin-top: 2.5rem !important;
-    }
-
-    /* ─── Topic filter chip vocabulary (inlined-markup edition) ────
-       TopicFilter.astro's chip styles are scoped to that component, so
-       when we render `.topic-filter__*` markup directly in this page
-       they don't inherit. We re-declare the relevant rules here with
-       `:global()` so they apply to our inlined markup. Values mirror
-       TopicFilter.astro exactly — keep in sync if that component
-       changes. Wraps the whole `.topic-filter` in transparent chrome
-       so it reads as part of the hero, not a bordered widget. */
-    :global(.hero__filter .topic-filter) {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 0.4rem !important;
-      background: transparent !important;
-      border: 0 !important;
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-    :global(.hero__filter .topic-filter__label) {
-      font-family: var(--nbg-type-mono, var(--nbg-ff-mono, ui-monospace, monospace)) !important;
-      font-size: var(--nbg-fs-xs, 0.6875rem) !important;
-      font-weight: var(--nbg-fw-medium, 500) !important;
-      letter-spacing: var(--nbg-ls-wide, 0.16em) !important;
-      text-transform: uppercase !important;
-      color: var(--nbg-color-fg-muted, var(--nbg-muted, #5b6b80)) !important;
-    }
-    :global(.hero__filter .topic-filter__group) {
-      display: inline-flex !important;
-      flex-wrap: wrap !important;
-      gap: var(--nbg-sp-1, 0.4rem) !important;
-    }
-    :global(.hero__filter .topic-filter__chip) {
-      padding: 0.35rem 0.8rem !important;
-      font-family: var(--nbg-type-body, var(--nbg-ff-body)) !important;
-      font-size: var(--nbg-fs-sm, 0.8125rem) !important;
-      font-weight: var(--nbg-fw-medium, 500) !important;
-      line-height: 1.3 !important;
-      color: var(--nbg-color-fg-secondary, var(--nbg-ink-2, #1a3148)) !important;
-      background: var(--nbg-color-bg-page, transparent) !important;
-      border: 1px solid var(--nbg-color-border-subtle, var(--nbg-border, #dce3eb)) !important;
-      border-radius: var(--nbg-r-pill, 999px) !important;
-      cursor: pointer !important;
-      transition:
-        background-color 120ms ease,
-        color            120ms ease,
-        border-color     120ms ease !important;
-      user-select: none !important;
-    }
-    :global(.hero__filter .topic-filter__chip:hover) {
-      color: var(--nbg-color-fg-primary, var(--nbg-ink, #0b1e2e)) !important;
-      background: var(--nbg-color-bg-surface-hover, color-mix(in srgb, var(--nbg-accent, #007a8a) 6%, var(--nbg-surface, #ffffff))) !important;
-    }
-    :global(.hero__filter .topic-filter__chip[aria-pressed='true']) {
-      color: #ffffff !important;
-      background: var(--nbg-accent, #007a8a) !important;
-      border-color: var(--nbg-accent, #007a8a) !important;
-    }
-    :global(.hero__filter .topic-filter__chip:focus-visible) {
-      outline: 2px solid var(--nbg-accent, #007a8a) !important;
-      outline-offset: 2px !important;
-    }
-    :global(.hero__filter .topic-filter__clear) {
-      padding: 0.35rem 0.7rem !important;
-      font-family: var(--nbg-type-body, var(--nbg-ff-body)) !important;
-      font-size: var(--nbg-fs-sm, 0.8125rem) !important;
-      font-weight: var(--nbg-fw-medium, 500) !important;
-      color: var(--nbg-color-fg-muted, var(--nbg-muted, #5b6b80)) !important;
-      background: transparent !important;
-      border: 0 !important;
-      cursor: pointer !important;
-      text-decoration: underline !important;
-      text-underline-offset: 2px !important;
-    }
-    :global(.hero__filter .topic-filter__clear:hover) {
-      color: var(--nbg-color-fg-primary, var(--nbg-ink, #0b1e2e)) !important;
-    }
+    /* 2026-06-02 round 3 — the page-scoped `:global(.hero__filter
+       .topic-filter*)` overrides that used to live here (chip vocabulary
+       + column layout) are now redundant with the shared sticky-strip
+       rules in listing-rows.css, and the `flex-direction: column` rule
+       in particular was defeating the new `display: contents` inline
+       flow. All removed. */
     /* ─── Hero → first section gap (matches listing-rows.css) ──── */
     .hero--stack:has(.hero__filter) {
       padding-bottom: 1.5rem !important;
@@ -427,7 +351,26 @@ const allUnits = Array.from(new Set(items.map((u) => u.data.business_unit))).sor
       gap: 0.5rem;
       margin-bottom: 0.85rem;
       padding-bottom: 0.85rem;
+      /* At rest the time chip sits flush against the card's right edge
+         (cleanest balance with the eyebrow on the left). On hover /
+         focus-within / pinned, the pin overlay appears in the top-right
+         — nudge the head's right padding so the chip slides left and
+         doesn't collide. Same trigger condition as `.usecase-card__pin`. */
+      padding-right: 0;
+      transition: padding-right 140ms ease;
       border-bottom: 1px solid var(--nbg-hairline, #ebeff5);
+    }
+    .usecase-card-wrap:hover .usecase-card__head,
+    .usecase-card-wrap:focus-within .usecase-card__head,
+    .usecase-card-wrap:has(.nbg-pin[aria-pressed='true']) .usecase-card__head {
+      padding-right: 2.25rem;
+    }
+    /* Touch devices — pin overlay is always visible (no hover state),
+       so reserve the space permanently. */
+    @media (hover: none) {
+      .usecase-card__head {
+        padding-right: 2.25rem;
+      }
     }
     .usecase-card__eyebrow {
       font-family: var(--nbg-ff-mono, ui-monospace, monospace);
@@ -488,20 +431,11 @@ const allUnits = Array.from(new Set(items.map((u) => u.data.business_unit))).sor
       line-height: 1.5 !important;
       color: var(--nbg-ink, #0b1e2e) !important;
     }
-    /* Footer row holds the CTA on the left and the time-estimate chip on
-       the right. Time moved out of `__head` (2026-06-02) so the top-right
-       corner stays clear for the hover-revealed pin overlay. */
-    .usecase-card__footer {
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.6rem;
-      margin-top: 1rem;
-    }
     .usecase-card__cta {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      margin-top: 1rem;
       font-family: var(--nbg-ff-mono, ui-monospace, monospace);
       font-size: 0.75rem;
       font-weight: 600;

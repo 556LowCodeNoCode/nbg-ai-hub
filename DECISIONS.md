@@ -578,3 +578,17 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Vertical real estate matters in a sticky strip — the more the bar consumes, the less content below it the user sees while scrolling. The inline flow also reads as "one filter control" instead of two stacked widgets.
 
 **References:** `site/src/styles/listing-rows.css` (`.listing-filter-bar` block); `site/src/components/AudienceFilter.astro`, `site/src/components/TopicFilter.astro`; `site/src/pages/use-cases/index.astro`.
+
+---
+
+## 2026-06-02 (round 4) — Use-case card polish + unit-filter inline
+
+**Trigger:** Three follow-ups landed in the same pass — clock icon was missing from the use-case time chip (the chip's flex+gap CSS implied an icon but the SVG was never wired), `UNIT` filter rendered as a stacked column on use-cases while tips/skills had flipped to the inline `LABEL [chips]` flow, and the user wanted the time chip flush-right at rest and only nudged left when the pin overlay needed the room.
+
+- **Clock icon restored** on `.usecase-card__time` — same 11×11 lucide-style clock SVG that `.listing-pill--time` already uses on `/skills/` rows. The chip's `display: inline-flex; gap: 0.3rem` was always designed for an icon, just never had one in the JSX.
+- **Use-cases inline UNIT filter** — deleted the page-scoped `:global(.hero__filter .topic-filter*) { flex-direction: column !important }` overrides (and the redundant chip-vocabulary mirror) that pre-dated the sticky-strip refactor. They were defeating the shared `display: contents` chain that bubbles chips up to the bar's flex row.
+- **Slide-on-hover head padding** — at rest, `.usecase-card__head` has `padding-right: 0` so the time chip sits flush against the card's right edge (cleanest balance with the eyebrow on the left). On `:hover` / `:focus-within` / `:has(.nbg-pin[aria-pressed='true'])`, padding-right transitions to `2.25rem` so the chip slides left and the pin overlay slots in beside it. `@media (hover: none)` keeps the padding reserved permanently since touch has no real hover state and the pin is always shown.
+
+**Why:** Round-2 had moved the time chip to the footer to dodge the pin collision, but the head row read empty at rest with just the eyebrow. Flush-right time + slide-on-hover gives a balanced rest layout AND clean hover affordance — best of both.
+
+**References:** `site/src/pages/use-cases/index.astro` (head row markup + `.usecase-card__head` / `.usecase-card__cta` CSS).
