@@ -6,6 +6,21 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-02 (tips cascade fix + first workflow tip) — Section-head margins pinned; new `team-or-gsd` lede
+
+**Trigger:** Published /tips/ sat the sticky preview pane ~58px below the first row even though the same code aligned gap=0 locally. Puppeteer comparison of local vs prod DOM showed Starlight's prose cascade (`content-prose.css .sl-markdown-content h2/p/ul { margin-block: ... }`) was injecting different margins on the cluster heading + lede + list in the two environments depending on Vite's CSS load order. Same root cause as `docs/reference/starlight-cascade-gotcha.md`. Separately, the user asked for a first-position workflow tip introducing the two heavy-hitter skills (`/team` vs `gsd-*`).
+
+**Decision:**
+- `!important` on four section-head rules in `listing-rows.css` so heading geometry is identical in local + prod: `.listing-section__title { margin: 0 !important }`, `.listing-section__lede { margin: 0 !important }`, `.listing-section__head { margin-bottom: 1.5rem !important }`, `.listing-list { margin: 0 !important }`. After the fix, first listing row lands at 104px from `.tips-shell` top in both envs.
+- Pane `margin-top` dropped from 10.75rem → 6.5rem in `tip-preview.css` so pane top = 104px = first row top. Local gap verified 0 via puppeteer; prod will follow once the deploy lands.
+- New tip `tips/workflow-1-team-or-gsd.md` (audience `both`, topics `[workflow]`). Numeric `-1-` filename prefix sorts before `workflow-at-…` (`'1' < 'a'`) so it lands first in the cluster without schema/template changes. Body: one-line lede + `/team` section (feature-sized, ten phases, one sitting) + `gsd-*` section (multi-week, persistent `.planning/`, pause-resume) + one-sentence picker. Bumps tips 27 → 28; `sync-doc-counts.mjs` ran.
+
+**Why:** Starlight unlayered cascade was the documented root cause for local-vs-prod drift; the canonical fix is `!important` on the affected properties (not layer reordering). The new tip seeds Workflow with the answer to "which orchestrator do I pick" that newcomers ask first.
+
+**Refs:** `site/src/styles/listing-rows.css` (section-head rules), `site/src/styles/tip-preview.css` (pane margin-top 6.5rem), `tips/workflow-1-team-or-gsd.md`, `docs/reference/starlight-cascade-gotcha.md`.
+
+---
+
 ## 2026-06-02 (tips preview pane) — Two-column shell with sticky tip preview
 
 **Trigger:** /tips/ hover-preview was a floating 820px popover that covered ~3 list rows below the hovered one. Sidebar-pattern fallback (narrowed to 440px, anchored top-right) still overlapped the row's right portion. User asked for a stable 2-column layout with the preview permanently in the right column.

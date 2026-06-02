@@ -90,7 +90,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 | Pillar | Files |
 |---|---|
 | Glossary | 45 |
-| Tips | 27 |
+| Tips | 28 |
 | Skills | 6 |
 | Use Cases | 12 |
 | Journeys | 2 |
