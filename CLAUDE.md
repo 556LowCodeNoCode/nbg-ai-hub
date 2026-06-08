@@ -72,13 +72,13 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 │   ├── rss-triage.yml         ← PAUSED 2026-06-08 — cron removed; `workflow_dispatch:` only. Commit steps run `sync-doc-counts.mjs` before staging (permanent docs-drift fix)
 │   └── validate-skill-submission.yml ← PR-on-skills/**/*.md → CI validator → GH Actions annotations
 └── docs/
-    ├── reference/             ← live reference docs: gist-contract, integration-verification-*, starlight-cascade-gotcha, authoring-tips/glossary/use-cases (codebase-scans + investigations moved to archive 2026-06-08)
-    ├── research/              ← agentnews-source experimental research bundle
+    ├── reference/             ← live reference docs only: authoring-glossary-terms, authoring-tips, gist-contract, starlight-cascade-gotcha. New audits/post-mortems land here.
     ├── tools/                 ← per-tool docs per global CLAUDE.md convention (skill-validator.md)
     └── archive/               ← shipped/paused work parked for git-search instead of working-tree weight
         ├── design/            ← project-design.md + plan-001..006 (RSS / site / hub plugin / personalization / UI redesign / agentnews / glossary tooltips)
-        ├── refined-requests/  ← refined specs from shipped phases (rss-pipeline, astro-starlight-site, hub-plugin, personalization, ui-redesign, glossary-tooltips, agentnews-aesthetic-match, beginner-foundations, uat-analysis)
-        ├── reference/         ← codebase-scan-* and investigation-* snapshots from shipped phases
+        ├── refined-requests/  ← refined specs from shipped phases
+        ├── reference/         ← phase reports: codebase-scan-*, investigation-*, code-review-*, dependency-validation-*, integration-verification-*, test-build-*, glossary-audit-2026-05-25
+        ├── research/          ← astro-fonts-api, pagefind-ui-variant, agentnews-source bundle
         └── uat/               ← root-level UAT-*.md artefacts (2026-05-25..27) + glossary screenshots
 ```
 

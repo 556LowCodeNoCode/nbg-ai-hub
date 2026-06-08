@@ -7,9 +7,6 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 24. **PinType union restated in 5 places — should derive from `FavoriteEntry['type']`** (low / DRY follow-up to 2026-06-08 cleanup).
     Same 5-tuple lives in `gist.ts` (canonical), `pin-store.ts` `isPinType`, `PinButton.astro` (×2), `my-pins.astro` (already uses `FavoriteEntry['type']` post-cleanup), `build-pin-index.ts` `PinType`. Fix path: re-export from `gist.ts` and import everywhere; `.astro` script blocks can `import type` since 2024.
 
-25. **`agentnews-layout.css` contains news-card rules now dead** (low / CSS-prune follow-up to 2026-06-08 cleanup).
-    The homepage uses `.hero` / `.section` / `.wrap` from this file (load-bearing per the Starlight cascade gotcha). News-card rules under it (`.news-row`, etc.) no longer have consumers. Fix path: grep `agentnews-layout.css` for any selector starting `.news-` or `.story-` and drop, keep the homepage layout rules.
-
 23. **Real GitHub-token-page screenshot for SignInModal Step 1** (low / asset capture, 2026-05-27 UAT T13 V1).
     A CSS/HTML mock of the GitHub token-creation page now sits inside the SignInModal Step 1 (`site/src/components/SignInModal.astro` — `.nbg-signin__preview` block) because this environment can't log into github.com to capture the real page. **Replace path:** capture `github.com/settings/tokens/new?scopes=gist&description=NbgAiHub` while logged in, save as `site/public/brand/github-token-page.png`, swap the mock block for a single `<img>`.
 

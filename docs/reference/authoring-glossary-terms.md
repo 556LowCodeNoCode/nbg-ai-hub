@@ -187,11 +187,11 @@ Default preference is **just write** (read the diff, ask for revision). Optional
 
 ## Related docs
 
-- `docs/design/project-design.md` §S.14 — full design contract (10 subsections)
-- `docs/design/plan-006-glossary-tooltips.md` — phased plan + AC coverage table
-- `docs/refined-requests/glossary-tooltips.md` — 31 acceptance criteria
-- `docs/reference/integration-verification-glossary-tooltips.md` — visual verification + screenshots
-- `docs/reference/code-review-glossary-tooltips.md` — Phase 7 PASS verdict + the IM-1/IM-2 finding history
-- `docs/reference/glossary-audit-2026-05-25.md` — sample output of the candidate-jargon audit
+- `docs/archive/design/project-design.md` §S.14 — full design contract (10 subsections)
+- `docs/archive/design/plan-006-glossary-tooltips.md` — phased plan + AC coverage table
+- `docs/archive/refined-requests/glossary-tooltips.md` — 31 acceptance criteria
+- `docs/archive/reference/integration-verification-glossary-tooltips.md` — visual verification + screenshots
+- `docs/archive/reference/code-review-glossary-tooltips.md` — Phase 7 PASS verdict + the IM-1/IM-2 finding history
+- `docs/archive/reference/glossary-audit-2026-05-25.md` — sample output of the candidate-jargon audit
 - `DECISIONS.md` 2026-05-25 — the glossary-tooltips decision entry + post-review follow-ons
 - `Issues - Pending Items.md` #15 — forward pattern for adding new `createMarkdownProcessor` wiring sites

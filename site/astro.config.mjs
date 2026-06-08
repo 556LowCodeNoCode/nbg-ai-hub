@@ -64,8 +64,8 @@ export default defineConfig({
   },
 
   // P4.B — Astro Fonts API. Stable since Astro 6.0.0 (we are on 6.3.5).
-  // See docs/research/astro-fonts-api-experimental-stability.md and
-  // project-design.md §S.13.3.
+  // See docs/archive/research/astro-fonts-api-experimental-stability.md and
+  // archive/design/project-design.md §S.13.3.
   // The CSS variables --nbg-font-body and --nbg-font-mono are referenced
   // by tokens/primitives.css (--nbg-ff-body / --nbg-ff-mono) and aliased
   // to --sl-font / --sl-font-mono in tokens/aliases.css so all Starlight

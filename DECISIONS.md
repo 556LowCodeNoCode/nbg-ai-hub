@@ -6,6 +6,33 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-08 (evening) — T1 archive sweep + SignInModal Step 01 hierarchy fix
+
+**Trigger:** Post-push survey found ~24 phase reports still in `docs/reference/` that PR B missed (same archive logic, just overlooked). Separately, user flagged SignInModal Step 01 as confusing — the realistic-looking GitHub mock sat above the CTA, so users tried clicking the mock instead of the "Open GitHub token page" button buried below it.
+
+**Decision — T1 archive sweep:**
+- `docs/reference/` trimmed from 32 files (456KB) → 4 live operational docs (48KB): kept `authoring-glossary-terms.md`, `authoring-tips.md`, `gist-contract.md`, `starlight-cascade-gotcha.md`.
+- Moved 27 phase reports to `docs/archive/reference/`: all `code-review-*`, `dependency-validation-*`, `integration-verification-*`, `test-build-*`, plus `glossary-audit-2026-05-25.md`.
+- `docs/research/` (120KB) → `docs/archive/research/`: astro-fonts API research, pagefind UI variant, agentnews-source bundle.
+- In-tree path refs updated: SCOPE.md, CLAUDE.md tree, `authoring-glossary-terms.md`, `site/astro.config.mjs`, `site/src/styles/tokens/aliases.css`, `site/src/styles/agentnews-layout.css`, `site/tests/build-output.test.ts`. DECISIONS historical entries left untouched.
+- `scripts/audit-glossary-candidates.mjs` path-guard left at `docs/reference/glossary-audit-*` — that's where NEW audits write; only the old 2026-05-25 audit was archived.
+
+**Decision — SignInModal Step 01 redesign:**
+- Reorder: title → hint → CTA → preview-label → mock figure. CTA now reads first; mock now reads as reference.
+- New `<p class="nbg-signin__preview-label">` reading "HERE'S WHAT YOU'LL SEE ON GITHUB" — small caps, muted, 0.6875rem — sits between CTA and mock so the reader understands the mock is recognition material, not action surface.
+- Step title reworded: "Create a token on GitHub" → "Get a token from GitHub" (action verb clearer).
+- Vertical spacing between CTA and mock: 1.5rem (was 0.85rem).
+- Visual treatment now mirrors Step 02's clean badge + title + hint + actionable pattern.
+- Verified locally via puppeteer screenshot at `localhost:4321/my-pins/`.
+
+**Issue #25 dropped** — `agentnews-layout.css` does not contain dead news-card rules. Verified: zero `.news-*` / `.story-*` selectors; the file's news mentions are source-attribution comments only. False alarm in my earlier flag.
+
+**Why:** the working tree was carrying 370KB of frozen phase reports + 120KB of frozen research that git already preserves — same archive logic as PR B, just incomplete. SignInModal Step 01 hierarchy was inverting the reading order — the mock has been shown to confuse non-developers attempting to interact with it (UAT T13 V1, Issue #23). Reorder makes the CTA the dominant element and demotes the mock to reference.
+
+**Refs:** site 246/246 + plugin 122/122 tests green. `docs/reference/` now 4 files; archive grew to ~7.7MB. SignInModal change in `site/src/components/SignInModal.astro` step-01 markup + new `.nbg-signin__preview-label` CSS block.
+
+---
+
 ## 2026-06-08 (afternoon) — Repo cleanup: News pillar fully removed + planning-doc archive
 
 **Trigger:** After the morning's news-cron pause, opened a "what could we remove?" conversation. Top finding: the sidebar already routed "News ↗" externally (`the-agent-daily.org`), so the internal `/news` rendering was silently orphaned. Two-PR cleanup proposed and approved.

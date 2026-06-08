@@ -3,9 +3,9 @@
  * AgentNews-style layout classes — the second layer atop the three-tier
  * tokens. Marketing-surface page bodies compose these classes.
  *
- * Source of truth: docs/research/agentnews-source/home-inline-styles.css
- * Captured + token-mapped in: docs/reference/investigation-agentnews-aesthetic.md
- * Spec: docs/design/project-design.md §S.13.16.5 (Layout class API).
+ * Source of truth: docs/archive/research/agentnews-source/home-inline-styles.css
+ * Captured + token-mapped in: docs/archive/reference/investigation-agentnews-aesthetic.md
+ * Spec: docs/archive/design/project-design.md §S.13.16.5 (Layout class API).
  *
  * All values resolved through --nbg-* semantic tokens — never hardcoded hex.
  * (AC5 + AC16 of the AgentNews refined spec.)

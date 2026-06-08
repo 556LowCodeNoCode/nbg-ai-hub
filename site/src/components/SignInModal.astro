@@ -51,16 +51,24 @@
       <li class="nbg-signin__step">
         <span class="nbg-signin__step-num">01</span>
         <div class="nbg-signin__step-body">
-          <p class="nbg-signin__step-title">Create a token on GitHub</p>
+          <p class="nbg-signin__step-title">Get a token from GitHub</p>
           <p class="nbg-signin__step-hint">
             Scope: <code>gist</code> only. Nothing else. Takes 30 seconds.
           </p>
 
-          {/* UAT T13 V1 (2026-05-27) — inline visual cue of the GitHub token
-              page. Recognition over recall: the reader sees what's behind the
-              deeplink before they leave the hub. Built as a static
-              CSS/HTML mock for now; a real captured screenshot can replace
-              it later (see Issues - Pending Items). */}
+          <a
+            class="nbg-signin__deeplink"
+            href="https://github.com/settings/tokens/new?scopes=gist&description=NbgAiHub"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open GitHub token page
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17L17 7M7 7h10v10" />
+            </svg>
+          </a>
+
+          <p class="nbg-signin__preview-label">Here's what you'll see on GitHub</p>
           <figure class="nbg-signin__preview" aria-hidden="true">
             <div class="nbg-signin__preview-bar">
               <span class="nbg-signin__preview-dot"></span>
@@ -101,18 +109,6 @@
               <strong>1</strong> Name it <code>NbgAiHub</code>. <strong>2</strong> Tick <code>gist</code> only. <strong>3</strong> Click Generate, copy the token.
             </figcaption>
           </figure>
-
-          <a
-            class="nbg-signin__deeplink"
-            href="https://github.com/settings/tokens/new?scopes=gist&description=NbgAiHub"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open GitHub token page
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </a>
         </div>
       </li>
 
@@ -410,11 +406,21 @@
       .nbg-signin__deeplink { animation: none; }
     }
 
-    /* UAT T13 V1 — inline visual cue of the GitHub token-creation page.
-       A CSS mock for now; can be swapped for a real captured screenshot
-       once an operator (or someone logged into github.com) captures one. */
+    /* Reference preview of the GitHub token-creation page. Sits below the
+       deeplink CTA after a "Here's what you'll see" label so the reader
+       understands it's not interactive — recognition cue only, not action.
+       White background contrasts with the surrounding grey step card. */
+    .nbg-signin__preview-label {
+      margin: 1.5rem 0 0.5rem 0;
+      font-family: var(--nbg-ff-body);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--nbg-muted, #5b6b80);
+    }
     .nbg-signin__preview {
-      margin: 0.85rem 0;
+      margin: 0;
       border: 1px solid var(--nbg-border, #dce3eb);
       border-radius: 8px;
       overflow: hidden;

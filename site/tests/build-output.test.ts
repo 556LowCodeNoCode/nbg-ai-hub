@@ -4,8 +4,8 @@
 // Reads built HTML/CSS files under site/dist/ and asserts on their contents
 // to verify the redesign's structural contracts.
 //
-// Related: docs/refined-requests/ui-redesign.md
-//          docs/reference/test-build-ui-output.md
+// Related: docs/archive/refined-requests/ui-redesign.md
+//          docs/archive/reference/test-build-ui-output.md
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';

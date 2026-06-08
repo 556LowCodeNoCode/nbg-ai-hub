@@ -3,9 +3,9 @@
  * Tier 3 (cross-system) — Starlight alias block.
  * The ONE file that binds the redesign to Starlight.
  *
- * Related: project-design.md §S.13.16 (AgentNews aesthetic anchor) +
- *          §S.13.2.5 (Starlight alias block).
- * Source of truth: docs/research/pagefind-ui-variant-in-starlight-0-39.md
+ * Related: docs/archive/design/project-design.md §S.13.16 (AgentNews aesthetic
+ *          anchor) + §S.13.2.5 (Starlight alias block).
+ * Source of truth: docs/archive/research/pagefind-ui-variant-in-starlight-0-39.md
  * Backs AC4 (≥13 --sl-color-* aliases) + AC18 + AC29 (Pagefind retint).
  *
  * Pattern: Starlight's Search.astro already aliases --sl-color-* into Pagefind's
