@@ -64,6 +64,10 @@ const shouldRenderSearch =
 // newcomers reach for them.
 // `external: true` swaps the rendered <a> to target="_blank" so AgentNews
 // opens in a new tab and the user keeps the hub's navigation context.
+// `desktopAsIcon: true` lifts the entry out of the horizontal section
+// list on desktop and into the right-side actions cluster as an
+// icon-only affordance. Mobile drawer still renders it as a labeled
+// link so first-time visitors aren't hunting for a glyph.
 const navLinks = [
   { label: 'Foundations', href: '/start-here/foundations/', external: false },
   { label: 'Day 1',       href: '/start-here/day-1/',       external: false },
@@ -71,9 +75,12 @@ const navLinks = [
   { label: 'Tips',        href: '/tips/',                   external: false },
   { label: 'Skills',      href: '/skills/',                 external: false },
   { label: 'Glossary',    href: '/glossary/',               external: false },
+  { label: 'Newsletter',  href: '/newsletter/',             external: false },
   { label: 'News ↗',      href: 'https://the-agent-daily.org/', external: true },
-  { label: 'My Pins',     href: '/my-pins/',                external: false },
+  { label: 'My Pins',     href: '/my-pins/',                external: false, desktopAsIcon: true },
 ] as const;
+
+const desktopSectionLinks = navLinks.filter((l) => !('desktopAsIcon' in l) || !l.desktopAsIcon);
 
 const currentPath = Astro.url.pathname;
 function isCurrent(href: string): boolean {
@@ -128,7 +135,7 @@ const base = import.meta.env.BASE_URL;
       </a>
 
       <ul class="nbg-topnav__links" role="list">
-        {navLinks.map((link) => (
+        {desktopSectionLinks.map((link) => (
           <li>
             <a
               href={link.href}
@@ -149,6 +156,31 @@ const base = import.meta.env.BASE_URL;
             <Search />
           </div>
         )}
+        {/* My Pins — icon-only on desktop. Same pin glyph as PinButton so
+            users who've pinned an item recognise the shape instantly. */}
+        <a
+          class="nbg-topnav__pins"
+          href="/my-pins/"
+          aria-label="Your pins"
+          title="Your pins"
+          data-current={isCurrent('/my-pins/') ? 'true' : undefined}
+          aria-current={isCurrent('/my-pins/') ? 'page' : undefined}
+        >
+          <svg
+            aria-hidden="true"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 17v5" />
+            <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+          </svg>
+        </a>
         <AuthControls />
         <div class="nbg-topnav__theme" title="Switch theme" aria-label="Switch theme">
           <ThemeSelect />
@@ -474,6 +506,41 @@ const base = import.meta.env.BASE_URL;
     }
     @media (min-width: 64rem) {
       .nbg-topnav__actions { display: inline-flex; }
+    }
+
+    /* ── My Pins — icon-only anchor in the actions cluster ──────────────
+     * 32px square, matches the height of search trigger / Sign in /
+     * ThemeSelect. Same pin glyph users see on every pinnable item, so
+     * the visual association is preloaded. Border-on-hover only — keeps
+     * the bar quiet by default. */
+    .nbg-topnav__pins {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--nbg-r-md);
+      border: 1px solid transparent;
+      color: var(--nbg-color-fg-secondary);
+      text-decoration: none;
+      transition:
+        background-color var(--nbg-dur-fast) var(--nbg-ease-out),
+        color            var(--nbg-dur-fast) var(--nbg-ease-out),
+        border-color     var(--nbg-dur-fast) var(--nbg-ease-out);
+    }
+    .nbg-topnav__pins:hover {
+      color: var(--nbg-color-fg-primary);
+      background: var(--nbg-color-bg-surface-hover);
+      border-color: var(--nbg-color-border-default);
+    }
+    .nbg-topnav__pins:focus-visible {
+      outline: none;
+      box-shadow: var(--nbg-sh-focus-ring);
+    }
+    .nbg-topnav__pins[data-current='true'] {
+      color: var(--nbg-color-accent);
+      background: var(--nbg-color-accent-bg);
+      border-color: var(--nbg-color-accent);
     }
 
     /* ── Pagefind search trigger — compact ────────────────────────────

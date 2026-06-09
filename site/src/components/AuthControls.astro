@@ -54,7 +54,7 @@
       <polyline points="10 17 15 12 10 7" />
       <line x1="15" y1="12" x2="3" y2="12" />
     </svg>
-    <span>Sign in</span>
+    <span class="nbg-auth__signin-label">Sign in</span>
   </button>
 
   <!-- Signed-in state (hidden by default; script flips on read) -->
@@ -140,9 +140,11 @@
     .nbg-auth__signin {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: var(--nbg-sp-1-5);
+      width: 32px;
       height: 32px;
-      padding-inline: var(--nbg-sp-3);
+      padding: 0;
       border-radius: var(--nbg-r-md);
       border: 1px solid var(--nbg-color-border-default);
       background: transparent;
@@ -156,6 +158,20 @@
         background-color var(--nbg-dur-fast) var(--nbg-ease-out),
         color            var(--nbg-dur-fast) var(--nbg-ease-out),
         border-color     var(--nbg-dur-fast) var(--nbg-ease-out);
+    }
+    /* Icon-only on desktop — frees ~6ch of horizontal space in the
+       topnav. Label still announced via aria-label and rendered as a
+       visually-hidden span for screen readers. */
+    .nbg-auth__signin-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .nbg-auth__signin:hover {
       background: var(--nbg-color-bg-surface-hover);

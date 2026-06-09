@@ -31,6 +31,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 ├── tips/                      ← entries (prompting, control keys, context, compliance)
 ├── journeys/                  ← day-1.md (full 6-step walkthrough) + foundations.md (newcomer onboarding); week-1.md + by-role TBD
 ├── usecases/                  ← 12 beginner-friendly worked examples across 10 business units (Retail, Contact center, Compliance ×2, Mortgages, Operations, HR, Risk, Data, Accounting, Process improvement, Operations multilingual). Same `## Step N — Title` body shape as journeys/. Mac/Windows divergent commands wrapped in `<div data-os="mac">` / `<div data-os="windows">` blocks consumed by the OS toggle on the detail page. Per-OS visibility rules in `site/src/pages/use-cases/[slug].astro` MUST be wrapped in `:global()` because the divs come from `set:html` markdown content and don't carry the Astro scope hash.
+├── newsletters/               ← periodic internal newsletters. Two files per issue: `<NN>-<slug>.md` (metadata-only frontmatter) + `<NN>-<slug>.html` (raw email HTML, kept verbatim). Rendered by `site/src/pages/newsletter/index.astro` as a single-page archive — left rail lists every issue (newest first, `DD/MM/YYYY | Title`), right column renders the selected issue inside a same-origin `iframe srcdoc` so the email's own styles stay isolated from the site. Authoring: docs/reference/authoring-newsletter.md.
 ├── pipeline/                  ← TypeScript workspace for the RSS Action + skill validator
 │   ├── package.json           ← Node 22, ESM, vitest 4.x, @rowanmanning/feed-parser
 │   ├── src/                   ← 15 RSS modules + src/validators/ (skill, cli, config)
@@ -40,7 +41,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 │   ├── package.json           ← Node 22, ESM, astro ^6, @astrojs/starlight ^0.39, vitest 4.x
 │   ├── astro.config.mjs       ← sidebar 11 entries (My Pins + Submit a Skill added), SocialIcons override, dev port 4321
 │   ├── vitest.config.ts       ← Vitest 4.x node-env, tests/**/*.test.ts pattern
-│   ├── src/content.config.ts  ← 4 content collections (skills, tips, glossary, journeys, usecases — news removed 2026-06-08); skills schema extended with 7 new fields
+│   ├── src/content.config.ts  ← 5 content collections (skills, tips, glossary, journeys, usecases, newsletters); skills schema extended with 7 new fields. Newsletter collection holds metadata-only entries; sibling HTML lives in `newsletters/<slug>.html`.
 │   ├── src/components/        ← 10 .astro components (NewsPanel + NewsList removed 2026-06-08)
 │   ├── src/components/primitives/  ← 16 portable primitives — Container, Section, Stack, Cluster, Grid, Split, Card, Button, Badge, Chip, Kbd, Eyebrow, Lede, Display, MotionReveal, StepIndicator (AC36 portability gate: zero @astrojs/starlight imports)
 │   ├── src/styles/tokens/     ← design system — primitives.css (135 tokens), semantic.css (38 × 2 themes), aliases.css (16 --sl-color-* × 2 themes), layers.css (8-layer cascade), legacy.css (absorbed custom.css), index.css (aggregator)
@@ -92,6 +93,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 | Skills | 6 |
 | Use Cases | 12 |
 | Journeys | 2 |
+| Newsletters | 1 |
 | News (published) | 0 |
 <!-- /AUTO:counts -->
 

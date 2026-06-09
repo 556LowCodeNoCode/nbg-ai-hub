@@ -163,6 +163,7 @@ export default defineConfig({
         { label: 'Tips & Tricks', link: '/tips/' },
         { label: 'Skills', link: '/skills/' },
         { label: 'Glossary', link: '/glossary/' },
+        { label: 'Newsletter', link: '/newsletter/' },
         {
           label: 'News ↗',
           link: 'https://the-agent-daily.org/',

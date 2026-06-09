@@ -6,6 +6,29 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-09 — Newsletter pillar + topnav tightening
+
+**Trigger:** User asked to add a "Newsletter" section for periodic internal dispatches, with a repeatable drop-and-go authoring process. Same session uncovered the topnav was visually cramped (9 section links + 3 action controls), and refining the newsletter listing surfaced follow-ons (item card aesthetic, hero text triggering glossary popover, iframe scrollbar).
+
+**Decision — Newsletter pillar:**
+- New `newsletters/` folder at repo root. Each issue is two sibling files — `<NN>-<slug>.md` (metadata-only frontmatter, Zod-validated) + `<NN>-<slug>.html` (raw email HTML, kept verbatim). New `newsletter` content collection extends `baseShape('newsletter')` with `issue: number`, `summary`, `language: 'el'|'en'`.
+- Single-page split-pane archive at `/newsletter/`. Left rail: 2-line cards (`DD/MM/YYYY` line 1, title line 2), newest first. Right column: selected issue rendered inside a same-origin `iframe srcdoc` for total style isolation (neither the email's generic `.container`/`.cta`/`.hero-title` class names nor our @layer rules can leak across). Click an item → swap srcdoc + update `aria-current` + `history.replaceState` to a shareable hash URL. Each issue's raw HTML embedded once in a non-executing `<script type="text/x-newsletter-html">` so swapping is instant.
+- Iframe auto-fit: `Math.max(html.scrollHeight, html.offsetHeight, body.scrollHeight, body.offsetHeight)` + 4px buffer, re-runs on `document.fonts.ready`, `img.load`, ResizeObserver on html+body, plus defensive late setTimeouts (200/600/1400ms). Belt-and-braces: `overflow: hidden` on iframe doc so a scrollbar physically can't render even under a race condition. Verified at 3922px (== content height).
+- Item cards match `.listing-row` aesthetic from /tips and /skills — no new colour introduced for active state (just border promotes to existing teal accent + slightly bolder title weight).
+- "Newsletter" sidebar entry between Glossary and News in both `astro.config.mjs` and `SplashAwareHeader.navLinks`. AUTO-sync regenerated to count newsletter files.
+- Authoring docs at `docs/reference/authoring-newsletter.md`. First issue: `01-nbg-gpt-six-months` (Greek, June 2026).
+
+**Decision — Topnav tightening:**
+- "My Pins" lifted out of desktop section links into the actions cluster as a 32×32 icon-only anchor. Same pin SVG as `PinButton` — users recognise it after their first pin. `aria-label` for screen readers, teal-accent active state on `/my-pins/`.
+- "Sign in" stripped of its visible label — now a 32×32 square showing only the door-arrow icon. Label preserved as `aria-label` + visually-hidden `<span>` for screen readers. Modal flow unchanged.
+- Mobile drawer unchanged: both surfaces render as labeled text links there. New `desktopAsIcon: true` flag on the My Pins navLink drives a filtered `desktopSectionLinks` list used only by the desktop nav.
+
+**Why:** the newsletter is a long-lived archive surface that adds another entry to the topnav — without tightening, the bar would tip from "cramped" to "broken" at narrow desktop widths. Doing both in one pass keeps the topnav's 32px-square actions rhythm intact and lets the newsletter ship without regressing the surrounding nav.
+
+**Refs:** new — `newsletters/01-nbg-gpt-six-months.{md,html}`, `site/src/pages/newsletter/index.astro`, `docs/reference/authoring-newsletter.md`. Modified — `site/src/content.config.ts` (new collection), `site/astro.config.mjs` (sidebar), `site/src/components/SplashAwareHeader.astro` (navLinks + filter + icon anchor + styles), `site/src/components/AuthControls.astro` (icon-only + visually-hidden label), `scripts/sync-doc-counts.mjs`, `SCOPE.md`/`CLAUDE.md`. Build clean (57 pages).
+
+---
+
 ## 2026-06-08 (night) — Search modal centering fix + missing `starlight.reset` layer
 
 **Trigger:** User reported the just-shipped re-skinned modal anchored at the top-left of the viewport with chunky text instead of centered. CDP cascade trace on the live deploy showed Starlight's own `@media dialog { margin: 4rem auto auto }` rule was being beaten by an unlayered-looking `* { margin: 0 }`.

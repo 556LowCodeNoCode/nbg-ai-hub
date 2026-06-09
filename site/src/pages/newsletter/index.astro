@@ -1,0 +1,400 @@
+---
+/**
+ * /newsletter — single-page archive.
+ *
+ * Layout: a Foundations-style two-column main — left rail lists every
+ * issue (newest first), right column renders the selected newsletter
+ * inside an iframe so the email's own styles stay isolated from the
+ * site. On page load, the newest issue auto-renders. Clicking a left-
+ * rail item swaps the iframe srcdoc to that issue's HTML (no full
+ * page reload) and updates `window.location.hash` so the selection is
+ * shareable / back-button-friendly.
+ *
+ * Authoring contract: each newsletter is two files in `newsletters/`:
+ *   1. `<NN>-<slug>.md` — frontmatter only (see docs/reference/
+ *      authoring-newsletter.md).
+ *   2. `<NN>-<slug>.html` — the raw email HTML, kept verbatim.
+ * The list sorts by `issue` descending; the matching `.html` body is
+ * inlined into a non-executing `<script type="text/x-newsletter-html">`
+ * tag so the browser parses it as text, never as live DOM.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { getCollection } from 'astro:content';
+import MarketingShell from '../../components/MarketingShell.astro';
+import { linkGlossaryTerms } from '../../lib/glossary-link-string';
+
+const items = (await getCollection('newsletters')).sort(
+  (a, b) => b.data.issue - a.data.issue,
+);
+
+// Resolve repo root from this file's location so we can read sibling
+// HTML files at build time. .astro file lives at
+// `<repo>/site/src/pages/newsletter/index.astro` → up 4 levels = repo root.
+const here = fileURLToPath(import.meta.url);
+const repoRoot = path.resolve(path.dirname(here), '..', '..', '..', '..');
+
+type EnrichedItem = {
+  slug: string;
+  issue: number;
+  title: string;
+  summary: string;
+  language: 'el' | 'en';
+  authored: string;
+  html: string;
+};
+
+const enriched: EnrichedItem[] = items.map((entry) => {
+  const htmlPath = path.join(repoRoot, 'newsletters', `${entry.id}.html`);
+  if (!fs.existsSync(htmlPath)) {
+    throw new Error(
+      `[newsletter/index] Sibling HTML file not found for "${entry.id}". ` +
+      `Expected: ${htmlPath}. Every newsletters/<slug>.md must have a sibling .html.`,
+    );
+  }
+  return {
+    slug: entry.id,
+    issue: entry.data.issue,
+    title: entry.data.title,
+    summary: entry.data.summary,
+    language: entry.data.language,
+    authored: entry.data.authored,
+    html: fs.readFileSync(htmlPath, 'utf-8'),
+  };
+});
+
+// DD/MM/YYYY display per user preference (European format).
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+const newest = enriched[0];
+---
+
+<MarketingShell
+  title="Newsletter"
+  description={`${items.length} internal NBG AI newsletter issue${items.length === 1 ? '' : 's'} — periodic dispatches archived in one place.`}
+  surfaceId="newsletter"
+  width="full"
+  hero="none"
+>
+  <section class="hero hero--stack">
+    <div class="wrap">
+      <div class="hero__intro">
+        <h1 class="hero__title">The <em>Newsletter</em></h1>
+        <p class="hero__lede">
+          <Fragment set:html={linkGlossaryTerms("Periodic internal dispatches — what's shipping, what's worth knowing, what to try next. Same email that landed in your inbox, archived here so you can scroll back later.")} />
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section newsletter-section">
+    <div class="wrap">
+      <div class="newsletter-layout">
+
+        {/* ─── Left rail: issue list ────────────────────────────── */}
+        <aside class="newsletter-rail" aria-label="Newsletter issues">
+          <p class="newsletter-rail__eyebrow">Issues</p>
+          <ul class="newsletter-rail__list" role="list">
+            {enriched.map((n, i) => (
+              <li>
+                <a
+                  href={`#${n.slug}`}
+                  class="newsletter-rail__item"
+                  data-newsletter-target={n.slug}
+                  aria-current={i === 0 ? 'true' : undefined}
+                >
+                  <span class="newsletter-rail__date">{formatDate(n.authored)}</span>
+                  <span class="newsletter-rail__title">{n.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+        {/* ─── Right column: rendered newsletter ────────────────── */}
+        <div class="newsletter-stage">
+          {newest && (
+            <iframe
+              class="newsletter-stage__frame"
+              title={`Newsletter — ${newest.title}`}
+              srcdoc={newest.html}
+              data-newsletter-frame
+            ></iframe>
+          )}
+          {!newest && (
+            <p class="newsletter-empty">No issues yet — first one's on its way.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</MarketingShell>
+
+{/*
+  Embed each newsletter's raw HTML once, in a non-executing script tag,
+  so click handlers can swap iframe.srcdoc instantly without a network
+  round-trip. The `type="text/x-newsletter-html"` is unrecognised by the
+  browser so the contents are treated as opaque text (NOT live DOM).
+*/}
+{enriched.map((n) => (
+  <script
+    type="text/x-newsletter-html"
+    data-newsletter-slug={n.slug}
+    set:html={n.html}
+  />
+))}
+
+<script>
+  /**
+   * Single-page newsletter archive — wire up:
+   *   - Left-rail click → swap iframe.srcdoc to the matching script's text.
+   *   - Set `aria-current` on the active item.
+   *   - Reflect selection in `window.location.hash` so URLs are shareable.
+   *   - Auto-resize iframe to its content height (same-origin srcdoc).
+   *   - On load, if `location.hash` matches an item, jump to it; else
+   *     stay on the newest (already SSR'd into the iframe).
+   */
+  function fitIframe(frame: HTMLIFrameElement): void {
+    const doc = frame.contentDocument;
+    if (!doc) return;
+    // Take the max across documentElement + body and scrollHeight +
+    // offsetHeight — different browsers under-report on different
+    // properties depending on whether the email's outer table uses
+    // explicit heights. Buffer of 4px guards against sub-pixel rounding
+    // that would otherwise summon a 1px internal scrollbar.
+    const html = doc.documentElement;
+    const body = doc.body;
+    if (!html || !body) return;
+    const h = Math.max(
+      html.scrollHeight, html.offsetHeight,
+      body.scrollHeight, body.offsetHeight,
+    );
+    if (h > 0) frame.style.height = (h + 4) + 'px';
+  }
+
+  function disableInternalScroll(frame: HTMLIFrameElement): void {
+    // Same-origin (srcdoc) — we can drive the iframe's own document so
+    // it never renders an internal scrollbar even if our fit measure
+    // is briefly short during font-swap.
+    const doc = frame.contentDocument;
+    if (!doc) return;
+    if (doc.documentElement) doc.documentElement.style.overflow = 'hidden';
+    if (doc.body) doc.body.style.overflow = 'hidden';
+  }
+
+  function readHtmlForSlug(slug: string): string | null {
+    const node = document.querySelector<HTMLScriptElement>(
+      `script[type="text/x-newsletter-html"][data-newsletter-slug="${slug}"]`,
+    );
+    return node ? (node.textContent ?? '') : null;
+  }
+
+  function selectNewsletter(slug: string, opts: { updateHash?: boolean } = {}): void {
+    const html = readHtmlForSlug(slug);
+    if (html === null) return;
+    const frame = document.querySelector<HTMLIFrameElement>('iframe[data-newsletter-frame]');
+    if (!frame) return;
+
+    // Set min-height to current height during swap so the page doesn't
+    // collapse and re-grow (which jumps the scroll position).
+    const currentH = frame.getBoundingClientRect().height;
+    if (currentH > 0) frame.style.minHeight = currentH + 'px';
+    frame.srcdoc = html;
+    frame.style.height = ''; // reset so fitIframe re-measures on next load
+
+    document.querySelectorAll<HTMLAnchorElement>('[data-newsletter-target]').forEach((a) => {
+      const isActive = a.getAttribute('data-newsletter-target') === slug;
+      if (isActive) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+
+    if (opts.updateHash !== false) {
+      history.replaceState(null, '', `#${slug}`);
+    }
+  }
+
+  function attach(): void {
+    document.querySelectorAll<HTMLAnchorElement>('[data-newsletter-target]').forEach((a) => {
+      a.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        const slug = a.getAttribute('data-newsletter-target');
+        if (slug) selectNewsletter(slug);
+      });
+    });
+
+    document.querySelectorAll<HTMLIFrameElement>('iframe[data-newsletter-frame]').forEach((frame) => {
+      const run = () => fitIframe(frame);
+      const onLoad = () => {
+        disableInternalScroll(frame);
+        run();
+        // Fonts inside the email's <link rel="stylesheet"
+        // href="fonts.googleapis.com…"> load asynchronously and shift
+        // line-heights when they swap in. Re-fit once they're ready.
+        const doc = frame.contentDocument;
+        if (doc) {
+          // FontFaceSet exists on Document at runtime in modern browsers.
+          doc.fonts?.ready?.then(run);
+          // Catch late-arriving images too.
+          doc.querySelectorAll('img').forEach((img) => {
+            if (!(img as HTMLImageElement).complete) {
+              img.addEventListener('load', run, { once: true });
+              img.addEventListener('error', run, { once: true });
+            }
+          });
+          if ('ResizeObserver' in window) {
+            const ro = new ResizeObserver(() => run());
+            if (doc.documentElement) ro.observe(doc.documentElement);
+            if (doc.body) ro.observe(doc.body);
+          }
+        }
+        // Defensive late re-fit — covers anything ResizeObserver / fonts
+        // hooks miss (e.g. media-query kicks on orientation change).
+        [200, 600, 1400].forEach((ms) => window.setTimeout(run, ms));
+      };
+      frame.addEventListener('load', onLoad);
+    });
+
+    // Honor initial hash if present.
+    const initial = window.location.hash.replace(/^#/, '');
+    if (initial && readHtmlForSlug(initial) !== null) {
+      selectNewsletter(initial, { updateHash: false });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attach);
+  } else {
+    attach();
+  }
+</script>
+
+<style>
+  @layer nbg.components {
+    /* Tighten the hero→content gap. `.section` defaults to 3.5rem
+       block-padding in agentnews-layout.css (unlayered, !important) so
+       both ends need !important to win. */
+    .newsletter-section {
+      padding-block: 1rem 3rem !important;
+    }
+
+    /* ─── Two-column layout ─────────────────────────────────────── */
+    .newsletter-layout {
+      display: grid !important;
+      grid-template-columns: 280px 1fr !important;
+      gap: 2rem !important;
+      align-items: start !important;
+    }
+    @media (max-width: 960px) {
+      .newsletter-layout {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+      }
+    }
+
+    /* ─── Left rail ─────────────────────────────────────────────── */
+    .newsletter-rail {
+      position: sticky !important;
+      top: 5rem !important;
+      align-self: start !important;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (max-width: 960px) {
+      /* Same posture as foundations / day-1 TOCs — non-sticky on phone,
+         flat list above the iframe so it never eats viewport. */
+      .newsletter-rail {
+        position: static !important;
+        top: auto !important;
+      }
+    }
+    .newsletter-rail__eyebrow {
+      margin: 0;
+      font-family: var(--nbg-ff-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--nbg-muted);
+    }
+    .newsletter-rail__list {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.375rem !important;
+      list-style: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    /* Items match the .listing-row card aesthetic used on /tips and
+       /skills: white/surface background, hairline border, light hover
+       tint. Active state lifts the border to the existing teal accent
+       (the brand colour already used elsewhere on the page) — no new
+       background tint, no extra colour introduced. */
+    .newsletter-rail__item {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.25rem !important;
+      padding: 0.75rem 1rem !important;
+      border: 1px solid var(--nbg-hairline) !important;
+      border-radius: var(--nbg-r-md, 10px) !important;
+      background: var(--nbg-surface) !important;
+      color: var(--nbg-ink) !important;
+      text-decoration: none !important;
+      line-height: 1.35 !important;
+      transition:
+        border-color var(--nbg-dur-fast, 150ms) var(--nbg-ease-out, ease),
+        background var(--nbg-dur-fast, 150ms) var(--nbg-ease-out, ease) !important;
+    }
+    .newsletter-rail__item:hover {
+      border-color: var(--nbg-border) !important;
+      background: var(--nbg-surface-2) !important;
+    }
+    .newsletter-rail__item[aria-current='true'] {
+      border-color: var(--nbg-accent) !important;
+      background: var(--nbg-surface) !important;
+    }
+    .newsletter-rail__date {
+      font-family: var(--nbg-ff-mono) !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.04em !important;
+      color: var(--nbg-muted) !important;
+    }
+    .newsletter-rail__item[aria-current='true'] .newsletter-rail__date {
+      color: var(--nbg-accent) !important;
+    }
+    .newsletter-rail__title {
+      font-size: 0.9375rem !important;
+      font-weight: 500 !important;
+      color: var(--nbg-ink) !important;
+      line-height: 1.35 !important;
+    }
+    .newsletter-rail__item[aria-current='true'] .newsletter-rail__title {
+      font-weight: 600 !important;
+    }
+
+    /* ─── Right column / stage ──────────────────────────────────── */
+    .newsletter-stage {
+      background: #ECF1EE; /* email's own page bg so the column blends */
+      border: 1px solid var(--nbg-hairline);
+      border-radius: var(--nbg-r-lg, 16px);
+      overflow: hidden;
+      min-height: 60vh;
+    }
+    .newsletter-stage__frame {
+      display: block;
+      width: 100%;
+      border: 0;
+      min-height: 60vh;
+      background: transparent;
+    }
+    .newsletter-empty {
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--nbg-muted);
+      font-size: 0.9375rem;
+    }
+  }
+</style>

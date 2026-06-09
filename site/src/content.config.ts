@@ -210,6 +210,29 @@ const usecases = defineCollection({
   }),
 });
 
+// ─── newsletters ───────────────────────────────────────────────────────
+// Periodic internal newsletters. Each entry is a *metadata-only* markdown
+// file in `newsletters/` whose body stays empty — the actual newsletter
+// content lives in a sibling `<slug>.html` file (raw email HTML, preserved
+// verbatim). The detail page embeds that file inside an iframe so the
+// email's own styles can't leak into the site (and vice-versa).
+//
+// Authoring process (see docs/reference/authoring-newsletter.md):
+//   1. Drop the email HTML at `newsletters/<NN>-<slug>.html` (NN = issue
+//      number, zero-padded).
+//   2. Drop a sibling `newsletters/<NN>-<slug>.md` with the frontmatter
+//      below — empty body.
+//   3. Commit. Listing page sorts newest-first by `issue` descending.
+const newsletters = defineCollection({
+  loader: glob({ pattern: '*.md', base: '../newsletters' }),
+  schema: z.object({
+    ...baseShape('newsletter'),
+    issue: z.number().int().min(1),
+    summary: z.string().min(1).max(400),
+    language: z.enum(['el', 'en']).default('en'),
+  }),
+});
+
 // ─── docs ──────────────────────────────────────────────────────────────
 // Starlight's built-in `docs` collection — backs `src/content/docs/` and
 // powers the splash homepage (`index.mdx`). Required by Starlight 0.39.
@@ -218,4 +241,4 @@ const docs = defineCollection({
   schema: docsSchema(),
 });
 
-export const collections = { docs, skills, tips, glossary, journeys, usecases };
+export const collections = { docs, skills, tips, glossary, journeys, usecases, newsletters };
