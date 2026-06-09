@@ -6,6 +6,25 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-08 (night) — Search modal centering fix + missing `starlight.reset` layer
+
+**Trigger:** User reported the just-shipped re-skinned modal anchored at the top-left of the viewport with chunky text instead of centered. CDP cascade trace on the live deploy showed Starlight's own `@media dialog { margin: 4rem auto auto }` rule was being beaten by an unlayered-looking `* { margin: 0 }`.
+
+**Root cause:** Starlight 0.39 ships its reset in `@layer starlight.reset` (`node_modules/@astrojs/starlight/style/reset.css:1`), but our `site/src/styles/tokens/layers.css` `@layer` declaration listed only `reset, tokens, starlight.base, starlight.core, starlight.components, nbg.*` — no `starlight.reset`. Per CSS spec, undeclared layers are pushed to the END of cascade, which made `* { margin: 0 }` the highest-priority layer and silently broke the dialog centering (margin: 0 wins, dialog renders top-left full-height).
+
+**Decision:**
+- `tokens/layers.css`: insert `starlight.reset` near the start of the layer order (`reset, starlight.reset, tokens, …`). Anchors Starlight's universal reset at the lowest-priority slot where it belongs — proper fix, also de-risks any other Starlight layout rules that were silently losing.
+- `site/src/styles/search-modal.css`: defensive `!important` on `margin`, `width`, `max-width`, `height`, `min-height`, `max-height` inside the `@media (min-width: 50rem) site-search dialog { … }` block. Keeps the modal centered even if a similar reset is reintroduced later upstream.
+- Tightened the modal density: `--pagefind-ui-scale` overridden to `0.7` (default `0.8` was chunky inside the 40rem max-width). Dropped my hardcoded `font-size: 1rem !important` overrides on `.pagefind-ui__search-input` and `.pagefind-ui__result-title` — let Pagefind's `calc(Npx * scale)` drive sizing.
+- Capped `max-width` at `36rem` (was Starlight's `40rem`) — tighter feel.
+- Verified at 1920×1080 prod build via Puppeteer: dialog renders at `rect.x=672, y=64, w=576, h=952` → properly centered with 4rem top margin.
+
+**Why:** the universal reset shadowing case is exactly the Starlight cascade gotcha (`docs/reference/starlight-cascade-gotcha.md`), just with a new mechanism — *layer name missing from declaration*, rather than *unlayered ships vs. layered*. Same defensive pattern (`!important` on properties that must win), plus the broader fix (declare the layer in the right slot).
+
+**Refs:** `site/src/styles/tokens/layers.css` (layer order + new comment block documenting why `starlight.reset` must be declared); `site/src/styles/search-modal.css` (centering `!important` + scale 0.7 + max-width 36rem + size overrides dropped). No test changes.
+
+---
+
 ## 2026-06-08 (late evening) — Pagefind search modal re-skin
 
 **Trigger:** Screenshot from user — Starlight's built-in search modal shipped Pagefind UI's generic defaults (harsh black focus border on input, system-font result tiles, yellow `<mark>`, generic chrome) — visually inconsistent with the rest of the hub.

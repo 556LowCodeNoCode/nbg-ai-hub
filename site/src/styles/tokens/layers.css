@@ -7,6 +7,10 @@
  *
  * Layer purpose, in cascade order (later wins on ties):
  *   reset                 — Reserved for future reset.css. Empty for now.
+ *   starlight.reset       — Starlight's universal-selector reset (* { margin: 0 }, box-sizing). MUST be declared
+ *                           here — if omitted, Starlight ships it in an undeclared layer and CSS pushes undeclared
+ *                           layers to the END of cascade, which makes `* { margin: 0 }` beat every layout rule
+ *                           including Starlight's own `@media dialog { margin: 4rem auto auto }` centering.
  *   tokens                — primitives.css + semantic.css + aliases.css
  *   starlight.base        — Starlight base reset + element styles (Starlight-authored).
  *   starlight.core        — Starlight core component CSS (Starlight-authored). Pagefind ui.css imports into this layer.
@@ -16,4 +20,4 @@
  *   nbg.utilities         — .audience-hidden, .visually-hidden, .motion-reveal state classes.
  */
 
-@layer reset, tokens, starlight.base, starlight.core, starlight.components, nbg.primitives, nbg.components, nbg.utilities;
+@layer reset, starlight.reset, tokens, starlight.base, starlight.core, starlight.components, nbg.primitives, nbg.components, nbg.utilities;
