@@ -512,6 +512,12 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
     .router-grid {
       grid-template-columns: 1fr;
     }
+    /* The "Jump straight in" pills don't fit as 4-across on phone — labels
+       like "Tips & Tricks" wrap onto 3 lines and the row reads cramped.
+       Drop to 2×2 below 720px. */
+    .router-card__actions--grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   /* Tighten the demo section's vertical padding (default global .section

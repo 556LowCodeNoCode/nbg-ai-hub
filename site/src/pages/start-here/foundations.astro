@@ -1019,9 +1019,14 @@ function resourceKindTone(kind: Resource['kind']): string {
       font-size: 0.9375rem;
       transition: background 120ms ease, border-color 120ms ease, filter 120ms ease;
     }
+    /* `color: ... !important` on both primary and secondary CTAs —
+       `.nbg-marketing a { color: inherit }` (class+element, specificity 0,1,1)
+       beats our scoped class-only selector (0,1,0) and forces the link to
+       inherit the parent's ink color. Without !important, the teal-bg CTA
+       renders dark-on-teal (illegible). */
     .foundation-next__cta--primary {
       background: var(--nbg-accent);
-      color: #ffffff;
+      color: #ffffff !important;
       border: 1px solid var(--nbg-accent);
     }
     .foundation-next__cta--primary:hover {
@@ -1029,7 +1034,7 @@ function resourceKindTone(kind: Resource['kind']): string {
     }
     .foundation-next__cta--secondary {
       background: transparent;
-      color: var(--nbg-accent);
+      color: var(--nbg-accent) !important;
       border: 1px solid color-mix(in srgb, var(--nbg-accent) 40%, var(--nbg-hairline));
       font-weight: 500;
       font-size: 0.875rem;
