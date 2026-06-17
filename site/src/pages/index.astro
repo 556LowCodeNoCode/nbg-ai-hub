@@ -24,6 +24,7 @@ import MarketingShell from '../components/MarketingShell.astro';
 // split / topSkills / topTips deleted with the grids.
 
 const AGENTNEWS_URL = 'https://the-agent-daily.org/';
+const SANDBOX_URL = 'https://claude-code-sandbox.azurewebsites.net/';
 
 // Real-recording demo (2026-05-27). Sonnet 4.6 driven through the
 // claude CLI inside a VHS-recorded PTY — same TUI a colleague sees
@@ -123,6 +124,7 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
             <a class="router-pill" href="/skills/">Skills</a>
             <a class="router-pill" href="/glossary/">Glossary</a>
             <a class="router-pill" href={AGENTNEWS_URL} target="_blank" rel="noopener">News ↗</a>
+            <a class="router-pill" href={SANDBOX_URL} target="_blank" rel="noopener">Sandbox ↗</a>
           </div>
         </article>
       </div>
@@ -187,6 +189,7 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
             <li><a href="/start-here/foundations/">Foundations</a></li>
             <li><a href="/start-here/day-1/">Day 1 setup</a></li>
             <li><a href="/use-cases/">Use Cases</a></li>
+            <li><a href={SANDBOX_URL} target="_blank" rel="noopener">Sandbox ↗</a></li>
             <li><a href="/my-pins/">My Pins</a></li>
           </ul>
         </div>
@@ -447,13 +450,12 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
     padding-top: 1.5rem;
   }
 
-  /* Pills laid out as a single row of 4 (matching the newcomer card's
-     single-row button layout). Each pill flexes to fill its share of
-     the row width, so all four are exactly equal width regardless of
-     label length. */
+  /* Pills laid out in a 3-column grid that wraps to a second row for
+     the 5th pill (Sandbox). Tips & Tricks needs the headroom that 3-col
+     gives — a single tight row of 5 would crowd the longest label. */
   .router-card__actions--grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
   }
 

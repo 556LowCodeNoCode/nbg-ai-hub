@@ -6,6 +6,22 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-06-17 — "Sandbox ↗" external link added to nav, hero pill grid, and footer
+
+**Trigger:** User pointed at PR #8 (from `chrishham:main`, marked CONFLICTING against the latest `main`) and asked for the change to be applied: a new "Sandbox ↗" entry pointing at <https://claude-code-sandbox.azurewebsites.net/>.
+
+- Added to `SplashAwareHeader.astro` `navLinks` array between "News ↗" and "My Pins" — same `external: true` shape as News.
+- Added to homepage hero pill grid (the "Jump straight in" card) and to the footer "Start" column. Shared `SANDBOX_URL` constant in `index.astro`.
+- Pill grid switched from `repeat(4, 1fr)` to `repeat(3, 1fr)` so the 5-pill set wraps to 2 rows (3 + 2) without crowding "Tips & Tricks". Trailing empty cell on row 2 is accepted; alternative would be 5-col single-row which crowds the longest label.
+- PR #8 itself is left to be closed manually (it was authored from a fork's `main` and conflicts with the recent newsletter / copy-button work; applying by hand was lower-risk than rebasing the fork).
+- 246/246 site tests pass; visually verified on / for header + hero + footer.
+
+**Why:** New sandbox surface is going live and needs first-class wayfinding from the hub — same external-link treatment as the agent-news pillar so colleagues recognise it as "leaves the hub, opens a separate tool".
+
+**References:** PR #8 (closed); `site/src/components/SplashAwareHeader.astro`, `site/src/pages/index.astro`.
+
+---
+
 ## 2026-06-16 — Copy-to-clipboard buttons on use-case prompts and terminal blocks
 
 **Trigger:** User flagged the missing copy affordance on use-case prompts — "so the user can easily copy and paste to claude" — then asked for the same on terminal `<pre>` blocks, and explicitly asked for the chrome to be delicate (icon only, no border, no background).
