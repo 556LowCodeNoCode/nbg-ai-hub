@@ -12,6 +12,9 @@ resources:
     - webhook: adopush
       connection: ado-codepush-webhook
 
+      filters:
+        - path: resource.repository.name
+          value: nbg-ai-hub
 schedules:
   - cron: "0 * * * *"
     displayName: Hourly backstop
