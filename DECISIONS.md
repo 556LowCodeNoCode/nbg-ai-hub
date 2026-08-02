@@ -903,3 +903,15 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Round-2 had moved the time chip to the footer to dodge the pin collision, but the head row read empty at rest with just the eyebrow. Flush-right time + slide-on-hover gives a balanced rest layout AND clean hover affordance — best of both.
 
 **References:** `site/src/pages/use-cases/index.astro` (head row markup + `.usecase-card__head` / `.usecase-card__cta` CSS).
+
+## 2026-08-03 — Contract automation project lands in NbgAiHub
+
+Trigger: procurement contract automation use case starting build; needed a home.
+
+- Project workspace at `contract-automation/` (docs, data-model, templates, src, tests)
+- Source contracts converted to markdown, stored under `docs/source-contracts/`
+- Spec at `contract-automation/docs/project-spec.md`, not inlined here
+
+Why: keeps delivery work alongside the hub rather than in a separate repo.
+
+Refs: `contract-automation/README.md`
