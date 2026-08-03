@@ -915,3 +915,16 @@ Trigger: procurement contract automation use case starting build; needed a home.
 Why: keeps delivery work alongside the hub rather than in a separate repo.
 
 Refs: `contract-automation/README.md`
+
+## 2026-08-03 — Re-converted source contracts to preserve article numbering
+
+Trigger: first conversion dropped Word's automatic numbering, breaking clause
+cross-references («κατά τα οριζόμενα στο άρθρο 3»).
+
+- Word stores article numbers as formatting, not text, so pandoc loses them
+- convert.py resolves numbering from the document's own XML and writes it in
+  as literal text before pandoc runs
+- Verified: Family Α 31 articles («Άρθρο N.»), Family Β 16-19 (plain «N.»)
+- Note: the two families number differently — assembly must handle both
+
+Why: clause references are load-bearing for parameterisation.
