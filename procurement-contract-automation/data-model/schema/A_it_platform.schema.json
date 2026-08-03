@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nbg.gr/procurement/contracts/A_it_platform.schema.json",
+  "title": "Κατηγορία A — IT PLATFORM (Σύμβαση Προμήθειας Συστήματος)",
+  "description": "Πρότυπο NBG_IT PLATFORM — 31 άρθρα, 6 παραρτήματα. Χαρακτηριστικά: ΕΠΠΠ/ΠΠΠ/ΠΤΠ, Περίοδος Εγγύησης + Μετά την Εγγύηση Περίοδος, Εγγυητική Επιστολή, πλήρες πλαίσιο ποινικών ρητρών, GDPR, escrow.",
+
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["category", "contract", "bank", "vendor", "system", "term", "acceptance", "commercials", "guarantee", "penalties", "liability", "data_protection", "annexes"],
+
+  "properties": {
+
+    "category": { "const": "A_IT_PLATFORM" },
+
+    "contract": { "$ref": "common.schema.json#/$defs/ContractHeader" },
+    "bank":     { "$ref": "common.schema.json#/$defs/Bank" },
+    "vendor":   { "$ref": "common.schema.json#/$defs/Vendor" },
+
+    "system": {
+      "type": "object",
+      "description": "Άρθρα 1 (Ορισμοί) & 2 (Αντικείμενο).",
+      "additionalProperties": false,
+      "required": ["name", "delivery_model"],
+      "properties": {
+        "name": { "type": "string", "minLength": 3, "description": "Ονομασία Συστήματος (εξώφυλλο, Άρθρο 2)." },
+        "delivery_model": {
+          "type": "string",
+          "enum": ["SAAS_VENDOR_CLOUD", "ON_PREMISE", "HYBRID"],
+          "description": "Κανόνας R-02. SAAS_VENDOR_CLOUD → ενεργοποιεί τη ρήτρα «με τη μορφή υπηρεσιών (Software-as-a-Service) σε υποδομές cloud της Εταιρείας»."
+        },
+        "software_manufacturer": {
+          "type": "string",
+          "description": "Κατασκευάστρια εταιρεία Λογισμικού. Χρησιμοποιείται στα Άρθρα 13 & 19. ΠΡΟΣΟΧΗ: στο σημερινό πρότυπο ήταν hard-coded «Accertify Inc»."
+        },
+        "includes_training":  { "type": "boolean", "default": true },
+        "includes_migration": { "type": "boolean", "default": false, "description": "Μετάπτωση δεδομένων — αναφέρεται στον ορισμό ΠΠΠ." }
+      }
+    },
+
+    "term": {
+      "allOf": [{ "$ref": "common.schema.json#/$defs/Term" }],
+      "description": "Άρθρο 7. Η λήξη συνδέεται με το πέρας της Μετά την Εγγύηση Περιόδου."
+    },
+
+    "acceptance": {
+      "type": "object",
+      "description": "Άρθρα 1, 5, 15 — καθεστώς παραλαβής και εγγύησης.",
+      "additionalProperties": false,
+      "required": ["warranty_period_months", "post_warranty_period_years", "final_acceptance_lag_months"],
+      "properties": {
+        "warranty_period_months":      { "type": "integer", "minimum": 1, "default": 6,  "description": "«Περίοδος εγγύησης»." },
+        "post_warranty_period_years":  { "type": "integer", "minimum": 1, "default": 5,  "description": "«Μετά την Εγγύηση Περίοδος»." },
+        "final_acceptance_lag_months": { "type": "integer", "minimum": 1, "default": 6,  "description": "Μήνες από ΠΠΠ έως ΠΤΠ." },
+        "acceptance_procedure_annex":  { "type": "integer", "default": 3, "description": "Αριθμός Παραρτήματος Διαδικασίας Παραλαβής." }
+      }
+    },
+
+    "commercials": {
+      "type": "object",
+      "description": "Άρθρα 11 & 12.",
+      "additionalProperties": false,
+      "required": ["total_price", "payment_terms_days", "implementation_milestones"],
+      "properties": {
+        "total_price":        { "$ref": "common.schema.json#/$defs/Money" },
+        "payment_terms_days": { "type": "integer", "default": 60, "description": "Κανόνας R-09: 60 ημέρες για Κατηγορία A." },
+        "implementation_milestones": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "common.schema.json#/$defs/Milestone" },
+          "description": "Πίνακας Άρθρου 12. Το άθροισμα των percentage ΠΡΕΠΕΙ να ισούται με 100 (έλεγχος εκτός schema)."
+        },
+        "annual_license_fee": {
+          "$ref": "common.schema.json#/$defs/Money",
+          "description": "Ετήσια αμοιβή χρήσης & υποστήριξης Λογισμικού (στοιχείο 2.1 Πίνακα Τιμών)."
+        },
+        "incoterms":       { "type": "string", "const": "DDP" },
+        "price_fixed":     { "type": "boolean", "const": true, "description": "Άρθρο 11 — παγίωση τιμών, παραίτηση από ΑΚ 388." },
+        "travel_expenses_included": { "type": "boolean", "default": true }
+      }
+    },
+
+    "guarantee": { "$ref": "common.schema.json#/$defs/LetterOfGuarantee" },
+
+    "penalties": {
+      "type": "object",
+      "description": "Άρθρο 16 — Ποινικές Ρήτρες Καθυστέρησης.",
+      "additionalProperties": false,
+      "required": ["delay_pct_per_month", "cap_pct"],
+      "properties": {
+        "delay_pct_per_month": {
+          "$ref": "common.schema.json#/$defs/Percentage",
+          "default": 5,
+          "description": "% συνολικής αμοιβής ανά συμπληρωμένο μήνα καθυστέρησης παραλαβής."
+        },
+        "availability": {
+          "type": "object",
+          "description": "Κανόνας R-14 — εμφανίζεται μόνο αν has_sla=true.",
+          "additionalProperties": false,
+          "properties": {
+            "has_sla":            { "type": "boolean", "default": true },
+            "target_pct":         { "$ref": "common.schema.json#/$defs/Percentage" },
+            "penalty_pct_per_0_1_deviation": { "$ref": "common.schema.json#/$defs/Percentage", "default": 1 }
+          }
+        },
+        "severity_rates": {
+          "type": "array",
+          "description": "Ρήτρες ανά βαθμό σοβαρότητας (Work around / Final Solution).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["severity", "pct"],
+            "properties": {
+              "severity": { "type": "string", "enum": ["CRITICAL", "MAJOR", "MINOR"] },
+              "pct":      { "$ref": "common.schema.json#/$defs/Percentage" },
+              "unit":     { "type": "string", "enum": ["HOUR", "DAY"] }
+            }
+          },
+          "default": [
+            { "severity": "CRITICAL", "pct": 0.5 },
+            { "severity": "MAJOR",    "pct": 0.4 },
+            { "severity": "MINOR",    "pct": 0.3 }
+          ]
+        },
+        "vulnerability": {
+          "type": "object",
+          "description": "Ποινική ρήτρα Vulnerability fixes: P = V × N / 365.",
+          "additionalProperties": false,
+          "properties": {
+            "applies":        { "type": "boolean", "default": true },
+            "cvss_threshold": { "type": "number", "minimum": 0, "maximum": 10, "default": 7 },
+            "measures_annex": { "type": "integer", "default": 5 }
+          }
+        },
+        "cap_pct": {
+          "$ref": "common.schema.json#/$defs/Percentage",
+          "default": 50,
+          "description": "Ανώτατο όριο όλων των ποινικών ρητρών επί της αμοιβής υπηρεσιών υποστήριξης."
+        }
+      }
+    },
+
+    "liability": {
+      "type": "object",
+      "description": "Άρθρο 8.",
+      "additionalProperties": false,
+      "required": ["cap_pct_light_negligence"],
+      "properties": {
+        "cap_pct_light_negligence": {
+          "$ref": "common.schema.json#/$defs/Percentage",
+          "default": 100,
+          "description": "Ανώτατο όριο θετικής ζημίας για ελαφρά αμέλεια, ως % της συνολικής αξίας του έργου. Εκκρεμεί Q-09."
+        },
+        "unlimited_for_ip_and_confidentiality": { "type": "boolean", "const": true }
+      }
+    },
+
+    "subcontracting": {
+      "type": "object",
+      "description": "Άρθρο 13 — Κανόνας R-04.",
+      "additionalProperties": false,
+      "properties": {
+        "approved_subcontractors": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/Subcontractor" },
+          "default": [],
+          "description": "Αν κενό, η πρόταση «…θα παρασχεθούν από την εταιρεία Χ ως εγκεκριμένων υπεργολάβων» ΔΙΑΓΡΑΦΕΤΑΙ εξ ολοκλήρου."
+        }
+      }
+    },
+
+    "intellectual_property": {
+      "type": "object",
+      "description": "Άρθρο 19.",
+      "additionalProperties": false,
+      "properties": {
+        "license_type": {
+          "type": "string",
+          "enum": ["NON_EXCLUSIVE_PERPETUAL_IRREVOCABLE", "SUBSCRIPTION_TERM"],
+          "default": "NON_EXCLUSIVE_PERPETUAL_IRREVOCABLE"
+        },
+        "license_terms_annex": { "type": "integer", "default": 4 },
+        "escrow": {
+          "type": "object",
+          "description": "Κανόνας R-05.",
+          "additionalProperties": false,
+          "required": ["applies"],
+          "properties": {
+            "applies":               { "type": "boolean" },
+            "owner_company":         { "type": "string", "description": "Ιδιοκτήτρια εταιρεία Λογισμικού." },
+            "agent":                 { "type": "string", "description": "Θεματοφύλακας." },
+            "consent_deadline_days": { "type": "integer", "default": 15, "description": "Προθεσμία προσκόμισης έγγραφης συναίνεσης από την υπογραφή." }
+          },
+          "if":   { "properties": { "applies": { "const": true } } },
+          "then": { "required": ["applies", "owner_company"] }
+        }
+      }
+    },
+
+    "data_protection": { "$ref": "common.schema.json#/$defs/DataProtection" },
+
+    "suspension": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "notice_months":   { "type": "integer", "default": 3 },
+        "max_duration_months": { "type": "integer", "default": 6 }
+      }
+    },
+
+    "termination": {
+      "type": "object",
+      "description": "Άρθρο 17.",
+      "additionalProperties": false,
+      "properties": {
+        "convenience_notice_months": { "type": "integer", "default": 3 },
+        "brrd_clauses_apply":        { "type": "boolean", "const": true, "description": "Ρήτρες «Μέτρων» / Αρχής Εξυγίανσης — υποχρεωτικές για εποπτευόμενο ίδρυμα." },
+        "transition_support_months": { "type": "integer", "default": 6 }
+      }
+    },
+
+    "annexes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "common.schema.json#/$defs/Annex" },
+      "description": "Κανόνας R-16. Τυπική σύνθεση Κατηγορίας A: 1 Τεχνική Πρόταση/Υπηρεσίες Υποστήριξης, 2 Πίνακας Τιμών, 3 Διαδικασία Παραλαβής, 4 Όροι Χρήσης Λογισμικού, 5 Μέτρα Ασφαλείας, 6 GDPR."
+    },
+
+    "purchase_option": {
+      "type": "object",
+      "description": "Άρθρο 29 — Δικαίωμα Αγοράς πρόσθετων αδειών/υπηρεσιών.",
+      "additionalProperties": false,
+      "properties": { "applies": { "type": "boolean", "default": true } }
+    },
+
+    "_meta": { "$ref": "common.schema.json#/$defs/GenerationMeta" }
+  },
+
+  "allOf": [
+    {
+      "if": {
+        "properties": { "intellectual_property": { "properties": { "escrow": { "properties": { "applies": { "const": true } }, "required": ["applies"] } }, "required": ["escrow"] } },
+        "required": ["intellectual_property"]
+      },
+      "then": {
+        "properties": { "system": { "required": ["name", "delivery_model", "software_manufacturer"] } }
+      }
+    },
+    {
+      "if":   { "properties": { "data_protection": { "properties": { "processes_personal_data": { "const": true } }, "required": ["processes_personal_data"] } } },
+      "then": { "description": "Απαιτείται ενεργό Παράρτημα GDPR στη λίστα annexes (έλεγχος στη μηχανή παραγωγής, κανόνας R-03)." }
+    }
+  ]
+}
