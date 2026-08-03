@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nbg.gr/procurement/contracts/common.schema.json",
+  "title": "NBG Vendor Contracts — Κοινός Πυρήνας",
+  "description": "Κοινοί ορισμοί τύπων και μπλοκ πεδίων που επαναχρησιμοποιούνται από όλες τις κατηγορίες συμβάσεων (A/B/C/D).",
+
+  "$defs": {
+
+    "Date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "ISO-8601 (YYYY-MM-DD). Η μορφοποίηση σε ΗΗ/ΜΜ/ΕΕΕΕ γίνεται από τη μηχανή παραγωγής."
+    },
+
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "multipleOf": 0.01,
+          "description": "Ποσό ΧΩΡΙΣ ΦΠΑ, εκτός αν ρητά ορίζεται διαφορετικά."
+        },
+        "currency": { "type": "string", "enum": ["EUR", "USD", "GBP"], "default": "EUR" },
+        "in_words": {
+          "type": "string",
+          "description": "Ολογράφως. ΠΑΡΑΓΕΤΑΙ ΑΥΤΟΜΑΤΑ από το amount — δεν συμπληρώνεται χειροκίνητα (κανόνας R-17)."
+        },
+        "vat_included": { "type": "boolean", "default": false }
+      }
+    },
+
+    "Percentage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Ποσοστό επί τοις εκατό (π.χ. 10 = 10%)."
+    },
+
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "title"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "description": "Ονοματεπώνυμο σε ΑΙΤΙΑΤΙΚΗ (π.χ. «Ευάγγελο Χρήστου») — έτσι εμφανίζεται στο προοίμιο."
+        },
+        "name_nominative": {
+          "type": "string",
+          "description": "Ονοματεπώνυμο σε ΟΝΟΜΑΣΤΙΚΗ (π.χ. «Ευάγγελος Χρήστου») — για το μπλοκ υπογραφών."
+        },
+        "title": { "type": "string", "minLength": 3, "description": "Ιδιότητα / θέση." }
+      }
+    },
+
+    "Address": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["city", "street"],
+      "properties": {
+        "city":     { "type": "string" },
+        "street":   { "type": "string" },
+        "number":   { "type": "string" },
+        "postcode": { "type": "string", "pattern": "^[0-9]{3}[ -]?[0-9]{2}$" },
+        "region":   { "type": "string", "description": "π.χ. «Αττικής»" },
+        "country":  { "type": "string", "default": "GR" }
+      }
+    },
+
+    "Bank": {
+      "type": "object",
+      "description": "Σταθερά στοιχεία ΕΤΕ. Δεν συμπληρώνονται από τον χρήστη — προέρχονται από κεντρική παραμετροποίηση.",
+      "additionalProperties": false,
+      "required": ["signatories"],
+      "properties": {
+        "legal_name":      { "type": "string", "const": "ΕΘΝΙΚΗ ΤΡΑΠΕΖΑ ΤΗΣ ΕΛΛΑΔΟΣ Α.Ε." },
+        "legal_name_full": { "type": "string", "const": "ΕΘΝΙΚΗ ΤΡΑΠΕΖΑ ΤΗΣ ΕΛΛΑΔΟΣ ΑΝΩΝΥΜΗ ΕΤΑΙΡΕΙΑ" },
+        "vat_number":      { "type": "string", "const": "094014201" },
+        "tax_office":      { "type": "string", "const": "ΦΑΕ ΑΘΗΝΩΝ" },
+        "gemi":            { "type": "string", "const": "000237901000" },
+        "address":         { "$ref": "#/$defs/Address" },
+        "notices_address": { "$ref": "#/$defs/Address" },
+        "signatories": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/Person" },
+          "description": "Κανόνας R-01: το πλήθος καθορίζει τη διάταξη του πίνακα υπογραφών. Πηγή: πίνακας εξουσιοδοτήσεων (εκκρεμεί Q-10)."
+        }
+      }
+    },
+
+    "Vendor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["legal_name", "legal_form", "vat_number", "gemi", "address", "signatories"],
+      "properties": {
+        "legal_name": { "type": "string", "minLength": 3, "description": "Πλήρης επωνυμία (ΓΕΜΗ)." },
+        "trade_name": { "type": "string", "description": "Διακριτικός τίτλος." },
+        "legal_form": {
+          "type": "string",
+          "enum": ["ΑΕ", "ΜΟΝΟΠΡΟΣΩΠΗ_ΑΕ", "ΕΠΕ", "ΜΟΝΟΠΡΟΣΩΠΗ_ΕΠΕ", "ΙΚΕ", "ΟΕ", "ΕΕ", "ΑΛΛΟΔΑΠΗ"],
+          "description": "Καθορίζει τη διατύπωση του προοιμίου («Της Ανώνυμης Εταιρείας…»)."
+        },
+        "vat_number": {
+          "type": "string",
+          "pattern": "^[0-9]{9}$",
+          "description": "ΑΦΜ — ακριβώς 9 ψηφία για ημεδαπές."
+        },
+        "tax_office": { "type": "string", "description": "ΔΟΥ." },
+        "gemi": {
+          "type": "string",
+          "pattern": "^[0-9]{9,14}$",
+          "description": "Αρ. ΓΕΜΗ."
+        },
+        "gemi_registration_code": {
+          "type": "string",
+          "description": "Κωδικός Αριθμός Καταχώρισης στο ΓΕΜΗ του πρακτικού Δ.Σ."
+        },
+        "address":         { "$ref": "#/$defs/Address" },
+        "notices_address": { "$ref": "#/$defs/Address", "description": "Αν παραλειφθεί, χρησιμοποιείται η address." },
+        "signatories": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/Person" }
+        },
+        "board_resolution_date": {
+          "$ref": "#/$defs/Date",
+          "description": "Ημερομηνία πρακτικού Δ.Σ. που παρέχει εξουσία εκπροσώπησης."
+        },
+        "process_agent": {
+          "type": "object",
+          "description": "Αντίκλητος (Άρθρο Ειδοποιήσεων). ΠΡΟΣΟΧΗ: δεν υπάρχει σήμερα στη ροή προμήθειας — εκκρεμεί Q-11.",
+          "additionalProperties": false,
+          "required": ["name", "address"],
+          "properties": {
+            "name":    { "type": "string" },
+            "address": { "$ref": "#/$defs/Address" }
+          }
+        },
+        "is_foreign": {
+          "type": "boolean",
+          "default": false,
+          "description": "true → ενεργοποιεί δίγλωσση παραγωγή / εναλλακτική διατύπωση σύστασης (εκκρεμεί Q-13)."
+        }
+      }
+    },
+
+    "ContractHeader": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "title", "signing_date"],
+      "properties": {
+        "number":        { "type": "string", "minLength": 1, "description": "ΑΡ. ΣΥΜΒΑΣΗΣ." },
+        "title":         { "type": "string", "minLength": 3, "description": "Τίτλος Έργου (εξώφυλλο + Άρθρο Αντικειμένου)." },
+        "signing_date":  { "$ref": "#/$defs/Date" },
+        "signing_place": { "type": "string", "default": "Αθήνα" },
+        "cover_period":  { "type": "string", "description": "π.χ. «ΙΑΝΟΥΑΡΙΟΣ 2026». ΠΑΡΑΓΕΤΑΙ από το signing_date." },
+        "language":      { "type": "string", "enum": ["el", "el-en"], "default": "el" }
+      }
+    },
+
+    "Term": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_date"],
+      "properties": {
+        "start_date":  { "$ref": "#/$defs/Date" },
+        "end_date":    { "$ref": "#/$defs/Date" },
+        "duration_months": { "type": "integer", "minimum": 1 },
+        "is_retroactive": {
+          "type": "boolean",
+          "description": "Κανόνας R-13. ΠΑΡΑΓΕΤΑΙ: start_date < contract.signing_date → εισάγεται η λέξη «αναδρομικά»."
+        },
+        "extendable_by_agreement": { "type": "boolean", "default": true }
+      }
+    },
+
+    "Milestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seq", "description", "percentage"],
+      "properties": {
+        "seq":         { "type": "integer", "minimum": 1 },
+        "description": { "type": "string", "minLength": 3, "description": "ΕΛΕΥΘΕΡΟ ΚΕΙΜΕΝΟ — απαιτεί ανθρώπινο έλεγχο (Ζώνη 4)." },
+        "percentage":  { "$ref": "#/$defs/Percentage" },
+        "amount":      { "$ref": "#/$defs/Money" },
+        "trigger":     { "type": "string", "description": "Γεγονός ενεργοποίησης πληρωμής." }
+      }
+    },
+
+    "LetterOfGuarantee": {
+      "type": "object",
+      "description": "Τραπεζική Εγγυητική Επιστολή Καλής Εκτέλεσης (κανόνας R-06).",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "amount":              { "$ref": "#/$defs/Money" },
+        "percentage_of_value": { "$ref": "#/$defs/Percentage", "default": 10 },
+        "validity_end":        { "$ref": "#/$defs/Date" },
+        "issuing_bank_note":   { "type": "string", "const": "τρίτης τράπεζας (εκτός ΕΤΕ)" },
+        "replacement": {
+          "type": "object",
+          "description": "Μόνο Κατηγορία A: αντικατάσταση πριν τη λήξη του 1ου έτους Μετά την Εγγύηση Περιόδου.",
+          "additionalProperties": false,
+          "properties": {
+            "amount":        { "$ref": "#/$defs/Money" },
+            "validity_end":  { "$ref": "#/$defs/Date" }
+          }
+        }
+      },
+      "if":   { "properties": { "required": { "const": true } } },
+      "then": { "required": ["required", "amount", "validity_end"] }
+    },
+
+    "Subcontractor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["legal_name", "role"],
+      "properties": {
+        "legal_name": { "type": "string" },
+        "role":       { "type": "string", "description": "π.χ. «κατασκευάστρια εταιρεία του Λογισμικού»." },
+        "country":    { "type": "string" }
+      }
+    },
+
+    "DataProtection": {
+      "type": "object",
+      "description": "Κανόνας R-03. Αν processes_personal_data=false, ΟΛΟ το άρθρο GDPR και το αντίστοιχο Παράρτημα αφαιρούνται.",
+      "additionalProperties": false,
+      "required": ["processes_personal_data"],
+      "properties": {
+        "processes_personal_data": { "type": "boolean" },
+        "data_subject_categories": { "type": "array", "items": { "type": "string" } },
+        "data_categories":         { "type": "array", "items": { "type": "string" } },
+        "subprocessors":           { "type": "array", "items": { "$ref": "#/$defs/Subcontractor" } },
+        "transfers_outside_eea":   { "type": "boolean", "default": false, "description": "Κανόνας R-11." },
+        "transfer_mechanism": {
+          "type": "string",
+          "enum": ["SCC", "ADEQUACY_DECISION", "BCR", "DEROGATION_ART49"]
+        },
+        "transfer_countries":      { "type": "array", "items": { "type": "string" } },
+        "breach_notification_hours": { "type": "integer", "default": 48 },
+        "dsr_forward_hours":         { "type": "integer", "default": 48 }
+      },
+      "allOf": [
+        {
+          "if":   { "properties": { "processes_personal_data": { "const": true } }, "required": ["processes_personal_data"] },
+          "then": { "required": ["processes_personal_data", "data_subject_categories", "data_categories"] }
+        },
+        {
+          "if":   { "properties": { "transfers_outside_eea": { "const": true } }, "required": ["transfers_outside_eea"] },
+          "then": { "required": ["transfer_mechanism", "transfer_countries"] }
+        }
+      ]
+    },
+
+    "Annex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "title", "source"],
+      "properties": {
+        "number": { "type": "integer", "minimum": 1 },
+        "title":  { "type": "string" },
+        "source": {
+          "type": "string",
+          "enum": ["GENERATED", "PASS_THROUGH", "UPLOADED"],
+          "description": "GENERATED = παράγεται από το μοντέλο· PASS_THROUGH = έγγραφο προμηθευτή που επισυνάπτεται ως έχει (π.χ. Oracle Support Policies)· UPLOADED = χειροκίνητο αρχείο."
+        },
+        "file_ref": { "type": "string", "description": "Διαδρομή/αναγνωριστικό αρχείου στο DMS." },
+        "conditional_on": { "type": "string", "description": "Πεδίο του μοντέλου από το οποίο εξαρτάται (κανόνας R-16)." }
+      }
+    },
+
+    "GenerationMeta": {
+      "type": "object",
+      "description": "Μεταδεδομένα παραγωγής — δεν εμφανίζονται στο έγγραφο· τροφοδοτούν τον έλεγχο R-18.",
+      "additionalProperties": false,
+      "properties": {
+        "template_id":      { "type": "string" },
+        "template_version": { "type": "string" },
+        "prepared_by":      { "type": "string" },
+        "prepared_at":      { "type": "string", "format": "date-time" },
+        "legal_review_required": { "type": "boolean", "default": true },
+        "open_items": {
+          "type": "array",
+          "description": "Κανόνας R-18: κάθε πεδίο που δεν συμπληρώθηκε. Αν μη κενό, ΑΠΑΓΟΡΕΥΕΤΑΙ η εξαγωγή τελικού εγγράφου.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "reason"],
+            "properties": {
+              "field":  { "type": "string" },
+              "reason": { "type": "string" },
+              "severity": { "type": "string", "enum": ["BLOCKING", "WARNING"], "default": "BLOCKING" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

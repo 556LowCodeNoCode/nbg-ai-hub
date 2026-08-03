@@ -1,0 +1,1316 @@
+{
+  "$comment": "NBG — Ruleset επιλογής modular άρθρων. Παράγεται από rules.py· ταυτόσημο περιεχόμενο με το DECISION_RULES.xlsx.",
+  "version": "1.0",
+  "categories": {
+    "A": {
+      "code": "A",
+      "title": "Σύμβαση Προμήθειας Συστήματος",
+      "cover_title": "ΣΥΜΒΑΣΗ ΠΡΟΜΗΘΕΙΑΣ ΣΥΣΤΗΜΑΤΟΣ {{system.name}}",
+      "template": "A_IT_PLATFORM_TEMPLATE_v2.docx"
+    },
+    "B": {
+      "code": "B",
+      "title": "Σύμβαση Προμήθειας Πλατφόρμας",
+      "cover_title": "ΣΥΜΒΑΣΗ ΠΡΟΜΗΘΕΙΑΣ ΠΛΑΤΦΟΡΜΑΣ {{solution.name}}",
+      "template": "B_IT_SOLUTION_TEMPLATE_v2.docx"
+    },
+    "C": {
+      "code": "C",
+      "title": "Σύμβαση Παροχής Υπηρεσιών",
+      "cover_title": "ΣΥΜΒΑΣΗ ΠΑΡΟΧΗΣ ΥΠΗΡΕΣΙΩΝ ΓΙΑ ΤΟ ΕΡΓΟ «{{project.name}}»",
+      "template": "C_IT_CONSULTING_TEMPLATE_v2.docx"
+    },
+    "D": {
+      "code": "D",
+      "title": "Πρόσθετη Πράξη",
+      "cover_title": "ΠΡΟΣΘΕΤΗ ΠΡΑΞΗ ΣΤΗ ΣΥΜΒΑΣΗ ΣΥΝΤΗΡΗΣΗΣ – ΥΠΟΣΤΗΡΙΞΗΣ ΠΡΟΪΟΝΤΩΝ ΛΟΓΙΣΜΙΚΟΥ {{addendum.title_object}}",
+      "template": "D_ADDENDUM_TEMPLATE_v2.docx"
+    }
+  },
+  "template_selection": [
+    {
+      "if": "is_amendment",
+      "then": "D"
+    },
+    {
+      "if": "delivers_software_licences and has_formal_acceptance",
+      "then": "A"
+    },
+    {
+      "if": "is_recurring_service",
+      "then": "B"
+    },
+    {
+      "else": "C"
+    }
+  ],
+  "variables": [
+    {
+      "id": "is_amendment",
+      "label": "Τροποποιείται υφιστάμενη σύμβαση",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Μητρώο συμβάσεων (Q-15)",
+      "notes": "Καθορίζει άμεσα την κατηγορία D"
+    },
+    {
+      "id": "delivers_software_licences",
+      "label": "Παραδίδονται άδειες χρήσης λογισμικού",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Τεχνική Προσφορά",
+      "notes": "Βασικός διαφοροποιητής A vs B/C"
+    },
+    {
+      "id": "has_formal_acceptance",
+      "label": "Τυπική διαδικασία ΠΠΠ / ΠΤΠ",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Διακήρυξη",
+      "notes": "Βασικός διαφοροποιητής A"
+    },
+    {
+      "id": "is_recurring_service",
+      "label": "Συνεχής/επαναλαμβανόμενη υπηρεσία (συνδρομή)",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Διακήρυξη",
+      "notes": "Βασικός διαφοροποιητής B"
+    },
+    {
+      "id": "delivery_model",
+      "label": "Μοντέλο παράδοσης",
+      "type": "enum",
+      "options": [
+        "SaaS σε cloud Αναδόχου",
+        "On-premise",
+        "Υβριδικό"
+      ],
+      "default": "SaaS σε cloud Αναδόχου",
+      "source": "Τεχνική Προσφορά",
+      "notes": "Επηρεάζει τη ρήτρα cloud"
+    },
+    {
+      "id": "processes_personal_data",
+      "label": "Επεξεργασία προσωπικών δεδομένων",
+      "type": "boolean",
+      "options": null,
+      "default": true,
+      "source": "DPIA / ερωτηματολόγιο GDPR",
+      "notes": "⛔ Κανονιστικά δεσμευτικό"
+    },
+    {
+      "id": "transfers_outside_eea",
+      "label": "Διαβίβαση δεδομένων εκτός ΕΟΖ",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "DPA",
+      "notes": "Απαιτεί μηχανισμό διαβίβασης"
+    },
+    {
+      "id": "is_material_outsourcing",
+      "label": "Ουσιώδης εξωτερική ανάθεση",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Outsourcing register (Q-18)",
+      "notes": "⛔ Ενεργοποιεί κανονιστικά αναφαίρετα άρθρα"
+    },
+    {
+      "id": "is_cloud_outsourcing",
+      "label": "Ανάθεση σε υποδομές cloud",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Τεχνική Προσφορά",
+      "notes": "EBA cloud guidelines"
+    },
+    {
+      "id": "vendor_accesses_bank_systems",
+      "label": "Πρόσβαση σε συστήματα/δίκτυο Τράπεζας",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Security assessment",
+      "notes": "Ενεργοποιεί πρότυπα ασφάλειας"
+    },
+    {
+      "id": "has_sla",
+      "label": "Υπάρχουν συμφωνημένα SLA",
+      "type": "boolean",
+      "options": null,
+      "default": true,
+      "source": "Διακήρυξη / Τεχνική Προσφορά",
+      "notes": "Χωρίς SLA δεν υπάρχουν ποινικές ρήτρες"
+    },
+    {
+      "id": "has_availability_sla",
+      "label": "SLA διαθεσιμότητας (uptime)",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "SLA Παράρτημα",
+      "notes": "Υποσύνολο του has_sla"
+    },
+    {
+      "id": "has_subcontractors",
+      "label": "Χρήση εγκεκριμένων υπεργολάβων",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Αξιολόγηση προσφοράς",
+      "notes": "⚠ Αν Όχι, η ρήτρα ΔΙΑΓΡΑΦΕΤΑΙ (όχι κενή)"
+    },
+    {
+      "id": "escrow_required",
+      "label": "Απαιτείται escrow πηγαίου κώδικα",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Τεχνική Προσφορά",
+      "notes": "Απαιτεί κατασκευάστρια εταιρεία"
+    },
+    {
+      "id": "contract_value_over_lg_threshold",
+      "label": "Αξία άνω του κατωφλίου εγγυητικής",
+      "type": "boolean",
+      "options": null,
+      "default": true,
+      "source": "Οικονομική Προσφορά (Q-06)",
+      "notes": "⚠ Το κατώφλι εκκρεμεί"
+    },
+    {
+      "id": "pricing_model",
+      "label": "Μοντέλο τιμολόγησης",
+      "type": "enum",
+      "options": [
+        "Σταθερό τίμημα",
+        "Χρέωση βάσει απασχόλησης με ανώτατο όριο"
+      ],
+      "default": "Σταθερό τίμημα",
+      "source": "Οικονομική Προσφορά",
+      "notes": "Αμοιβαία αποκλειόμενα blocks"
+    },
+    {
+      "id": "hardware_included",
+      "label": "Περιλαμβάνεται προμήθεια εξοπλισμού",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Οικονομική Προσφορά",
+      "notes": "Προσθέτει δόση πληρωμής"
+    },
+    {
+      "id": "legacy_transition",
+      "label": "Μεταβατική υποστήριξη υφιστάμενου συστήματος",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Τεχνική Προσφορά",
+      "notes": "Προσθέτει SLA + δόση"
+    },
+    {
+      "id": "work_on_bank_premises",
+      "label": "Παροχή στις εγκαταστάσεις της Τράπεζας",
+      "type": "boolean",
+      "options": null,
+      "default": true,
+      "source": "Αίτημα",
+      "notes": "Επηρεάζει υποχρεώσεις υγιεινής/ασφάλειας"
+    },
+    {
+      "id": "vendor_is_foreign",
+      "label": "Αλλοδαπός προμηθευτής",
+      "type": "boolean",
+      "options": null,
+      "default": false,
+      "source": "Vendor master",
+      "notes": "Δίγλωσση παραγωγή (Q-13)"
+    }
+  ],
+  "modules": [
+    {
+      "id": "M01",
+      "title": "ΠΡΟΟΙΜΙΟ – ΣΥΜΒΑΛΛΟΜΕΝΟΙ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "ALWAYS"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΑΚ 158 επ.",
+      "notes": "Ταυτοποίηση μερών & εξουσία εκπροσώπησης"
+    },
+    {
+      "id": "M02",
+      "title": "ΟΡΙΣΜΟΙ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Μόνο η Κατηγορία A έχει αυτοτελές άρθρο ορισμών"
+    },
+    {
+      "id": "M03",
+      "title": "ΑΝΤΙΚΕΙΜΕΝΟ ΤΗΣ ΣΥΜΒΑΣΗΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M03a",
+      "title": "Ρήτρα SaaS / cloud στο αντικείμενο",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "delivery_model == 'SaaS σε cloud Αναδόχου'",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-02"
+    },
+    {
+      "id": "M04",
+      "title": "ΔΙΑΡΚΕΙΑ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Αν έναρξη < υπογραφή → «αναδρομικά» (R-13)"
+    },
+    {
+      "id": "M05",
+      "title": "ΧΡΟΝΟΔΙΑΓΡΑΜΜΑ",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_formal_acceptance",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M06",
+      "title": "ΠΑΡΑΛΑΒΗ (ΠΠΠ / ΠΤΠ)",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_formal_acceptance",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Απαιτεί Παράρτημα Διαδικασίας Παραλαβής"
+    },
+    {
+      "id": "M07",
+      "title": "ΔΙΑΔΙΚΑΣΙΑ & ΤΡΟΠΟΣ ΠΑΡΟΧΗΣ",
+      "applicability": {
+        "A": "NA",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Παραλαβή 30 εργάσιμων ημερών"
+    },
+    {
+      "id": "M08",
+      "title": "ΤΡΑΠΕΖΙΚΗ ΕΓΓΥΗΤΙΚΗ ΕΠΙΣΤΟΛΗ",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "COND",
+        "D": "COND"
+      },
+      "condition": "contract_value_over_lg_threshold",
+      "locked": false,
+      "legal_basis": "Πολιτική Τράπεζας",
+      "notes": "⚠ Κατώφλι εκκρεμεί (Q-06)"
+    },
+    {
+      "id": "M09",
+      "title": "ΑΜΟΙΒΗ / ΣΥΜΒΑΤΙΚΕΣ ΤΙΜΕΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "COND"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΑΚ 388 (παραίτηση)",
+      "notes": ""
+    },
+    {
+      "id": "M09a",
+      "title": "Πίνακας οροσήμων & ποσοστών",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "COND",
+        "D": "NA"
+      },
+      "condition": "pricing_model == 'Σταθερό τίμημα'",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-10 — αποκλείει το M09b"
+    },
+    {
+      "id": "M09b",
+      "title": "Πίνακας ημερήσιων χρεώσεων ανά προφίλ",
+      "applicability": {
+        "A": "NA",
+        "B": "NA",
+        "C": "COND",
+        "D": "NA"
+      },
+      "condition": "pricing_model == 'Χρέωση βάσει απασχόλησης με ανώτατο όριο'",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-10 — αποκλείει το M09a"
+    },
+    {
+      "id": "M09c",
+      "title": "Δόση πληρωμής για εξοπλισμό",
+      "applicability": {
+        "A": "NA",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "hardware_included",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-08"
+    },
+    {
+      "id": "M09d",
+      "title": "Δόση πληρωμής μεταβατικής υποστήριξης",
+      "applicability": {
+        "A": "NA",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "legacy_transition",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-07"
+    },
+    {
+      "id": "M10",
+      "title": "ΟΡΟΙ ΠΛΗΡΩΜΗΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "⚠ 60 ημ. σε A/C, 45 σε B (Q-07)"
+    },
+    {
+      "id": "M11",
+      "title": "ΥΠΟΧΡΕΩΣΕΙΣ – ΕΥΘΥΝΗ ΑΝΑΔΟΧΟΥ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M11a",
+      "title": "Υποχρεώσεις επί των εγκαταστάσεων της Τράπεζας",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "COND",
+        "D": "NA"
+      },
+      "condition": "work_on_bank_premises",
+      "locked": false,
+      "legal_basis": "ν.3850/2010 (ΥΑΕ)",
+      "notes": ""
+    },
+    {
+      "id": "M12",
+      "title": "ΕΤΑΙΡΙΚΗ ΚΟΙΝΩΝΙΚΗ ΕΥΘΥΝΗ (ΕΚΕ)",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "Οδηγία (ΕΕ) 2022/2464 (CSRD)",
+      "notes": ""
+    },
+    {
+      "id": "M13",
+      "title": "ΔΗΛΩΣΕΙΣ – ΕΓΓΥΗΣΕΙΣ ΑΝΑΔΟΧΟΥ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M14",
+      "title": "ΥΠΟΧΡΕΩΣΕΙΣ ΤΗΣ ΤΡΑΠΕΖΑΣ",
+      "applicability": {
+        "A": "NA",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M15",
+      "title": "ΕΥΘΥΝΗ – ΟΡΙΟ ΕΥΘΥΝΗΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΑΚ 330, 332",
+      "notes": "Απεριόριστη για ΔΠΙ & απόρρητο"
+    },
+    {
+      "id": "M16",
+      "title": "ΑΝΑΣΤΟΛΗ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M17",
+      "title": "ΤΡΟΠΟΠΟΙΗΣΕΙΣ ΚΑΤΑ ΤΗΝ ΕΚΤΕΛΕΣΗ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M18",
+      "title": "ΕΚΧΩΡΗΣΗ / ΥΠΟΚΑΤΑΣΤΑΣΗ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M18a",
+      "title": "Ρήτρα εγκεκριμένων υπεργολάβων",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "COND",
+        "D": "NA"
+      },
+      "condition": "has_subcontractors",
+      "locked": false,
+      "legal_basis": "EBA/GL/2019/02 §13",
+      "notes": "⚠ Αν Όχι, η πρόταση ΔΙΑΓΡΑΦΕΤΑΙ — R-04"
+    },
+    {
+      "id": "M18b",
+      "title": "Δικαιώματα ελέγχου έναντι υπεργολάβων",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_subcontractors and is_material_outsourcing",
+      "locked": true,
+      "legal_basis": "EBA/GL/2019/02 §75",
+      "notes": "⛔ Αναφαίρετο όταν ενεργοποιείται"
+    },
+    {
+      "id": "M19",
+      "title": "ΚΙΝΔΥΝΟΙ & ΤΙΤΛΟΙ ΚΥΡΙΟΤΗΤΑΣ",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "delivers_software_licences",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M20",
+      "title": "ΕΓΓΥΗΣΗ (warranty)",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_formal_acceptance",
+      "locked": false,
+      "legal_basis": "ΑΚ 534 επ.",
+      "notes": ""
+    },
+    {
+      "id": "M20a",
+      "title": "Εγγύηση κατά ιών / κακόβουλου κώδικα",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "delivers_software_licences",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M21",
+      "title": "ΠΟΙΝΙΚΕΣ ΡΗΤΡΕΣ ΚΑΘΥΣΤΕΡΗΣΗΣ",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_sla",
+      "locked": false,
+      "legal_basis": "ΑΚ 404 επ.",
+      "notes": "⚠ Αν Όχι, αλλάζει και ο ΤΙΤΛΟΣ του άρθρου στο B (R-14)"
+    },
+    {
+      "id": "M21a",
+      "title": "Ρήτρα μη τήρησης διαθεσιμότητας",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_availability_sla",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M21b",
+      "title": "Ρήτρα Vulnerability fixes (P = V×N/365)",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "has_sla and vendor_accesses_bank_systems",
+      "locked": false,
+      "legal_basis": "DORA (ΕΕ) 2022/2554",
+      "notes": "Απαιτεί Παράρτημα Μέτρων Ασφαλείας"
+    },
+    {
+      "id": "M22",
+      "title": "ΚΑΤΑΓΓΕΛΙΑ ΤΗΣ ΣΥΜΒΑΣΗΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M22a",
+      "title": "Ρήτρες «Μέτρων» Εξυγίανσης (BRRD)",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "is_material_outsourcing",
+      "locked": true,
+      "legal_basis": "ν.4335/2015 αρ.2 (Οδ. 2014/59/ΕΕ)",
+      "notes": "⛔ Αναφαίρετο — εποπτευόμενο ίδρυμα"
+    },
+    {
+      "id": "M22b",
+      "title": "Υποχρέωση υποστήριξης μετάβασης (exit plan)",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "is_material_outsourcing",
+      "locked": true,
+      "legal_basis": "EBA/GL/2019/02 §106-108",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M23",
+      "title": "ΑΝΩΤΕΡΑ ΒΙΑ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΑΚ 380",
+      "notes": ""
+    },
+    {
+      "id": "M24",
+      "title": "ΠΝΕΥΜΑΤΙΚΗ ΙΔΙΟΚΤΗΣΙΑ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ν.2121/1993",
+      "notes": ""
+    },
+    {
+      "id": "M24a",
+      "title": "Άδεια χρήσης Λογισμικού",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "delivers_software_licences",
+      "locked": false,
+      "legal_basis": "ν.2121/1993 αρ.42",
+      "notes": "Απαιτεί Παράρτημα Όρων Χρήσης"
+    },
+    {
+      "id": "M24b",
+      "title": "Escrow πηγαίου κώδικα",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "escrow_required",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Κανόνας R-05 — απαιτεί κατασκευάστρια εταιρεία"
+    },
+    {
+      "id": "M25",
+      "title": "ΕΜΠΙΣΤΕΥΤΙΚΟΤΗΤΑ – ΑΠΟΡΡΗΤΟ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": true,
+      "legal_basis": "ν.4261/2014 αρ.84 (τραπεζικό απόρρητο)",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M25a",
+      "title": "Εσωτερικές πληροφορίες / κατάχρηση αγοράς",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "Καν. (ΕΕ) 596/2014, ν.3340/2005",
+      "notes": ""
+    },
+    {
+      "id": "M26",
+      "title": "ΕΠΕΞΕΡΓΑΣΙΑ ΠΡΟΣΩΠΙΚΩΝ ΔΕΔΟΜΕΝΩΝ (GDPR)",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "processes_personal_data",
+      "locked": true,
+      "legal_basis": "ΓΚΠΔ (ΕΕ) 2016/679 αρ.28 παρ.3",
+      "notes": "⛔ Αναφαίρετο · ✕ δεν υπάρχει στο πρότυπο C"
+    },
+    {
+      "id": "M26a",
+      "title": "Διαβίβαση δεδομένων εκτός ΕΟΖ",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "processes_personal_data and transfers_outside_eea",
+      "locked": true,
+      "legal_basis": "ΓΚΠΔ Κεφ. V (αρ.44-49)",
+      "notes": "⛔ Απαιτεί μηχανισμό διαβίβασης"
+    },
+    {
+      "id": "M26b",
+      "title": "Υπεργολάβοι επεξεργασίας (subprocessors)",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "processes_personal_data and has_subcontractors",
+      "locked": true,
+      "legal_basis": "ΓΚΠΔ αρ.28 παρ.2 & 4",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M27",
+      "title": "ΠΡΟΤΥΠΑ ΑΣΦΑΛΕΙΑΣ ΠΛΗΡΟΦΟΡΙΩΝ",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "vendor_accesses_bank_systems or is_cloud_outsourcing",
+      "locked": false,
+      "legal_basis": "DORA, ΠΔ/ΤΕ 2577/2006",
+      "notes": "⚠ Δεν υπήρχε στα πρότυπα — προστέθηκε (R-12)"
+    },
+    {
+      "id": "M28",
+      "title": "ΔΙΚΑΙΩΜΑΤΑ ΠΡΟΣΒΑΣΗΣ, ΠΛΗΡΟΦΟΡΗΣΗΣ & ΕΛΕΓΧΟΥ",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "is_material_outsourcing",
+      "locked": true,
+      "legal_basis": "ν.4261/2014 αρ.57 παρ.3 · ν.4335/2015 αρ.63",
+      "notes": "⛔ Αναφαίρετο — δικαιώματα ΤτΕ"
+    },
+    {
+      "id": "M28a",
+      "title": "Πρόσβαση cloud & τοποθεσία δεδομένων",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "is_cloud_outsourcing",
+      "locked": true,
+      "legal_basis": "EBA/REC/2017/03",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M29",
+      "title": "ΚΑΤΑΠΟΛΕΜΗΣΗ ΔΙΑΦΘΟΡΑΣ & ΔΩΡΟΔΟΚΙΑΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": true,
+      "legal_basis": "ν.4557/2018 (ΞΧ/ΧΤ)",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M30",
+      "title": "ΣΥΜΨΗΦΙΣΜΟΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΑΚ 440 επ.",
+      "notes": ""
+    },
+    {
+      "id": "M31",
+      "title": "ΕΙΔΟΠΟΙΗΣΕΙΣ & ΑΝΤΙΚΛΗΤΟΣ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "COND"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "ΚΠολΔ 142",
+      "notes": "⚠ Ο αντίκλητος δεν συλλέγεται σήμερα (Q-11)"
+    },
+    {
+      "id": "M32",
+      "title": "ΕΦΑΡΜΟΣΤΕΟ ΔΙΚΑΙΟ – ΔΩΣΙΔΙΚΙΑ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": true,
+      "legal_basis": "Καν. (ΕΕ) 1215/2012",
+      "notes": "⛔ Αναφαίρετο"
+    },
+    {
+      "id": "M32a",
+      "title": "Ρήτρα γλώσσας / δίγλωσσο κείμενο",
+      "applicability": {
+        "A": "COND",
+        "B": "COND",
+        "C": "COND",
+        "D": "COND"
+      },
+      "condition": "vendor_is_foreign",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Q-13"
+    },
+    {
+      "id": "M33",
+      "title": "ΣΕΙΡΑ ΠΡΟΤΕΡΑΙΟΤΗΤΑΣ ΕΓΓΡΑΦΩΝ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Παράγεται από τα ενεργά παραρτήματα (R-16)"
+    },
+    {
+      "id": "M34",
+      "title": "ΣΧΕΣΕΙΣ ΜΕΤΑΞΥ ΣΥΜΒΑΛΛΟΜΕΝΩΝ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Αποκλεισμός εργασιακής σχέσης"
+    },
+    {
+      "id": "M35",
+      "title": "ΔΙΚΑΙΩΜΑ ΑΓΟΡΑΣ ΠΡΟΣΘΕΤΩΝ ΑΔΕΙΩΝ",
+      "applicability": {
+        "A": "COND",
+        "B": "NA",
+        "C": "NA",
+        "D": "NA"
+      },
+      "condition": "delivers_software_licences",
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M36",
+      "title": "ΑΠΑΓΟΡΕΥΣΕΙΣ (χρήση σημάτων κ.λπ.)",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M37",
+      "title": "ΔΕΣΜΕΥΣΗ ΔΙΑΔΟΧΩΝ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M38",
+      "title": "ΔΙΑΧΩΡΙΣΜΟΣ – ΠΑΡΑΙΤΗΣΗ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M39",
+      "title": "ΕΠΙΚΕΦΑΛΙΔΕΣ ΑΡΘΡΩΝ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "NA"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": ""
+    },
+    {
+      "id": "M40",
+      "title": "ΠΑΡΑΡΤΗΜΑΤΑ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "COND"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Η λίστα παράγεται από τα ενεργά modules"
+    },
+    {
+      "id": "M41",
+      "title": "ΑΝΑΦΟΡΑ ΑΡΧΙΚΗΣ ΣΥΜΒΑΣΗΣ",
+      "applicability": {
+        "A": "NA",
+        "B": "NA",
+        "C": "NA",
+        "D": "ALWAYS"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Μόνο Πρόσθετη Πράξη"
+    },
+    {
+      "id": "M42",
+      "title": "ΠΡΑΞΕΙΣ ΤΡΟΠΟΠΟΙΗΣΗΣ (amendments[])",
+      "applicability": {
+        "A": "NA",
+        "B": "NA",
+        "C": "NA",
+        "D": "ALWAYS"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Επαναλαμβανόμενο block"
+    },
+    {
+      "id": "M43",
+      "title": "ΡΗΤΡΑ ΔΙΑΤΗΡΗΣΗΣ ΛΟΙΠΩΝ ΟΡΩΝ",
+      "applicability": {
+        "A": "NA",
+        "B": "NA",
+        "C": "NA",
+        "D": "ALWAYS"
+      },
+      "condition": null,
+      "locked": true,
+      "legal_basis": "—",
+      "notes": "⛔ «Κατά τα λοιπά οι όροι εξακολουθούν να ισχύουν»"
+    },
+    {
+      "id": "M44",
+      "title": "ΜΠΛΟΚ ΥΠΟΓΡΑΦΩΝ",
+      "applicability": {
+        "A": "ALWAYS",
+        "B": "ALWAYS",
+        "C": "ALWAYS",
+        "D": "ALWAYS"
+      },
+      "condition": null,
+      "locked": false,
+      "legal_basis": "—",
+      "notes": "Διάταξη κατά R-01 (πλήθος υπογραφόντων)"
+    }
+  ],
+  "guardrails": [
+    {
+      "id": "G01",
+      "kind": "Επιλογή προτύπου",
+      "when": "is_amendment = Ναι",
+      "action": "Επιβάλλεται η Κατηγορία D. Τα modules των A/B/C δεν εφαρμόζονται.",
+      "severity": "BLOCKING",
+      "legal_basis": "—",
+      "trigger": "is_amendment"
+    },
+    {
+      "id": "G02",
+      "kind": "Επιλογή προτύπου",
+      "when": "delivers_software_licences = Ναι ΚΑΙ has_formal_acceptance = Ναι",
+      "action": "Επιβάλλεται η Κατηγορία A.",
+      "severity": "WARNING",
+      "legal_basis": "—",
+      "trigger": "delivers_software_licences and has_formal_acceptance"
+    },
+    {
+      "id": "G03",
+      "kind": "Επιλογή προτύπου",
+      "when": "is_recurring_service = Ναι ΚΑΙ has_formal_acceptance = Όχι",
+      "action": "Επιβάλλεται η Κατηγορία B.",
+      "severity": "WARNING",
+      "legal_basis": "—",
+      "trigger": "is_recurring_service and not has_formal_acceptance"
+    },
+    {
+      "id": "G04",
+      "kind": "Κανονιστικό",
+      "when": "processes_personal_data = Ναι",
+      "action": "Τα M26 / M26a / M26b είναι ΑΝΑΦΑΙΡΕΤΑ. Απαιτείται Παράρτημα GDPR.",
+      "severity": "BLOCKING",
+      "legal_basis": "ΓΚΠΔ αρ.28 παρ.3",
+      "trigger": "processes_personal_data and not CATEGORY_D"
+    },
+    {
+      "id": "G05",
+      "kind": "Ασυμβατότητα",
+      "when": "processes_personal_data = Ναι ΚΑΙ κατηγορία = C",
+      "action": "Το πρότυπο C δεν περιέχει άρθρο GDPR. Απαιτείται αλλαγή προτύπου ή προσθήκη του M26 από το πρότυπο B, κατόπιν νομικού ελέγχου.",
+      "severity": "BLOCKING",
+      "legal_basis": "ΓΚΠΔ αρ.28 παρ.3",
+      "trigger": "processes_personal_data and CATEGORY_C"
+    },
+    {
+      "id": "G06",
+      "kind": "Πληρότητα",
+      "when": "transfers_outside_eea = Ναι ΚΑΙ transfer_mechanism κενό",
+      "action": "Δεν επιτρέπεται εξαγωγή. Απαιτείται μηχανισμός (SCC / απόφαση επάρκειας / BCR) και κατάλογος χωρών.",
+      "severity": "BLOCKING",
+      "legal_basis": "ΓΚΠΔ αρ.44-49",
+      "trigger": "transfers_outside_eea and not CATEGORY_D"
+    },
+    {
+      "id": "G07",
+      "kind": "Κανονιστικό",
+      "when": "is_material_outsourcing = Ναι",
+      "action": "Τα M28 / M22a / M22b είναι ΑΝΑΦΑΙΡΕΤΑ και δεν απενεργοποιούνται από τον χρήστη.",
+      "severity": "BLOCKING",
+      "legal_basis": "ν.4261/2014 αρ.57 · ν.4335/2015 · EBA/GL/2019/02",
+      "trigger": "is_material_outsourcing"
+    },
+    {
+      "id": "G08",
+      "kind": "Κανονιστικό",
+      "when": "is_cloud_outsourcing = Ναι",
+      "action": "Ενεργοποιούνται υποχρεωτικά τα M27 και M28a (τοποθεσία δεδομένων & δικαιώματα πρόσβασης).",
+      "severity": "BLOCKING",
+      "legal_basis": "EBA/REC/2017/03",
+      "trigger": "is_cloud_outsourcing"
+    },
+    {
+      "id": "G09",
+      "kind": "Πληρότητα",
+      "when": "escrow_required = Ναι ΚΑΙ software_manufacturer κενό",
+      "action": "Δεν επιτρέπεται εξαγωγή. Το M24b απαιτεί την κατασκευάστρια εταιρεία.",
+      "severity": "BLOCKING",
+      "legal_basis": "—",
+      "trigger": "escrow_required"
+    },
+    {
+      "id": "G10",
+      "kind": "Καθαρότητα",
+      "when": "has_subcontractors = Όχι",
+      "action": "Η πρόταση εγκεκριμένων υπεργολάβων ΔΙΑΓΡΑΦΕΤΑΙ εξ ολοκλήρου — δεν παραμένει με ονόματα τρίτων.",
+      "severity": "BLOCKING",
+      "legal_basis": "Τεκμηριωμένο ελάττωμα σημερινών προτύπων",
+      "trigger": "not has_subcontractors and not CATEGORY_D"
+    },
+    {
+      "id": "G11",
+      "kind": "Αμοιβαίος αποκλεισμός",
+      "when": "pricing_model = Χρέωση βάσει απασχόλησης",
+      "action": "Το M09a απενεργοποιείται και το M09b ενεργοποιείται. Ποτέ και τα δύο μαζί.",
+      "severity": "BLOCKING",
+      "legal_basis": "—",
+      "trigger": "pricing_model == 'Χρέωση βάσει απασχόλησης με ανώτατο όριο'"
+    },
+    {
+      "id": "G12",
+      "kind": "Συνέπεια τίτλου",
+      "when": "has_sla = Όχι ΚΑΙ κατηγορία = B",
+      "action": "Ο τίτλος του άρθρου γίνεται «ΔΙΑΔΙΚΑΣΙΑ ΚΑΙ ΤΡΟΠΟΣ ΠΑΡΟΧΗΣ ΤΩΝ ΥΠΗΡΕΣΙΩΝ» (αφαιρείται το «- ΠΟΙΝΙΚΕΣ ΡΗΤΡΕΣ»).",
+      "severity": "WARNING",
+      "legal_basis": "Παρατηρήθηκε στο υπογεγραμμένο MOVEO",
+      "trigger": "not has_sla and CATEGORY_B"
+    },
+    {
+      "id": "G13",
+      "kind": "Πληρότητα",
+      "when": "contract_value_over_lg_threshold = Ναι ΚΑΙ ποσό/λήξη εγγυητικής κενά",
+      "action": "Δεν επιτρέπεται εξαγωγή.",
+      "severity": "BLOCKING",
+      "legal_basis": "Πολιτική Τράπεζας (Q-06)",
+      "trigger": "contract_value_over_lg_threshold"
+    },
+    {
+      "id": "G14",
+      "kind": "Πληρότητα",
+      "when": "Ενεργό module παραπέμπει σε παράρτημα που δεν υπάρχει στη λίστα",
+      "action": "Δεν επιτρέπεται εξαγωγή. Καταγράφεται open_item ανά παράρτημα που λείπει.",
+      "severity": "BLOCKING",
+      "legal_basis": "Κανόνας R-16",
+      "trigger": null
+    },
+    {
+      "id": "G15",
+      "kind": "Ακεραιότητα",
+      "when": "Μετά την επιλογή modules",
+      "action": "Επαναρίθμηση άρθρων ΚΑΙ ενημέρωση όλων των εσωτερικών παραπομπών. Ορφανή παραπομπή = μπλοκάρισμα.",
+      "severity": "BLOCKING",
+      "legal_basis": "Κανόνας R-15 — τεκμηριωμένο ελάττωμα (διπλό «Άρθρο 23»)",
+      "trigger": null
+    },
+    {
+      "id": "G16",
+      "kind": "Πληρότητα",
+      "when": "Οποιοδήποτε πεδίο ενεργού module χωρίς τιμή",
+      "action": "Δεν επιτρέπεται εξαγωγή τελικού εγγράφου.",
+      "severity": "BLOCKING",
+      "legal_basis": "Κανόνας R-18 — τεκμηριωμένο ελάττωμα («€ΧΧΧ» σε υπογεγραμμένο)",
+      "trigger": null
+    },
+    {
+      "id": "G17",
+      "kind": "Αριθμητικός έλεγχος",
+      "when": "Άθροισμα ποσοστών οροσήμων ≠ 100%",
+      "action": "Δεν επιτρέπεται εξαγωγή.",
+      "severity": "BLOCKING",
+      "legal_basis": "—",
+      "trigger": null
+    },
+    {
+      "id": "G18",
+      "kind": "Αριθμητικός έλεγχος",
+      "when": "Σύνολο πίνακα τιμών ≠ άθροισμα γραμμών",
+      "action": "Δεν επιτρέπεται εξαγωγή.",
+      "severity": "BLOCKING",
+      "legal_basis": "—",
+      "trigger": null
+    },
+    {
+      "id": "G19",
+      "kind": "Γλώσσα",
+      "when": "vendor_is_foreign = Ναι",
+      "action": "Ενεργοποιείται το M32a και απαιτείται δίγλωσση παραγωγή.",
+      "severity": "WARNING",
+      "legal_basis": "Q-13",
+      "trigger": "vendor_is_foreign"
+    },
+    {
+      "id": "G20",
+      "kind": "Νομικός έλεγχος",
+      "when": "Οποιοδήποτε πεδίο Ζώνης 4 (ελεύθερο κείμενο)",
+      "action": "Το έγγραφο δεν οριστικοποιείται χωρίς ανθρώπινη έγκριση.",
+      "severity": "WARNING",
+      "legal_basis": "—",
+      "trigger": null
+    }
+  ]
+}
