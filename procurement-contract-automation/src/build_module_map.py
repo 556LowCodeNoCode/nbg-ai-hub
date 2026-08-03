@@ -7,8 +7,17 @@ resolves through the heading index, a CLAUSE anchor through a regex that must
 match inside that article. Anything that does not resolve is reported as
 ΛΕΙΠΕΙ — that list is the drafting backlog for Legal.
 """
-import zipfile, re, json, csv, os
+import zipfile, re, json, csv, os, unicodedata
 import xml.etree.ElementTree as ET
+
+
+def fold(s):
+    """Strip Greek diacritics and normalise final sigma, so an anchor written
+    'άκυρ' still matches 'ακυρότητα'. Accent-sensitive matching produced false
+    'missing clause' reports."""
+    d = unicodedata.normalize('NFD', s)
+    d = ''.join(c for c in d if not unicodedata.combining(c))
+    return unicodedata.normalize('NFC', d).replace('ς', 'σ').lower()
 
 W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
 TDIR = ("/mnt/c/Users/Anastasios.Kakavouli/OneDrive - EY/Desktop/Claude Code/Procurement/"
@@ -49,6 +58,7 @@ DOCS = {c: load(c) for c in FILES}
 
 A_ = lambda n: ('ART', n)
 def CL(n, rx): return ('CLAUSE', n, rx)
+def PART(n, rx, note): return ('PARTIAL', n, rx, note)   # concept partly covered elsewhere
 
 # ── module → anchor per category ───────────────────────────────────────────
 MAP = {
@@ -63,7 +73,7 @@ MAP = {
  'M07':  {'B': A_(3), 'C': A_(3)},
  'M08':  {'A': A_(6), 'B': CL(6, r'Εγγυητική Επιστολή'), 'C': CL(6, r'Εγγυητική Επιστολή')},
  'M09':  {'A': A_(11), 'B': A_(4), 'C': A_(4), 'D': CL(0, r'συνολικό ποσό')},
- 'M09a': {'A': CL(12, r'Ορόσημα'), 'C': CL(4, r'Ορόσημα')},
+ 'M09a': {'A': CL(12, r'οροσημα'), 'B': CL(4, r'εκπληρωση των κατωτερω οροσημ'), 'C': CL(4, r'οροσημα')},
  'M09b': {},
  'M09c': {'B': CL(4, r'commercials\.hardware\.included')},
  'M09d': {'B': CL(4, r'transition\.legacy_support')},
@@ -100,7 +110,9 @@ MAP = {
  'M26':  {'A': CL(20, r'Εκτελούσα την Επεξεργασία'), 'B': A_(12)},
  'M26a': {'A': CL(20, r'Ευρωπαϊκής Οικονομικής Ζώνης'), 'B': CL(12, r'Ευρωπαϊκής Οικονομικής Ζώνης')},
  'M26b': {'B': CL(12, r'subprocessor|υπεργολάβ')},
- 'M27':  {},
+ 'M27':  {'B': PART(11, r'προτυπα ασφαλειασ και εμπιστευτικοτητασ',
+                   'Μία πρόταση ισοδυναμίας προτύπων μέσα στην Εχεμύθεια. Δεν είναι αυτοτελές '
+                   'άρθρο με απαρίθμηση προτύπων (ISO 27001 κ.λπ.) ούτε παραπομπή σε παράρτημα.')},
  'M28':  {'A': A_(22), 'B': A_(14)},
  'M28a': {},
  'M29':  {'A': CL(27, r'ΔΙΑΦΘΟΡΑΣ'), 'B': A_(13), 'C': A_(12)},
@@ -112,8 +124,11 @@ MAP = {
  'M34':  {'A': A_(29), 'B': CL(5, r'εταιρικ\w*\s+σχέσ|μισθ'), 'C': CL(5, r'εταιρικ\w*\s+σχέσ|μισθ')},
  'M35':  {'A': A_(30)},
  'M36':  {'A': A_(31), 'B': CL(11, r'σήματ'), 'C': CL(11, r'σήματ')},
- 'M37':  {'A': A_(32)},
- 'M38':  {'A': A_(24)},
+ 'M37':  {'A': A_(32),
+          'B': PART(8, r'θα εχουν ισχυ οι προβλεψεισ ολων των ορων',
+                    'Καλύπτει μόνο την πλευρά της Τράπεζας (υποκατάσταση / εκχώρηση σε τρίτο). '
+                    'Δεν δεσμεύει τους διαδόχους του Αναδόχου, ούτε αποτελεί γενική ρήτρα.')},
+ 'M38':  {'A': A_(24), 'B': CL(17, r'ακυροτητα εν'), 'C': CL(15, r'ακυροτητα εν')},
  'M39':  {'A': A_(23)},
  'M40':  {'A': A_(28), 'B': A_(19), 'C': A_(17)},
  'M41':  {'D': CL(0, r'έχουν συνάψει')},
@@ -140,18 +155,20 @@ def resolve(mid, cat, anchor):
                 'article_title': a['title'],
                 'p_start': a['p0'], 'p_end': a['p1'], 'paras': a['p1'] - a['p0'] + 1,
                 'sample': sample(txt[a['p0'] + 1] if a['p0'] + 1 <= a['p1'] else txt[a['p0']])}
-    _, art_no, rx = anchor
+    art_no, rx = anchor[1], anchor[2]
+    note = anchor[3] if len(anchor) > 3 else None
     a = arts.get(art_no)
-    pat = re.compile(rx)
+    pat = re.compile(fold(rx))
     spans = []
     if a:
         spans.append((a['p0'], a['p1']))
     spans.append((0, len(txt) - 1))          # fallback: whole document
     for lo, hi in spans:
         for i in range(lo, hi + 1):
-            if pat.search(txt[i]):
+            if pat.search(fold(txt[i])):
                 host = next((v for v in arts.values() if v['p0'] <= i <= v['p1']), None)
-                return {'kind': 'ΟΡΟΣ',
+                return {'kind': ('ΜΕΡΙΚΗ ΚΑΛΥΨΗ' if anchor[0] == 'PARTIAL' else 'ΟΡΟΣ'),
+                        'note': note,
                         'article_no': (host['no'] if host else None),
                         'ordinal': (host['ordinal'] if host else None),
                         'article_title': (host['title'] if host else '— (εκτός αρίθμησης)'),
@@ -182,7 +199,7 @@ for m in RULES['modules']:
             entry[cat] = {'status': 'ΑΝΕΠΙΛΥΤΟ'}
             unresolved.append((mid, cat, anchor))
             continue
-        r['status'] = 'ΕΝΤΟΠΙΣΤΗΚΕ'
+        r['status'] = 'ΜΕΡΙΚΩΣ' if anchor[0] == 'PARTIAL' else 'ΕΝΤΟΠΙΣΤΗΚΕ'
         entry[cat] = r
     out[mid] = entry
     for cat in 'ABCD':
@@ -211,6 +228,7 @@ with open(os.path.join(SP, 'rcsv', '5. Αντιστοίχιση Κειμένου
 tot = sum(1 for r in rows if r[3] != 'Δ/Υ')
 print('εγγραφές (εξαιρώντας Δ/Υ): %d' % tot)
 print('ΕΝΤΟΠΙΣΤΗΚΕ: %d' % sum(1 for r in rows if r[3] == 'ΕΝΤΟΠΙΣΤΗΚΕ'))
+print('ΜΕΡΙΚΩΣ:     %d' % sum(1 for r in rows if r[3] == 'ΜΕΡΙΚΩΣ'))
 print('ΛΕΙΠΕΙ:      %d' % len(gaps))
 print('ΑΝΕΠΙΛΥΤΟ:   %d' % len(unresolved))
 if unresolved:
