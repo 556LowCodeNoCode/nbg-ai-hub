@@ -26,6 +26,23 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-09-15 (evening) — Glossary 47 → 55, and a linker bug that silenced whole terms
+
+**Trigger:** Part 3 of the agent-daily triage — item 101, the "35 Claude Code Concepts for Non Coders" piece.
+
+**Decisions:**
+- **Terms chosen by frequency, not taste.** Scanned tips/use-cases/journeys/skills for the 35 concepts and counted real usage. `session` appeared in **37 files / 173 times with no glossary entry**; `project` in 24. Those two alone justified the pass.
+- **Eight written:** session, project, git, permission-mode, plan-mode, compacting, subagent, deployment.
+- **`worktree` and `extended thinking` deliberately dropped — zero mentions anywhere in our content.** Writing a definition for a word we never use is speculative filler.
+- **Linker bug found and fixed.** `remark-glossary-link` builds its index from **slug + aliases and never `title`**, so a hyphenated slug can't match the spoken phrase. `plan-mode` was linking on **0 pages** despite being correct on `/glossary/`. Four shipped terms had the same hole (`plan-mode`, `permission-mode`, `shell-commands`, `large-language-model`). Spaced-form aliases added; plan-mode 0 → 6 pages, site-wide triggers 1205 → 1218.
+- **Rule documented** at the top of Step 2 in `docs/reference/authoring-glossary-terms.md`, because the failure is silent: a term looks perfect on the glossary page and links nowhere.
+
+**Why:** The glossary's value is the tooltips on words a beginner meets mid-sentence. A term that never triggers is invisible, and nothing in the build or tests flags it.
+
+**References:** `glossary/` (55), `docs/reference/authoring-glossary-terms.md`; site 246/246, plugin 122/122, snapshot rebuilt.
+
+---
+
 ## 2026-09-15 (late, corrected) — `meta` is Alt, not the Windows key
 
 **Trigger:** User challenged the "Windows reserves that key" caveat on Meta+J. They were right; I had inferred it rather than verified it. Checked the official reference at <https://code.claude.com/docs/en/keybindings>, which is authoritative and supersedes my binary-string inference.

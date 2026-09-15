@@ -63,6 +63,27 @@ resource if one exists.
 
 ## Step 2 — Choose aliases carefully
 
+> ### ⚠️ Multi-word terms: the spaced form MUST be an alias
+>
+> The auto-linker builds its index from the **slug and the aliases — never the
+> `title`**. So a term at `plan-mode.md` titled "Plan mode" indexes the variant
+> `plan-mode`, which never appears in prose. The phrase people actually write,
+> `plan mode`, matches nothing and the term silently never links anywhere.
+>
+> **If your slug contains a hyphen, add the spaced form as an alias.**
+>
+> ```yaml
+> # glossary/plan-mode.md
+> aliases: ["plan mode", "plan-mode", "planning mode"]
+> ```
+>
+> Found 2026-09-15: four shipped terms had this hole — `plan-mode` was linking
+> on 0 pages, and `shell-commands` / `large-language-model` / `permission-mode`
+> were all under-matching. Fixing the aliases took `plan-mode` from 0 to 6
+> pages. Verify with Step 5 rather than assuming; a term can look perfect on
+> `/glossary/` and still link nowhere.
+
+
 The plugin matches **case-insensitively with word-boundary awareness**. So:
 
 | Slug case in `glossary/` | What auto-matches without an alias | What needs an explicit alias |

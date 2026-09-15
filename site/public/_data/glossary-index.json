@@ -113,6 +113,15 @@
       ]
     },
     {
+      "slug": "compacting",
+      "title": "Compacting",
+      "audience": "both",
+      "topics": [
+        "claude-code",
+        "fundamentals"
+      ]
+    },
+    {
       "slug": "completion",
       "title": "Completion",
       "audience": "beginner",
@@ -150,6 +159,15 @@
       ]
     },
     {
+      "slug": "deployment",
+      "title": "Deployment",
+      "audience": "both",
+      "topics": [
+        "deployment",
+        "infrastructure"
+      ]
+    },
+    {
       "slug": "docker",
       "title": "Docker",
       "audience": "beginner",
@@ -175,6 +193,15 @@
       "topics": [
         "github",
         "tooling"
+      ]
+    },
+    {
+      "slug": "git",
+      "title": "Git",
+      "audience": "beginner",
+      "topics": [
+        "github",
+        "fundamentals"
       ]
     },
     {
@@ -279,6 +306,24 @@
       ]
     },
     {
+      "slug": "permission-mode",
+      "title": "Permission mode",
+      "audience": "beginner",
+      "topics": [
+        "claude-code",
+        "foundations"
+      ]
+    },
+    {
+      "slug": "plan-mode",
+      "title": "Plan mode",
+      "audience": "beginner",
+      "topics": [
+        "claude-code",
+        "foundations"
+      ]
+    },
+    {
       "slug": "plugin",
       "title": "Plugin",
       "audience": "advanced",
@@ -295,6 +340,15 @@
         "tooling",
         "database",
         "infrastructure"
+      ]
+    },
+    {
+      "slug": "project",
+      "title": "Project",
+      "audience": "beginner",
+      "topics": [
+        "foundations",
+        "claude-code"
       ]
     },
     {
@@ -345,6 +399,15 @@
       ]
     },
     {
+      "slug": "session",
+      "title": "Session",
+      "audience": "beginner",
+      "topics": [
+        "claude-code",
+        "foundations"
+      ]
+    },
+    {
       "slug": "shell-commands",
       "title": "Shell commands",
       "audience": "beginner",
@@ -378,6 +441,15 @@
       "topics": [
         "claude-code",
         "fundamentals"
+      ]
+    },
+    {
+      "slug": "subagent",
+      "title": "Subagent",
+      "audience": "advanced",
+      "topics": [
+        "claude-code",
+        "tooling"
       ]
     },
     {
