@@ -16,7 +16,33 @@
  *
  * Related: project-design.md §S.13.16 (AgentNews aesthetic anchor).
  */
+import { getCollection } from 'astro:content';
 import MarketingShell from '../components/MarketingShell.astro';
+
+// 2026-09-15 — "last updated" is derived from the content, not hardcoded and
+// not the build date. A build date changes on every deploy and would imply an
+// update that never happened; a hardcoded one goes stale the first time
+// someone forgets it. `last_reviewed` is the honest signal: it moves only when
+// an entry is actually written or revised.
+const dated = (
+  await Promise.all(
+    // Every content collection: the line says "Content last updated", so
+    // narrowing this would make the date quietly untrue the moment a glossary
+    // term or use case is the most recently revised thing on the site.
+    (['tips', 'skills', 'glossary', 'usecases', 'journeys'] as const).map((c) =>
+      getCollection(c).catch(() => []),
+    ),
+  )
+).flat();
+// ISO YYYY-MM-DD sorts lexically, so the max needs no Date parsing.
+const lastUpdatedIso = dated
+  .map((e) => (e.data as { last_reviewed?: string }).last_reviewed ?? '')
+  .filter(Boolean)
+  .sort()
+  .at(-1);
+const lastUpdated = lastUpdatedIso
+  ? `${lastUpdatedIso.slice(8, 10)}/${lastUpdatedIso.slice(5, 7)}/${lastUpdatedIso.slice(0, 4)}`
+  : null;
 
 // 2026-05-27 UAT T2 V1: below-fold Skills/Tips grids removed so the
 // homepage is a literal two-door router. Catalog access flows through
@@ -134,6 +160,11 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
           </div>
         </article>
       </div>
+      {lastUpdated && (
+        <p class="router-updated">
+          Content last updated <time datetime={lastUpdatedIso}>{lastUpdated}</time>
+        </p>
+      )}
     </div>
   </section>
 
@@ -536,6 +567,20 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
   .router-pill--accent:hover {
     background: color-mix(in srgb, var(--nbg-accent) 18%, transparent);
     border-color: var(--nbg-accent);
+  }
+
+  /* Sits under BOTH router cards, centred on the pair. */
+  /* Sits under BOTH router cards, hugging them — a quiet footnote on the pair,
+     not a band of its own. The tight top margin keeps clear air before the
+     "What Claude Code looks like" section below.
+     !important per docs/reference/starlight-cascade-gotcha.md — agentnews
+     ships unlayered `p` rules that were left-aligning and re-spacing this. */
+  .router-updated {
+    margin: 0.55rem 0 0 !important;
+    font-size: 0.75rem !important;
+    font-style: italic !important;
+    color: var(--nbg-muted) !important;
+    text-align: right !important;
   }
 
   .router-pill:hover {
