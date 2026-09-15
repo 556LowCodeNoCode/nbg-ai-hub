@@ -1010,3 +1010,28 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Round-2 had moved the time chip to the footer to dodge the pin collision, but the head row read empty at rest with just the eyebrow. Flush-right time + slide-on-hover gives a balanced rest layout AND clean hover affordance — best of both.
 
 **References:** `site/src/pages/use-cases/index.astro` (head row markup + `.usecase-card__head` / `.usecase-card__cta` CSS).
+
+## 2026-08-03 — Contract automation project lands in NbgAiHub
+
+Trigger: procurement contract automation use case starting build; needed a home.
+
+- Project workspace at `contract-automation/` (docs, data-model, templates, src, tests)
+- Source contracts converted to markdown, stored under `docs/source-contracts/`
+- Spec at `contract-automation/docs/project-spec.md`, not inlined here
+
+Why: keeps delivery work alongside the hub rather than in a separate repo.
+
+Refs: `contract-automation/README.md`
+
+## 2026-08-03 — Re-converted source contracts to preserve article numbering
+
+Trigger: first conversion dropped Word's automatic numbering, breaking clause
+cross-references («κατά τα οριζόμενα στο άρθρο 3»).
+
+- Word stores article numbers as formatting, not text, so pandoc loses them
+- convert.py resolves numbering from the document's own XML and writes it in
+  as literal text before pandoc runs
+- Verified: Family Α 31 articles («Άρθρο N.»), Family Β 16-19 (plain «N.»)
+- Note: the two families number differently — assembly must handle both
+
+Why: clause references are load-bearing for parameterisation.

@@ -8,6 +8,9 @@ resources:
   webhooks:
     - webhook: githubpush
       connection: github-bridge-webhook
+      filters:
+        - path: repository.name
+          value: NbgAiHub
 
 schedules:
   - cron: "0 * * * *"
