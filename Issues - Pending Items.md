@@ -4,6 +4,9 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 
 ## Pending
 
+30. **`pipeline/tests/config.test.ts` has been red since 2026-06-08** (low / stale test, found 2026-09-15).
+    Two tests assert the RSS seed has 5 sources and that every enabled feed is auto-promote eligible. The 2026-06-08 News-pillar decommission (`9e0e0e3`) trimmed `config/rss-sources.json` to the 2 Reddit feeds with both `enabled: false`, and the tests were never updated. Pipeline is 203/205, not the 205/205 the state docs claimed. Confirmed pre-existing: 0 content-diff in the seed or the test between `2a0546c` and now. **Fix path:** update the assertions to match the paused-pipeline reality, or mark them skipped until the pipeline is re-enabled.
+
 29. **Four internal skill entries link to repos that 404 for readers, and fail the CI validator** (medium / content + CI, 2026-09-15).
     `create-sandbox.md`, `deploy.md`, `team.md`, `uat-panel.md` carry `external_link`s to `556LowCodeNoCode/Skills` (**private**) and `NBG-AI/claude-tools` (not visible even to an authenticated org member — 404). The validator's `external_link` HEAD check fails on all four, so CI will fail the moment any of those files is touched in a PR; a colleague clicking through today gets a GitHub 404. Confirmed by running `pipeline/src/validators/cli.ts` over `skills/*.md` and by unauthenticated `curl -I`. **Fix path:** point `external_link` at a page readers can actually open (the hub's own detail page, or the marketplace listing) and keep the repo URL in `access_request`, which already explains how to request access.
 
