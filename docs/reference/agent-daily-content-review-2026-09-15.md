@@ -51,7 +51,7 @@ I read ~30 articles in full. The news sections are AI-industry commentary (Harar
 > Item **76** (Workflows) was deliberately skipped — the source itself warns it "will probably nuke your entire budget".
 > One item was added that appears in no article: **`/powerup`**, Claude Code's own built-in feature tour.
 >
-> **Parts 2–4 below are still open** and gated on the Skills-pillar question.
+> **Parts 2 and 3 are also done — see their banners below.** Part 4 was never a work item.
 
 
 ## A. Keyboard shortcuts beginners never discover
@@ -178,6 +178,21 @@ I read ~30 articles in full. The news sections are AI-industry commentary (Harar
 
 # PART 2 — SKILLS CATALOG CANDIDATES
 
+> ## ✅ PART 2 IS DONE (2026-09-15)
+>
+> **The gating question was answered: yes, the pillar catalogs external skills.** Skills 6 → 15.
+>
+> Taken: **77** (Anthropic's `document-skills` + `skill-creator`), **81** `/teach`, **82** `/handoff`, **83** `/grill-me`, **84** `prototype`, **87** doubt-driven-development, **88** source-driven-development, **89** diagram-design.
+>
+> **Three candidates died on verification, and that is the headline.** Every repo was opened and every `SKILL.md` read rather than trusting the write-ups:
+> - **Item 85 "Global Agent Guardrails" does not exist as a repo.**
+> - **Item 90's `/write-a-prd` is not a real skill name.**
+> - **Item 80 `google/skills` is not the no-code path the source claimed** — it is 17 Google *Cloud* database connectors.
+>
+> Logged in Issues rather than hedged onto a page. `origin` now encodes trust (internal / external / community) with a third listing group, and `docs/reference/authoring-skills.md` closes the gap where tips and glossary had authoring guides and skills didn't.
+>
+> Also fixed 5 internal entries that were failing the CI validator — four `external_link`s pointed at private repos (readers got a GitHub 404) and one maintainer handle contained a non-ASCII character.
+
 Our Skills pillar has 6 entries, all from our own `556LowCodeNoCode/Skills` marketplace. Everything below is **external and public**.
 
 > **Gating question:** does the Skills pillar catalog external skills at all? If it's our marketplace only, all of Part 2 is SKIP regardless of merit.
@@ -227,6 +242,16 @@ Our Skills pillar has 6 entries, all from our own `556LowCodeNoCode/Skills` mark
 
 # PART 3 — BONUS: a gift for the Glossary pillar
 
+> ## ✅ PART 3 IS DONE (2026-09-15)
+>
+> Glossary 47 → 55. Terms picked by **frequency in our own content**, not by working down the article's list: `session` appeared in **37 files / 173 times with no entry**, `project` in 24.
+>
+> Added: session, project, git, permission-mode, plan-mode, compacting, subagent, deployment.
+>
+> **`worktree` and `extended thinking` were scored and dropped — zero mentions anywhere in our content.** Defining words we never use is filler.
+>
+> Verifying this surfaced a real bug: the auto-linker indexes **slug + aliases, never `title`**, so `plan-mode` was linking on **0 pages** while looking perfect on `/glossary/`. Four shipped terms had the same hole. Fixed, and the rule is now documented in `authoring-glossary-terms.md` — the failure is silent, so nothing in the build or tests would have caught it.
+
 | # | Item | Why |
 |---|---|---|
 | 101 | **["All 35 Claude Code Concepts Explained for Non Coders"](https://the-agent-daily.org/agentnews-experimental/deep-dives/all-35-claude-code-concepts-explained-for-non-coders-chase-ai)** — a ready-made beginner glossary: terminal, `cd`/`ls`/`pwd`, project, context window, plan mode, permissions, MCP, subagents, worktrees, deployment, CLI tools, skills… | We have 47 terms. This is the single best-matched piece on the whole site for our audience and tone. **I'd take this before anything else if you want breadth fast.** Worth its own review pass |
@@ -234,6 +259,8 @@ Our Skills pillar has 6 entries, all from our own `556LowCodeNoCode/Skills` mark
 ---
 
 # PART 4 — ORG-LEVEL (not hub content)
+
+> **Not a work item — reading material.** Nothing here was built; both entries are comparison points for how the hub distributes itself.
 
 | # | Idea | Why it's here |
 |---|---|---|
