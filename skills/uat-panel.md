@@ -6,7 +6,7 @@ topics: [testing, qa, uat]
 internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
-external_link: "https://github.com/556LowCodeNoCode/Skills"
+external_link: null
 deeper_link: null
 ai_summary: Conversational UAT — Claude walks a non-developer through validating a built feature, asks scripted questions, and records pass/fail evidence the team can sign off on.
 when_to_use: Use this when the app is ready for business UAT — Claude walks the reviewer through each acceptance criterion live and produces a clean pass/fail sign-off record.
@@ -16,6 +16,11 @@ origin: internal
 category: testing
 status: active
 maintainer: "@nbg-ai-team"
+access_request: |
+  The source repo (`556LowCodeNoCode/Skills`) is private, so the link above is omitted
+  rather than pointing you at a GitHub 404. Ping the AI team channel on
+  Teams and they will add you: https://github.com/556LowCodeNoCode/Skills
+
 ---
 
 `uat-panel` turns User Acceptance Testing from a checklist exercise into a conversation. Claude reads the acceptance criteria, walks you through testing each one in the live app, and records what passed, what failed, and any evidence (screenshots, error messages) — so the team has a clean sign-off record without you writing a test plan from scratch.

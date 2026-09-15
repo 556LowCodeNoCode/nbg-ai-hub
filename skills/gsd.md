@@ -16,7 +16,7 @@ skill_id: gsd
 origin: community
 category: workflow
 status: active
-maintainer: "@TÂCHES"
+maintainer: "@gsd-build"
 time_saved: "~half a day per phase on multi-week projects"
 worked_scenario: "Building a multi-phase internal service over four weeks: roadmap, six phases, parallel workstreams. Without GSD: re-explaining the same context every Monday and losing decisions between sessions. With GSD: each phase has its own `discuss/plan/execute/verify` artefacts, the project state lives in `.planning/` next to the code, and you can resume next week with full continuity."
 ---

@@ -6,7 +6,7 @@ topics: [deployment, azure]
 internal: true
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
-external_link: "https://github.com/556LowCodeNoCode/Skills"
+external_link: null
 deeper_link: null
 ai_summary: Automates end-to-end deployment of NBG Azure-hosted web applications via the Azure Management Portal REST API — first-deploy (provision), auth-setup (identity team credentials + proxy + Kafka), and redeploy (rebuild + push).
 when_to_use: Use this when shipping to NBG Azure — provisioning a brand-new app, wiring identity-team auth and Kafka audit, or pushing changes to an existing one. Skips the click-through portal grind.
@@ -18,6 +18,11 @@ status: active
 maintainer: "@nbg-ai-team"
 time_saved: "~45 min per deploy; ~half a day for a first-deploy"
 worked_scenario: "Shipping a new internal API: provision the Azure resources, wire identity-team auth, set environment variables, push the container, verify the health check. Without `/deploy`: an afternoon of clicking through the Azure portal and copy-pasting credentials from email. With `/deploy first-deploy`: ten minutes of approving prompts and one health check at the end."
+access_request: |
+  The source repo (`556LowCodeNoCode/Skills`) is private, so the link above is omitted
+  rather than pointing you at a GitHub 404. Ping the AI team channel on
+  Teams and they will add you: https://github.com/556LowCodeNoCode/Skills
+
 ---
 
 `deploy` handles the full deployment lifecycle for NBG Azure-hosted apps. Three modes:

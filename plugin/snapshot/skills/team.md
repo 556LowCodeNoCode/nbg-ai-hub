@@ -6,7 +6,7 @@ topics: [workflow, orchestration, agents]
 internal: false
 authored: "2026-05-19"
 last_reviewed: "2026-05-19"
-external_link: "https://github.com/556LowCodeNoCode/Skills"
+external_link: null
 deeper_link: null
 ai_summary: Orchestrates a multi-agent team — refiner, scanner, investigator, planner, designer, parallel coders, reviewer, dependency validator, test builder, integration verifier — to take a request from idea to merged code in one sitting.
 when_to_use: Use this when you have a feature-sized request — bigger than a one-line fix, smaller than a multi-week project. It runs the full ten-phase pipeline (plan, design, code, review, test, verify) in one sitting.
@@ -18,6 +18,11 @@ status: active
 maintainer: "@nbg-ai-team"
 time_saved: "~half a day per feature-sized request"
 worked_scenario: "A colleague needed to add a new bank-data export endpoint, including tests and a small UI panel. Without `/team`: a day of switching between spec, plan, code, review, and integration. With `/team`: one prompt, one ten-phase run, one review pass at the end. The colleague was reading the AC report at lunchtime."
+access_request: |
+  The source repo (`556LowCodeNoCode/Skills`) is private, so the link above is omitted
+  rather than pointing you at a GitHub 404. Ping the AI team channel on
+  Teams and they will add you: https://github.com/556LowCodeNoCode/Skills
+
 ---
 
 `/team` is the team's flagship skill for delivering an end-to-end change in one sitting. You give it a request; it runs through ten phases (refine → scan → investigate → plan → design → implement → review → validate deps → build tests → integrate-verify) and reports back with an AC-by-AC verdict.
