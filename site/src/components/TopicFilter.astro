@@ -29,8 +29,19 @@ const { topics, scope } = Astro.props;
 // Stable display order — alphabetical, capitalised for the chip label.
 const ordered = [...new Set(topics)].sort();
 
+// A few topic values read as jargon once capitalised. `control` is the
+// schema enum value (frozen in content.config.ts and used by every tip's
+// frontmatter) but the user-facing word is "Shortcuts" — which is what
+// Claude Code itself calls these keys. Relabel at the display layer rather
+// than migrating the enum across 46 files.
+const TOPIC_LABELS: Record<string, string> = {
+  control: 'Shortcuts',
+};
+
 function display(t: string): string {
   if (t.length === 0) return t;
+  const override = TOPIC_LABELS[t];
+  if (override !== undefined) return override;
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 ---

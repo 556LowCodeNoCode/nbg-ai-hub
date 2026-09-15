@@ -15,7 +15,15 @@
  *   if (isSplash)
  *     → render the unified nbg-topnav: brand + section links + Pagefind
  *       search trigger + AuthControls (Sign in XOR chip) + ThemeSelect +
- *       mobile drawer + SignInModal.
+ *       mobile drawer + SignInModal + ShortcutsDialog.
+ *
+ *       ShortcutsDialog is mounted in the SPLASH branch only, beside the nav
+ *       that triggers it. The content-detail branch renders Starlight's
+ *       default header, which has no section links and so no Shortcuts
+ *       trigger. Mounting it here (not in MarketingShell) is deliberate:
+ *       Starlight renders this component as the Header override, so the
+ *       dialog exists wherever the trigger does — and exactly once, which
+ *       matters because the wiring looks it up by element id.
  *
  *   else (content-detail page)
  *     → render the default Starlight Header markup verbatim. SocialIcons
@@ -48,6 +56,7 @@ import SocialIcons from 'virtual:starlight/components/SocialIcons';
 import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
 
 import AuthControls from './AuthControls.astro';
+import ShortcutsDialog from './ShortcutsDialog.astro';
 import SignInModal from './SignInModal.astro';
 
 const { entry } = Astro.locals.starlightRoute;
@@ -73,6 +82,11 @@ const navLinks = [
   { label: 'Day 1',       href: '/start-here/day-1/',       external: false },
   { label: 'Use Cases',   href: '/use-cases/',              external: false },
   { label: 'Tips',        href: '/tips/',                   external: false },
+  // Opens the Shortcuts modal instead of navigating — same behaviour as the
+  // homepage pill, so "Shortcuts" means one thing everywhere. The <dialog>
+  // is mounted at the bottom of this component, which Starlight renders as
+  // the Header override on every page, so the trigger always has a target.
+  { label: 'Shortcuts',   href: '#',                        external: false, modal: true },
   { label: 'Skills',      href: '/skills/',                 external: false },
   { label: 'Glossary',    href: '/glossary/',               external: false },
   { label: 'Newsletter',  href: '/newsletter/',             external: false },
@@ -138,15 +152,21 @@ const base = import.meta.env.BASE_URL;
       <ul class="nbg-topnav__links" role="list">
         {desktopSectionLinks.map((link) => (
           <li>
-            <a
-              href={link.href}
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noopener' : undefined}
-              data-current={!link.external && isCurrent(link.href) ? 'true' : undefined}
-              aria-current={!link.external && isCurrent(link.href) ? 'page' : undefined}
-            >
-              {link.label}
-            </a>
+            {'modal' in link && link.modal ? (
+              <button type="button" class="nbg-topnav__modal-link" data-shortcuts-open aria-haspopup="dialog">
+                {link.label}
+              </button>
+            ) : (
+              <a
+                href={link.href}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener' : undefined}
+                data-current={!link.external && isCurrent(link.href) ? 'true' : undefined}
+                aria-current={!link.external && isCurrent(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>
@@ -213,15 +233,21 @@ const base = import.meta.env.BASE_URL;
       <ul role="list">
         {navLinks.map((link) => (
           <li>
-            <a
-              href={link.href}
-              target={link.external ? '_blank' : undefined}
-              rel={link.external ? 'noopener' : undefined}
-              data-current={!link.external && isCurrent(link.href) ? 'true' : undefined}
-              aria-current={!link.external && isCurrent(link.href) ? 'page' : undefined}
-            >
-              {link.label}
-            </a>
+            {'modal' in link && link.modal ? (
+              <button type="button" class="nbg-topnav__modal-link" data-shortcuts-open aria-haspopup="dialog">
+                {link.label}
+              </button>
+            ) : (
+              <a
+                href={link.href}
+                target={link.external ? '_blank' : undefined}
+                rel={link.external ? 'noopener' : undefined}
+                data-current={!link.external && isCurrent(link.href) ? 'true' : undefined}
+                aria-current={!link.external && isCurrent(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>
@@ -229,6 +255,7 @@ const base = import.meta.env.BASE_URL;
   </nav>
 
   <SignInModal />
+  <ShortcutsDialog />
 ) : (
   <div class="header">
     <div class="title-wrapper sl-flex">
@@ -457,7 +484,8 @@ const base = import.meta.env.BASE_URL;
     @media (min-width: 64rem) {
       .nbg-topnav__links { display: inline-flex; }
     }
-    .nbg-topnav__links a {
+    .nbg-topnav__links a,
+    .nbg-topnav__links .nbg-topnav__modal-link {
       display: inline-flex;
       align-items: center;
       height: 32px;
@@ -473,7 +501,20 @@ const base = import.meta.env.BASE_URL;
         background-color var(--nbg-dur-fast) var(--nbg-ease-out),
         color            var(--nbg-dur-fast) var(--nbg-ease-out);
     }
-    .nbg-topnav__links a:hover {
+    .nbg-topnav__links .nbg-topnav__modal-link {
+      /* Buttons inherit none of the above by default. */
+      border: 0;
+      background: none;
+      cursor: pointer;
+      font: inherit;
+      font-family: var(--nbg-type-body);
+      font-size: var(--nbg-fs-sm);
+      font-weight: var(--nbg-fw-medium);
+      color: var(--nbg-color-fg-secondary);
+      appearance: none;
+    }
+    .nbg-topnav__links a:hover,
+    .nbg-topnav__links .nbg-topnav__modal-link:hover {
       color: var(--nbg-color-fg-primary);
       background: var(--nbg-color-bg-surface-hover);
     }
@@ -490,7 +531,8 @@ const base = import.meta.env.BASE_URL;
       border-radius: var(--nbg-r-full);
       background: var(--nbg-color-accent);
     }
-    .nbg-topnav__links a:focus-visible {
+    .nbg-topnav__links a:focus-visible,
+    .nbg-topnav__links .nbg-topnav__modal-link:focus-visible {
       outline: none;
       box-shadow: var(--nbg-sh-focus-ring);
     }

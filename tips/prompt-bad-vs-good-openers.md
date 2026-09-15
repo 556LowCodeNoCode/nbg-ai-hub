@@ -5,7 +5,7 @@ audience: beginner
 topics: [prompting]
 internal: false
 authored: "2026-05-19"
-last_reviewed: "2026-05-28"
+last_reviewed: "2026-09-15"
 external_link: null
 deeper_link: null
 ai_summary: A useful prompt names the file, the symptom, the repro, and the desired action. Vague prompts get vague results. The five-part shape gives Claude what it needs on the first try.
@@ -32,3 +32,7 @@ When the prompt is more open than a bug fix — exploring a new area, planning a
 > Read `src/services/billing.ts` and `src/routes/billing.ts`. Then tell me where invoice totals are computed and whether there's a single source of truth.
 
 Two sentences. First sets context, second asks the question. Stops Claude from guessing what file you meant.
+
+## What doesn't belong in an opener
+
+Notice what the five-part shape has no room for: a role-play preamble. "You are a world-class senior engineer…" is the most-copied opener on the internet and it does nothing for you. The words that earn their place are the ones pointing at your project. See the drop-the-persona tip.

@@ -42,17 +42,19 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 │   ├── astro.config.mjs       ← sidebar 11 entries (My Pins + Submit a Skill added), SocialIcons override, dev port 4321
 │   ├── vitest.config.ts       ← Vitest 4.x node-env, tests/**/*.test.ts pattern
 │   ├── src/content.config.ts  ← 5 content collections (skills, tips, glossary, journeys, usecases, newsletters); skills schema extended with 7 new fields. Newsletter collection holds metadata-only entries; sibling HTML lives in `newsletters/<slug>.html`.
-│   ├── src/components/        ← 10 .astro components (NewsPanel + NewsList removed 2026-06-08)
-│   ├── src/components/primitives/  ← 16 portable primitives — Container, Section, Stack, Cluster, Grid, Split, Card, Button, Badge, Chip, Kbd, Eyebrow, Lede, Display, MotionReveal, StepIndicator (AC36 portability gate: zero @astrojs/starlight imports)
+│   ├── src/components/        ← 11 .astro components (+ShortcutsDialog — homepage modal) (NewsPanel + NewsList removed 2026-06-08)
+│   ├── src/components/primitives/  ← 18 portable primitives — Container, Section, Stack, Cluster, Grid, Split, Card, Button, Badge, Chip, Kbd, Eyebrow, Lede, Display, MotionReveal, StepIndicator (AC36 portability gate: zero @astrojs/starlight imports)
 │   ├── src/styles/tokens/     ← design system — primitives.css (135 tokens), semantic.css (38 × 2 themes), aliases.css (16 --sl-color-* × 2 themes), layers.css (8-layer cascade), legacy.css (absorbed custom.css), index.css (aggregator)
 │   ├── src/styles/            ← content-prose.css + content-chrome.css (Starlight chrome theme override) + motion.css (view-transitions + reduced-motion) + agentnews-layout.css (homepage .hero/.section/.wrap — see Starlight cascade gotcha) + search-modal.css (Pagefind UI re-skin inside Starlight's <Search/> dialog)
 │   ├── src/scripts/           ← motion.ts (IntersectionObserver reveal utility — 50 LOC) + glossary-filter.ts
-│   ├── src/lib/               ← 6 TS modules: slug, auth, api-fetch, gist, skill-types, pin-store, glossary-link-string (news.ts + news-sections.ts + submission.ts removed 2026-06-08)
+│   ├── src/data/              ← shortcuts.ts — canonical key-combo table, verified against the Claude Code binary (see §Key-combo tooltips). No page: popover only.
+│   ├── src/lib/               ← 8 TS modules: slug, auth, api-fetch, gist, skill-types, pin-store, glossary-link-string, shortcut-link(-string) (news.ts + news-sections.ts + submission.ts removed 2026-06-08)
 │   ├── src/pages/             ← /skills, /tips, /glossary, /start-here/day-1, /start-here/foundations, /my-pins, /about, /use-cases/* (legacy /news, /reference, /contribute, /submit-skill removed)
 │   ├── src/content/docs/      ← index.mdx (homepage, template:splash)
 │   ├── scripts/               ← build-pin-index.ts (pre-build step emitting public/_data/<type>-index.json — emits 5 indices, no news)
 │   ├── public/_data/          ← build-emitted JSON indices (5 files: skill, tip, use-case, glossary, journey-step)
-│   ├── src/plugins/           ← remark-glossary-link.ts — build-time auto-linker for glossary terms (§S.14.3). Single-layer unified Plugin, plain HTML output, news-skip via excludePaths (now defensive dead code — kept harmless)
+│   ├── src/plugins/           ← remark-shortcut-link.ts (key-combo auto-linker) +
+│   │                              remark-glossary-link.ts — build-time auto-linker for glossary terms (§S.14.3). Single-layer unified Plugin, plain HTML output, news-skip via excludePaths (now defensive dead code — kept harmless)
 │   └── tests/                 ← 16 test files, 246 tests (post-cleanup: agentnews-aesthetic, remark-glossary-news-skip, submission test files removed 2026-06-08)
 ├── plugin/                   ← Claude Code plugin workspace — eleven /hub-* commands
 │   ├── package.json           ← Node 22, ESM, vitest 4.x, esbuild ^0.25 (deps: gray-matter, js-yaml, open)
@@ -89,7 +91,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 | Pillar | Files |
 |---|---|
 | Glossary | 47 |
-| Tips | 30 |
+| Tips | 46 |
 | Skills | 6 |
 | Use Cases | 15 |
 | Journeys | 2 |
@@ -144,6 +146,16 @@ Per docs/archive/design/project-design.md §S.13 — the UI redesign that landed
 ## Starlight cascade gotcha — read before styling any prose page
 
 Starlight (and `agentnews-layout.css`) ship CSS **unlayered** — their rules beat our `@layer nbg.components` rules in production, even though they "win" locally because Vite orders CSS differently in dev. Symptom: visual regressions appear only on the deployed Pages site (https://556lowcodenocode.github.io/NbgAiHub/). Default posture for new components: `!important` on every layout/spacing/typography property that must win, avoid the `.section` and `.wrap` class names (already claimed by agentnews with `!important` rules baked in). Full incident log + fix pattern: `docs/reference/starlight-cascade-gotcha.md`.
+
+## Key-combo tooltips (no shortcuts page — by design)
+
+Landed 2026-09-15. Key combos auto-link to a **self-contained hover popover** wherever they appear in content. The homepage **Shortcuts pill opens a modal** — `ShortcutsDialog.astro`, all 16 combos in four groups. It is a `<button>`, not a link, and navigates nowhere. The header nav's Shortcuts entry links to `/tips/#control`; the `/tips/` cluster itself is unchanged. **There is deliberately no standalone `/shortcuts/` reference page and no "read more" link** — a beginner who has to navigate away to learn what `Ctrl+G` does has already lost the thread, so the popover must be the complete answer: the keys, alternate spellings, what it does, how it behaves, and a ruled-off **"Use it when"** line carrying the trigger situation. If you find yourself wanting to add a link out of the popover, add the missing information to the popover instead.
+
+Source of truth: **`site/src/data/shortcuts.ts`** (16 combos). **Every entry was verified against the installed Claude Code binary (v2.1.235)** by extracting its keybinding table and command registry; roughly a quarter of the third-party claims we checked were wrong. **Standing rule: if a combo is not in the binary, it does not go in the file.** Each entry carries `action` (Claude Code's internal action id, e.g. `chat:stash`) as the audit trail to re-grep when a new version ships.
+
+Mechanism mirrors the glossary (§S.14): `remark-shortcut-link.ts` wraps the first occurrence of each combo per markdown file in `<button data-shortcut-slug>`; `ShortcutKey.astro` (18th primitive, injected by `MarketingShell`) hydrates it into an HTML `popover`; `linkShortcuts()` does the same for frontmatter strings. The plugin is registered **after** `remark-glossary-link` on every page that calls `createMarkdownProcessor()` — the glossary linker emits `html` nodes, which this plugin skips, so the two can't fight over one span. Wired on: `tips/[slug]`, `use-cases/[slug]`, `start-here/day-1`, `start-here/foundations`.
+
+Naming: the user-facing word is **Shortcuts**, which is what Claude Code calls them in its own UI. The `topics` enum value stays `control` (frozen in `content.config.ts`, used by 46 tip files); `TopicFilter.astro` relabels it at the display layer via `TOPIC_LABELS`, and the `/tips/` cluster heading says "Shortcuts".
 
 ## Glossary auto-link + tooltips
 

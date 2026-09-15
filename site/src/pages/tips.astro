@@ -28,7 +28,38 @@ import '../styles/tip-preview.css';
 
 type Tip = CollectionEntry<'tips'>;
 
-const all = await getCollection('tips');
+const unsorted = await getCollection('tips');
+
+// 2026-09-15 — tips sort newest-first by `authored`, so a freshly added tip
+// surfaces at the top of its cluster instead of wherever the glob loader
+// happened to put it. `authored` is normalised to YYYY-MM-DD by the schema
+// (`content.config.ts` → isoDateString), so plain string compare is correct
+// and avoids a Date round-trip. Titles break ties for a stable build.
+const all = [...unsorted].sort((a, b) => {
+  const byDate = b.data.authored.localeCompare(a.data.authored);
+  return byDate !== 0 ? byDate : a.data.title.localeCompare(b.data.title);
+});
+
+// Cards show the added-date as DD/MM/YY. Built from the ISO parts directly —
+// `new Date('YYYY-MM-DD')` parses as UTC midnight and can render as the
+// previous day for viewers behind UTC.
+function formatAdded(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return iso;
+  return `${d}/${m}/${y.slice(2)}`;
+}
+// The visible stamp is bare `15/09/26` — unambiguous to a sighted reader in
+// context, but not to a screen reader. Long form goes on aria-label/title.
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+] as const;
+function addedLabel(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  const month = MONTHS[Number(m) - 1];
+  if (!y || !d || !month) return `Added ${iso}`;
+  return `Added ${Number(d)} ${month} ${y}`;
+}
 
 // 2026-05-29: pre-render every tip body to HTML at build time so the listing
 // page's hover-preview popover can show the same prose the detail page
@@ -87,6 +118,27 @@ function simpleMarkdown(md: string): string {
       out.push(`<blockquote><p>${inlineMd(escapeHtml(buf.join(' ')))}</p></blockquote>`);
       continue;
     }
+    // GitHub-flavoured tables. The hover preview was rendering `| a | b |`
+    // rows as literal pipe soup because this mini-renderer had no table
+    // case — visible on the shortcuts tip, which is mostly one big table.
+    // Header row + `|---|---|` delimiter + body rows.
+    if (line.trim().startsWith('|') && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] ?? '')) {
+      const cells = (row: string): string[] =>
+        row.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+      const head = cells(line);
+      i += 2; // consume header + delimiter
+      const body: string[][] = [];
+      while (i < lines.length && (lines[i] ?? '').trim().startsWith('|')) {
+        body.push(cells(lines[i] ?? ''));
+        i++;
+      }
+      const th = head.map((c) => `<th>${inlineMd(escapeHtml(c))}</th>`).join('');
+      const trs = body
+        .map((r) => `<tr>${r.map((c) => `<td>${inlineMd(escapeHtml(c))}</td>`).join('')}</tr>`)
+        .join('');
+      out.push(`<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`);
+      continue;
+    }
     if (/^[-*]\s+/.test(line)) {
       const items: string[] = [];
       while (i < lines.length && /^[-*]\s+/.test(lines[i] ?? '')) {
@@ -109,7 +161,7 @@ function simpleMarkdown(md: string): string {
     const buf: string[] = [];
     while (i < lines.length && (lines[i] ?? '').trim() !== '') {
       const lp = lines[i] ?? '';
-      if (lp.startsWith('```') || /^#{2,4}\s+/.test(lp) || /^[-*]\s+/.test(lp) || /^\d+\.\s+/.test(lp) || lp.startsWith('> ')) break;
+      if (lp.startsWith('```') || /^#{2,4}\s+/.test(lp) || /^[-*]\s+/.test(lp) || /^\d+\.\s+/.test(lp) || lp.startsWith('> ') || lp.trim().startsWith('|')) break;
       buf.push(lp);
       i++;
     }
@@ -152,8 +204,8 @@ const CLUSTERS: Array<{ key: string; label: string; blurb: string; match: (t: Ti
   },
   {
     key: 'control',
-    label: 'Control keys',
-    blurb: 'The keystrokes and modes that put you back in the driver seat — stop, undo, switch what Claude is allowed to do.',
+    label: 'Shortcuts',
+    blurb: 'The keys and modes that put you back in the driver seat — stop, rewind, stash, and switch what Claude is allowed to do. Claude Code calls these Shortcuts too.',
     match: (t) => hasAny(t.data.topics, ['control']),
   },
   {
@@ -269,9 +321,15 @@ function audienceTooltip(a: string): string {
                     >
                       {tip.data.audience}
                     </span>
-                    <div class="listing-row__pin">
+                    <time
+                      class="listing-row__added"
+                      datetime={tip.data.authored}
+                      aria-label={addedLabel(tip.data.authored)}
+                      title={addedLabel(tip.data.authored)}
+                    >{formatAdded(tip.data.authored)}</time>
+                    <span class="listing-row__pin">
                       <PinButton type="tip" slug={tip.id} iconOnly={true} />
-                    </div>
+                    </span>
                   </div>
                   {renderedBodies.has(tip.id) && (
                     <script
@@ -321,9 +379,15 @@ function audienceTooltip(a: string): string {
                   >
                     {tip.data.audience}
                   </span>
-                  <div class="listing-row__pin">
+                  <time
+                    class="listing-row__added"
+                    datetime={tip.data.authored}
+                    aria-label={addedLabel(tip.data.authored)}
+                    title={addedLabel(tip.data.authored)}
+                  >{formatAdded(tip.data.authored)}</time>
+                  <span class="listing-row__pin">
                     <PinButton type="tip" slug={tip.id} iconOnly={true} />
-                  </div>
+                  </span>
                 </div>
                 {renderedBodies.has(tip.id) && (
                   <script

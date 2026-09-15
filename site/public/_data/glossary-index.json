@@ -335,6 +335,16 @@
       ]
     },
     {
+      "slug": "sandbox",
+      "title": "Sandbox",
+      "audience": "beginner",
+      "topics": [
+        "infrastructure",
+        "tooling",
+        "claude-code"
+      ]
+    },
+    {
       "slug": "shell-commands",
       "title": "Shell commands",
       "audience": "beginner",
@@ -395,6 +405,16 @@
       "topics": [
         "foundations",
         "agents"
+      ]
+    },
+    {
+      "slug": "vm",
+      "title": "VM",
+      "audience": "beginner",
+      "topics": [
+        "infrastructure",
+        "tooling",
+        "deployment"
       ]
     },
     {

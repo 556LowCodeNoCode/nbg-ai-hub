@@ -6,6 +6,113 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-09-15 (late, corrected) — `meta` is Alt, not the Windows key
+
+**Trigger:** User challenged the "Windows reserves that key" caveat on Meta+J. They were right; I had inferred it rather than verified it. Checked the official reference at <https://code.claude.com/docs/en/keybindings>, which is authoritative and supersedes my binary-string inference.
+
+**Corrections — the docs say:**
+- **`alt` / `opt` / `option` / `meta` are all one modifier**: Alt on Windows and Linux, Option on macOS. `cmd` / `super` / `win` is the separate Command/Windows key, which the docs note most terminals never report. So my "Windows reserves meta" claim was wrong.
+- **`app:toggleTerminal` is not in the documented action list at all** — removed the Cmd+J / terminal-panel entry rather than ship an undocumented binding.
+- **`chat:imagePaste` is Ctrl+V but `Alt+V` on Windows and WSL** — a genuine per-OS binding difference I had missed. Added `keysWin` to model it.
+- **`chat:clearInput` is Ctrl+L**, so the action id on the Esc-Esc entry was mis-attributed; set to null.
+- **`Ctrl+S` inside history search cycles scope** (session → project → everywhere). This **vindicates 37-Cheat-Codes item #6**, which I dropped earlier as contradicted — it was right, just describing a different context from `chat:stash`. Added as a note rather than a separate row.
+- Added `Ctrl+J` (`chat:newline`) — "write a second line without sending" is a day-one question and was missing.
+- `Shift+Tab` falls back to Meta+M on Windows without VT mode; `Ctrl+B`/`Ctrl+Z` are documented terminal conflicts (tmux prefix, SIGTSTP), not Claude Code bindings.
+
+**Process lesson:** binary-string extraction is good for *discovering* bindings but cannot tell you modifier *semantics*. The published reference exists — check it before asserting per-platform behaviour. Standing rule for `data/shortcuts.ts` updated to cite the docs URL.
+
+**Also:** OS toggle shrunk (200x40 → 156x31) and moved onto the title row with a 14px gap, rather than occupying its own band.
+
+**References:** `site/src/data/shortcuts.ts`, `tips/keyboard-shortcuts-worth-knowing.md`, `src/components/ShortcutsDialog.astro`.
+
+---
+
+## 2026-09-15 (late) — OS toggle on the Shortcuts modal, after verifying per-platform keys
+
+**Trigger:** "how are we gonna differentiate mac and win users? … verify the keys for both OS, that they work that way as shortcuts for claude code."
+
+**What the binary actually says (v2.1.235):**
+- **There is no per-platform keybinding table.** The terminal bindings are identical on macOS and Windows — `ctrl+r/s/t/g/o/b`, `shift+tab`, `ctrl+_`, `ctrl+v` are the same everywhere. Only one platform-conditional key display exists in the binary at all (`darwin ? 'Cmd+Option+K' : 'Ctrl+Alt+K'`, the IDE extension launcher).
+- **Alt is Option on macOS** — same physical modifier, different name. Confirmed by `/terminal-setup`, which configures Terminal.app with *"Enabled 'Use Option as Meta key'"*.
+- **A reserved-keys table exists**: `cmd+c/v/x/q/w/tab/space` are labelled OS-owned ("macOS system paste" etc.) — which is why image paste is `Ctrl+V`, not `Cmd+V`. `ctrl+z` is labelled *"Unix process suspend (SIGTSTP)"*; `ctrl+c`/`ctrl+d`/`ctrl+m` are "Cannot be rebound".
+
+**Decisions:**
+- **Toggle ships anyway**, because the modifier rename is real and the reserved-key caveats are per-OS. Encoded as `keysMac` / `noteMac` / `noteWin` on only the entries that genuinely differ — not a blanket duplication.
+- **Reuses the site-wide OS contract** (`localStorage` `nbgaihub.os-prefer` + `<html data-os-prefer>`) that the use-case pages already use, so the choice carries across the site. First visit guesses from the user agent.
+- **Both spellings are rendered, CSS hides the non-matching one** — works on first paint, no JS re-render flash.
+- **The footer states plainly that the keys are the same on both**, so the toggle can't imply a difference that does not exist.
+- Inline SVG glyphs, not `` / `▦`: the Apple glyph is a tofu box on Windows — precisely the readers who need it.
+
+**Why:** A toggle that silently invented different keys per OS would be worse than none. Verify first, then only encode what is real.
+
+**Also in this pass — "Shortcuts" now means one thing everywhere:** the header nav entry became a modal trigger too, so it no longer navigates to `/tips/#control`. The `<dialog>` is mounted **once**, in `SplashAwareHeader`'s splash branch, because Starlight renders that component as the site-wide Header override — so the dialog exists wherever the trigger does, and exactly once (the wiring resolves it by element id, so a second copy would break it). The homepage's own mount was removed. The content-detail header branch renders Starlight's default markup with no section links, hence no trigger there.
+
+Two traps hit again and worth remembering: (1) a `{/* JSX comment */}` inside the header's ternary branch is a parse error in Astro — put the note in the frontmatter doc block; (2) a `<button>` dropped into a list of `<a>` inherits none of the link styling and ships UA chrome (16px/400/grey/outset vs 13px/500/transparent), so the nav-link rule had to be extended to cover it. Verified by comparing computed styles, not by eye.
+
+**References:** `site/src/data/shortcuts.ts` (`keysFor()`), `src/components/ShortcutsDialog.astro`, `src/components/SplashAwareHeader.astro`; verified by extracting the keybinding + reserved-key tables from the CLI binary.
+
+---
+
+## 2026-09-15 (evening) — Shortcuts page dropped; the popover is the whole answer
+
+**Trigger:** User reviewed the shipped `/shortcuts/` page and rejected it: "i dont want that as a page!! no shortcut page - just a popup that will be complete and the user will understand easily and immediately on when to use them."
+
+**Decisions — supersedes the page decision in the entry below:**
+- **Deleted `/shortcuts/`.** Site back to 78 pages.
+- **The homepage Shortcuts pill is a BUTTON that opens a modal — it navigates nowhere.** `ShortcutsDialog.astro` lists all 16 combos in four labelled groups (keys / what it does / when), with a `/keybindings` footnote. Native `<dialog>` + `showModal()` for free ESC-close, focus trapping and page inertness; backdrop-click dismissal hand-wired. Six pills now fill the 3-col grid as a clean 2x3.
+- **The `/tips/` Shortcuts cluster is untouched.** The header nav's Shortcuts entry still links to `/tips/#control`; only the homepage pill opens the modal.
+- **Combos render as one cap per physical key** — `[Ctrl] + [T]`, not one wide `Ctrl+T` chip — via `splitKeys()` in `data/shortcuts.ts`, used by both the modal and the inline popover (pre-split into the popover's JSON payload so the logic exists once). The joiner distinguishes *hold together* (`+`) from *press in sequence* (`then`), so `Esc Esc` reads as `[Esc] then [Esc]`.
+- **The Shortcuts pill carries the light-teal accent** (`--nbg-accent-soft` / `--nbg-accent` / `--nbg-accent-ink`, the Foundations-card pairing) so the one pill that opens a modal rather than navigating stands out from its five siblings.
+- The pill's trigger lives in `index.astro`, not in `ShortcutsDialog.astro`: `.router-pill` is scoped to the page's Astro hash, so a button rendered from the component never matched it and fell back to raw UA button chrome. The component renders only the `<dialog>`; `[data-shortcuts-open]` binds document-wide.
+- Two unlayered-cascade bites fixed by measuring, not guessing: a global reset zeroed the UA's `margin:auto` and pinned the dialog left, and an unlayered block margin (`16px 0 20px`) on the row text inflated row pitch to 78px. Explicit `margin:auto` and a scoped margin reset took it to 55px.
+- **The popover is the complete answer.** No "read more" link. It now renders keys, alternate spellings ("also Option+T"), what it does, how it behaves, and a ruled-off **"Use it when"** line in accent colour carrying the trigger situation. Standing rule recorded in CLAUDE.md: if you want to link out of the popover, put the missing information *in* the popover.
+- **Trimmed the data** to what the popover can surface — dropped the `!`, `@`, `/` prefix entries (never auto-linked, and with no page they were dead data; `workflow-at-and-bang` covers them), plus the now-unused `group` field, `SHORTCUT_GROUPS` and `SHORTCUTS_BY_SLUG`. 19 → 16 combos.
+- **Kept** the "Control keys" → "Shortcuts" rename on the `/tips/` cluster and the topic chip — that was a naming correction, independent of the page.
+
+**Why:** A reference page is somewhere a beginner has to go and come back from. The information is only useful at the moment the key is mentioned, which is exactly where the popover already sits.
+
+**References:** `site/src/data/shortcuts.ts`, `src/components/primitives/ShortcutKey.astro`; 25 triggers across 10 pages; 78 pages, 246/246 tests.
+
+---
+
+## 2026-09-15 (later) — Shortcuts pillar + key-combo popovers
+
+**Trigger:** User asked for a third nav pill between Tips and Skills, every shortcut mentioned anywhere to become a popup, and flagged that the tips hover-preview was rendering a markdown table as raw pipes.
+
+**Decisions:**
+- **New `/shortcuts/` page** — nav pill between Tips and Skills, plus a homepage router pill. 19 combos, grouped start-here / prompt / view / session / mode.
+- **Source of truth is `site/src/data/shortcuts.ts`, not a content collection.** Shortcuts are a verified lookup table, not authored prose — a TS module keeps them auditable against the binary and avoids 19 markdown files plus pin-index, snapshot and count plumbing. Trade-off accepted: shortcuts are not pinnable and not in the plugin snapshot. Migrating to a collection later is contained.
+- **Standing rule: if a combo is not in the binary, it does not go in the file.** Each entry carries Claude Code's internal `action` id as the audit trail.
+- **Auto-link mirrors the glossary system (§S.14)** rather than inventing a parallel one: `remark-shortcut-link.ts` + `lib/shortcut-link.ts` + `linkShortcuts()` + `ShortcutKey.astro` (18th primitive). Registered AFTER `remark-glossary-link` — that plugin emits `html` nodes, which this one skips, so they cannot fight over a span.
+- **`!`, `@`, `/` are deliberately not auto-linked** — punctuation would fire on every sentence. They still appear on `/shortcuts/`.
+- **Renamed "Control keys" → "Shortcuts"** (Claude Code's own UI label; "control keys" was our coinage and read as jargon). The `topics` enum value stays `control` — relabelled in `TopicFilter.astro` via `TOPIC_LABELS` rather than migrating 46 files.
+- **Fixed `simpleMarkdown()` in `tips.astro`** — the hover-preview mini-renderer had no table case, so the shortcuts tip previewed as pipe soup.
+
+**Why:** Shortcuts were the single most error-prone thing in the source sweep and the most useful to a beginner. Making them hoverable everywhere means a newcomer never has to leave the page to find out what `Ctrl+G` does.
+
+**References:** `site/src/data/shortcuts.ts`, `src/plugins/remark-shortcut-link.ts`, `src/components/primitives/ShortcutKey.astro`, `src/pages/shortcuts.astro`; 25 triggers across 10 pages; 79 pages built, 246/246 tests.
+
+---
+
+## 2026-09-15 — Tips pillar overhaul from external sweep, verified against the CLI binary
+
+**Trigger:** User asked to sweep the-agent-daily.org (a friend's curated Claude Code site) for Tips and Skills material, then execute all of Part 1 of the resulting triage.
+
+**Decisions:**
+- Content sourced from the site's Claude Code corpus — six paginated index pages, ~30 articles read in full. Triage doc: `docs/reference/agent-daily-content-review-2026-09-15.md` (103 numbered candidates, Parts 1–4).
+- **Nothing ships unverified.** Every keybinding, slash command and setting was checked against the installed CLI (v2.1.235) by extracting the command registry and keybinding table from the binary. ~25% of source claims were wrong; those were dropped or corrected, not hedged.
+- **Unverifiable claims are omitted, not caveated** (user call). Dropped: `Ctrl+S`-as-history-search (contradicted — it is stash), the `/config` concise-output-style path, mobile-push and telemetry key names, `cleanupPeriodDays` spelling, `/focus`, "clear context on plan accept". Logged in Issues for live testing.
+- **`/compact` conflict resolved as "present both"** (user call): `compact-and-clear.md` keeps its guidance and now states the fidelity cost, pointing at handoff for work that matters.
+- **Tips sort newest-first by `authored` within each topic cluster**, date shown on every card. Topic clusters kept (user call) — not flattened to a feed.
+- 16 new tips added; 14 existing tips edited to dedupe overlap and correct stale facts. Tips 30 → 46.
+- **Stale facts corrected in published tips:** auto is now the default permission mode; `Esc Esc` clears the input (it does not open a history scrubber — `/rewind` restores); `/effort` levels are low/medium/high/xhigh/max with no `auto`.
+
+**Why:** The source is video-transcript-derived and self-corrects twice within one article. For a bank onboarding hub, a documented keystroke that does nothing costs more credibility than the missing tip was worth.
+
+**References:** `docs/reference/agent-daily-content-review-2026-09-15.md`; `tips/` (46 files); `site/src/pages/tips.astro` (sort + date); site 246/246, plugin 122/122; plugin snapshot rebuilt. Parts 2–4 (Skills catalog, glossary piece) not executed — gated on whether the Skills pillar catalogs external skills.
+
+---
+
 ## 2026-06-17 (afternoon) — Day-1 Sandbox heads-up callout + VM / Sandbox glossary terms
 
 **Trigger:** User is redesigning the Sandbox landing page (mock attached — "Sandbox Connect" with What/Why/When cards) but it isn't shipping until end of week. Until then the external "Sandbox ↗" link still points at the current less-explained page, so we need a heads-up on Day 1.

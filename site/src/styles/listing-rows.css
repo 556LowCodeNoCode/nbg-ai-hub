@@ -485,6 +485,41 @@
     pointer-events: auto;
   }
 
+  /* 2026-09-15 — added-date stamp, trailing the audience pill on the SAME
+     line: `BEGINNER · 15/09/26`. The eyebrow line (the other place a date
+     could live) is display:none under .listing-list--compact, so the stamp
+     has to sit in the meta rail to be visible on /tips/.
+
+     Deliberately subordinate to the pill: 10px vs 11px, muted-2 vs the
+     pill's ink, no uppercase-badge treatment. The pill is a filterable
+     facet and stays the loud element; the date is passive provenance.
+     Keeping both on one line holds the card at its original height —
+     46 cards makes a stacked rail expensive.
+
+     No "ADDED" label: the DD/MM/YY shape reads as a date on its own, and
+     the word cost a line of attention for no information. Screen readers
+     get the full phrasing via aria-label.
+
+     Scoped styles stay off .listing-row__meta itself so /skills/ and
+     /use-cases/ — which share this stylesheet — are untouched. */
+  .listing-row__added {
+    font-family: var(--nbg-ff-mono, ui-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--nbg-muted-2, #8392a6);
+    white-space: nowrap;
+    line-height: 1;
+  }
+  /* Middot rides on the date so the markup stays flat. The rail's own
+     0.6rem gap supplies the space to its left. */
+  .listing-row__added::before {
+    content: '·';
+    margin-inline-end: 0.5rem;
+    color: var(--nbg-hairline-strong, #cfd8e3);
+  }
+
   /* Skill-specific: the command-hint line under the title. */
   .listing-row__cmd {
     margin: 0;

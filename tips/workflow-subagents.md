@@ -5,7 +5,7 @@ audience: advanced
 topics: [workflow]
 internal: false
 authored: "2026-05-28"
-last_reviewed: "2026-05-28"
+last_reviewed: "2026-09-15"
 external_link: https://code.claude.com/docs/en/subagents
 deeper_link: null
 ai_summary: A subagent runs in its own context window, does its exploration, and reports a summary. Your main session never loads the 40 files it had to read. Best for research-heavy tasks where the input is large and the answer is small.
@@ -53,3 +53,13 @@ The frontmatter shape above is the official format, but you don't need to type i
 Claude writes the markdown, including the `tools` restriction and the prompt body. Review the diff. The subagent is callable from the next prompt onwards.
 
 Trade-off worth naming: a subagent can't reason about the broader plan it's part of. If you push too much logic into subagents, your main Claude loses the holistic view of what's happening. Use them for *bounded* reads, not for the thinking that decides what to do next.
+
+## Two costs nobody mentions
+
+**They're expensive.** Each subagent is a separate Claude with its own context window, so delegating isn't a discount on the work — it's usually a multiple of it. The saving is to your *main session's* context, not to your usage. That's a real benefit, just not the one people assume. Spawning several in parallel because it feels efficient is the fastest way to burn through a week's allowance.
+
+**They don't inherit your CLAUDE.md the way you'd expect.** A subagent gets its task and a partial view of your project rules — not the conversation so far, not your output style, not the files you already had it read. This is why a subagent sometimes ignores a convention the main session had been following all morning.
+
+The fix is to restate what matters in the subagent's own instructions rather than assuming it's inherited. If the subagent must follow a naming convention, write the convention into its file.
+
+Rule of thumb: reach for a subagent when the job is **wide and shallow** — search this codebase, check these thirty files, find every call site. Keep **deep and contextual** work in the main session, where the accumulated understanding lives.

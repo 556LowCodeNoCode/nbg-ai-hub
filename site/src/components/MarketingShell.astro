@@ -36,6 +36,8 @@ import Section from './primitives/Section.astro';
 // emitted by the remark plugin into a popover. Build-time portable (zero
 // @astrojs/starlight imports), so it works under any Astro chrome.
 import GlossaryTerm from './primitives/GlossaryTerm.astro';
+// Sibling of the glossary registry — hydrates key-combo triggers into popovers.
+import ShortcutKey from './primitives/ShortcutKey.astro';
 // UAT T10 V1 — toast on pin/unpin success. Mounted once per marketing page;
 // any script can `document.dispatchEvent(new CustomEvent('nbgaihub:toast', {detail: {title, action?}}))`.
 import Toast from './Toast.astro';
@@ -109,6 +111,7 @@ const showHero    = hero === 'auto' && hasHeroSlot;
   </main>
 
   <GlossaryTerm />
+  <ShortcutKey />
   <Toast />
 </StarlightPage>
 

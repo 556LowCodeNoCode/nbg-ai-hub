@@ -4,6 +4,9 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 
 ## Pending
 
+25. **Six Claude Code claims dropped from the tips sweep as unverifiable** (low / needs a live interactive session, 2026-09-15).
+    Verified the 2026-09-15 tips batch against the CLI binary (v2.1.235); these could not be confirmed and were omitted per the "omit, don't caveat" call: `Ctrl+S` as cross-project prompt-history search (contradicted — `Ctrl+S` is `chat:stash`), the `/config` → output-style → concise path, the mobile-push setting name, the four telemetry env-var names, `cleanupPeriodDays` exact spelling, and `show clear context on plan accept`. **Fix path:** test each in a live interactive session; add as tips if real. Source claims: `docs/reference/agent-daily-content-review-2026-09-15.md` items 9, 60, 63, 65, 28, 71.
+
 24. **PinType union restated in 5 places — should derive from `FavoriteEntry['type']`** (low / DRY follow-up to 2026-06-08 cleanup).
     Same 5-tuple lives in `gist.ts` (canonical), `pin-store.ts` `isPinType`, `PinButton.astro` (×2), `my-pins.astro` (already uses `FavoriteEntry['type']` post-cleanup), `build-pin-index.ts` `PinType`. Fix path: re-export from `gist.ts` and import everywhere; `.astro` script blocks can `import type` since 2024.
 
