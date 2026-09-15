@@ -36,6 +36,27 @@ const sorted = items.sort((a, b) => {
   return byDate !== 0 ? byDate : a.data.title.localeCompare(b.data.title);
 });
 
+// 2026-09-15 — cards show the added-date as DD/MM/YY, matching /tips/. Built
+// from the ISO parts directly: `new Date('YYYY-MM-DD')` parses as UTC midnight
+// and can render as the previous day for viewers behind UTC.
+function formatAdded(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return iso;
+  return `${d}/${m}/${y.slice(2)}`;
+}
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+] as const;
+// The visible stamp is bare `15/09/26` — unambiguous to a sighted reader in
+// context, but not to a screen reader. Long form goes on aria-label/title.
+function addedLabel(iso: string): string {
+  const [y, m, d] = iso.split('-');
+  const month = MONTHS[Number(m) - 1];
+  if (!y || !d || !month) return `Added ${iso}`;
+  return `Added ${Number(d)} ${month} ${y}`;
+}
+
 function audienceTooltip(a: string): string {
   if (a === 'beginner') return 'For colleagues new to Claude Code';
   if (a === 'advanced') return 'For experienced Claude Code users';
@@ -61,6 +82,12 @@ const GROUPS: Array<{ key: string; label: string; blurb: string; origin: string 
     label: 'Built at NBG',
     blurb: 'Skills authored by the NBG AI team — tuned for our codebase, conventions, and compliance constraints.',
     origin: 'internal',
+  },
+  {
+    key: 'external',
+    label: 'Official — from Anthropic',
+    blurb: 'Skills published and maintained by Anthropic themselves. The safest external bet: same vendor as Claude Code, and they ship in the marketplace that is configured out of the box.',
+    origin: 'external',
   },
   {
     key: 'community',
@@ -208,6 +235,12 @@ const grouped = GROUPS.map((g) => ({
                       >
                         {entry.data.audience}
                       </span>
+                      <time
+                        class="listing-row__added"
+                        datetime={entry.data.authored}
+                        aria-label={addedLabel(entry.data.authored)}
+                        title={addedLabel(entry.data.authored)}
+                      >{formatAdded(entry.data.authored)}</time>
                       <div class="listing-row__pin">
                         <PinButton type="skill" slug={entry.id} iconOnly={true} />
                       </div>
@@ -245,11 +278,13 @@ const grouped = GROUPS.map((g) => ({
        The summary's 56rem readability cap is also lifted here, with a
        touch of right padding so the prose doesn't butt the meta block. */
     #internal .listing-row,
+    #external .listing-row,
     #community .listing-row {
       grid-template-columns: 1fr !important;
       position: relative;
     }
     #internal .listing-row__meta,
+    #external .listing-row__meta,
     #community .listing-row__meta {
       position: absolute;
       top: 1.25rem;
@@ -257,10 +292,12 @@ const grouped = GROUPS.map((g) => ({
       justify-self: unset;
     }
     #internal .listing-row__eyebrow,
+    #external .listing-row__eyebrow,
     #community .listing-row__eyebrow {
       padding-right: 22rem;  /* reserve space for the absolute-positioned meta */
     }
     #internal .listing-row__summary,
+    #external .listing-row__summary,
     #community .listing-row__summary {
       max-width: none !important;
       padding-right: 0.25rem;

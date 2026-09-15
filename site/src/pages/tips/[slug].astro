@@ -22,6 +22,9 @@ import { getCollection, getEntry } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import MarketingShell from '../../components/MarketingShell.astro';
 import remarkGlossaryLink from '../../plugins/remark-glossary-link.ts';
+// Runs AFTER the glossary linker: that one emits `html` nodes, which this
+// plugin skips, so the two can never fight over the same text span.
+import remarkShortcutLink from '../../plugins/remark-shortcut-link.ts';
 import { linkGlossaryTerms } from '../../lib/glossary-link-string';
 
 export const getStaticPaths = (async () => {
@@ -51,6 +54,7 @@ const processor = await createMarkdownProcessor({
       remarkGlossaryLink as any,
       { glossaryDir: '../glossary', excludePaths: ['/news/published/'] },
     ],
+    remarkShortcutLink as any,
   ],
 });
 

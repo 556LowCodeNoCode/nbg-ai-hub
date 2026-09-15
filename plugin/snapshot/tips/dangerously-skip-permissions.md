@@ -5,7 +5,7 @@ audience: beginner
 topics: [control]
 internal: false
 authored: "2026-05-27"
-last_reviewed: "2026-05-27"
+last_reviewed: "2026-09-15"
 external_link: null
 deeper_link: null
 ai_summary: The flag the team uses as its default Day-1 launch command. Skips read/shell permission prompts but does NOT skip code-edit reviews. Knowing the precise boundary defuses the "wait, isn't this dangerous?" anxiety.
@@ -38,6 +38,17 @@ This isn't *every* team's call. Other teams keep the prompts on and use `Shift+T
 - **You're auditing Claude's behaviour** for a write-up, a training session, or a security review. Drop the flag — every prompt becomes a visible decision.
 - **You're paranoid for any reason at all.** Drop the flag. Latency-pain is real but knowable; not knowing what your tool is doing is worse.
 
-To launch without the flag: just `claude` (no flag). The permission prompts come back. You can also press `Shift+Tab` *within* a session to flip between `default`, `auto-accept edits`, and `plan` modes — see the `permission-modes` tip.
+To launch without the flag: just `claude` (no flag). You can also press `Shift+Tab` *within* a session to change permission mode — see the `permission-modes` tip.
+
+## There's a middle setting most people skip past
+
+The flag is a blunt instrument, and reaching for it is usually a reaction to prompt fatigue rather than a considered choice. Two better tools exist:
+
+- **`/fewer-permission-prompts`** — pre-approves the safe, read-only commands you already keep approving, based on your own usage. Removes most of the noise without removing the reviews.
+- **`/permissions`** — lets you write **deny rules**, which hold no matter which mode you're in. A deny rule on `.env` reads or `git push` stays in force even on the days you're moving fast.
+
+That second one is the important half for bank work: a deny rule is a control you can point at and describe. "I'm careful" isn't. See the permission-rules-not-blanket-trust tip.
+
+Also worth knowing: the default permission mode is now **auto**, where Claude vets each action for risk and prompt injection before running it and only asks about what warrants asking. Much of the prompt fatigue this flag was invented to solve is less severe than it was.
 
 The reconciliation you might be looking for: the "always review the diff" advice you see elsewhere on this hub refers to *code-change reviews* — which this flag does not touch. The flag and the always-review-the-diff habit live at different layers of the permission system. They coexist by design.

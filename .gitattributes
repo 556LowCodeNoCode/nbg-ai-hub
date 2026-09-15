@@ -1,0 +1,24 @@
+# Normalise line endings to LF in the repository, always.
+#
+# 2026-09-15: commit 8d0851f (contract-automation, since reverted as a mistake)
+# rewrote all 163 tracked files from LF to CRLF. That turned every markdown
+# frontmatter delimiter into `---\r\n`, which the content parsers don't match,
+# and the glossary schema tests went red on main. Without this file nothing
+# stops a Windows checkout doing it again.
+#
+# `text=auto eol=lf` means: git decides what's text, and text is stored AND
+# checked out as LF on every platform.
+* text=auto eol=lf
+
+# Binaries must never be touched.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.zip  binary
+*.mp4  binary

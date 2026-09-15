@@ -5,7 +5,7 @@ audience: beginner
 topics: [context]
 internal: false
 authored: "2026-05-27"
-last_reviewed: "2026-06-02"
+last_reviewed: "2026-09-15"
 external_link: null
 deeper_link: https://code.claude.com/docs/en/best-practices
 ai_summary: A worked example of a project-level CLAUDE.md, distilled from Anthropic's official guidance, Karpathy's viral behavioral rules, HumanLayer's "under 60 lines" guide, and the awesome-claude-md curated index. Each section is annotated with why it earns its slot.
@@ -78,6 +78,12 @@ That's it — about forty lines. The art isn't what you add, it's what you cut.
 ## What's deliberately *not* in this file
 
 The project's history. The architecture diagram. Prose about why we chose Postgres. The full README. Anthropic's own guidance is explicit: "If Claude already does something correctly without the instruction, delete it or convert it to a hook." When in doubt, ask: *would removing this line cause Claude to make a mistake?* If not, drop it.
+
+## Two things that catch people out
+
+**Your edits don't apply until you restart.** CLAUDE.md is read once, when the session begins. Adding a rule mid-conversation has no effect on the conversation you're in — which is why people conclude the file is ignored when it isn't. See the claudemd-needs-a-restart tip.
+
+**A rule only works if it's checkable.** "Keep the database code organised sensibly" reads like a rule and does nothing; "all SQL lives in `database/`" is followable. See the write-rules-for-the-agent tip for the phrasing test and the deletion test.
 
 ## Sources
 

@@ -4,6 +4,22 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 
 ## Pending
 
+30. **`pipeline/tests/config.test.ts` has been red since 2026-06-08** (low / stale test, found 2026-09-15).
+    Two tests assert the RSS seed has 5 sources and that every enabled feed is auto-promote eligible. The 2026-06-08 News-pillar decommission (`9e0e0e3`) trimmed `config/rss-sources.json` to the 2 Reddit feeds with both `enabled: false`, and the tests were never updated. Pipeline is 203/205, not the 205/205 the state docs claimed. Confirmed pre-existing: 0 content-diff in the seed or the test between `2a0546c` and now. **Fix path:** update the assertions to match the paused-pipeline reality, or mark them skipped until the pipeline is re-enabled.
+
+
+28. **Three Skills-pillar candidates dropped as unverifiable or mis-sourced** (low / source-quality, 2026-09-15).
+    From Part 2 of the agent-daily triage: item **85 "Global Agent Guardrails" (davidondrej) — no such repo exists** (listed the account's repos and searched GitHub; not published); item **90 `/write-a-prd` is not a real skill name** (the mattpocock equivalents are `to-spec` / `to-tickets`, both requiring `/setup-matt-pocock-skills` plus a configured issue tracker); item **80 `google/skills` is mischaracterised** as a no-code path — the 17 published plugins are Google *Cloud* database connectors (AlloyDB, Bigtable, Spanner, Looker), wrong cloud and wrong audience for us. **Fix path:** none needed unless a real source surfaces; `to-spec` is a genuine candidate if we ever wire Jira into the flow.
+
+27. **`skills/gsd.md` maintainer `@TÂCHES` fails the CI validator regex** (low / latent, 2026-09-15).
+    `MAINTAINER_HANDLE_RE = /^@[a-zA-Z0-9-]+$/` in `pipeline/src/validators/skill.ts` rejects accented characters, so the entry would fail if that file is ever touched in a PR (the workflow runs on changed `skills/**/*.md` only, which is why it has never fired). **Fix path:** replace with the maintainer's actual GitHub handle, or widen the regex to allow Unicode letters.
+
+26. **Detail page renders a slash command for model-invoked skills that don't have one** (low / template fidelity, 2026-09-15).
+    `splitTitle()` in `site/src/pages/skills/[slug].astro` derives the "Use it" step from the title and always prefixes `/`, so `document-skills` shows `/document-skills` — a command that does not exist (those four skills fire when you mention the file, and the namespaced form is `document-skills:pdf`). Bodies currently state the real invocation, so the page contradicts its own sidebar. **Fix path:** add an optional `invocation` frontmatter key, or render a natural-language line when the skill is model-invoked.
+
+25. **Six Claude Code claims dropped from the tips sweep as unverifiable** (low / needs a live interactive session, 2026-09-15).
+    Verified the 2026-09-15 tips batch against the CLI binary (v2.1.235); these could not be confirmed and were omitted per the "omit, don't caveat" call: `Ctrl+S` as cross-project prompt-history search (contradicted — `Ctrl+S` is `chat:stash`), the `/config` → output-style → concise path, the mobile-push setting name, the four telemetry env-var names, `cleanupPeriodDays` exact spelling, and `show clear context on plan accept`. **Fix path:** test each in a live interactive session; add as tips if real. Source claims: `docs/reference/agent-daily-content-review-2026-09-15.md` items 9, 60, 63, 65, 28, 71.
+
 24. **PinType union restated in 5 places — should derive from `FavoriteEntry['type']`** (low / DRY follow-up to 2026-06-08 cleanup).
     Same 5-tuple lives in `gist.ts` (canonical), `pin-store.ts` `isPinType`, `PinButton.astro` (×2), `my-pins.astro` (already uses `FavoriteEntry['type']` post-cleanup), `build-pin-index.ts` `PinType`. Fix path: re-export from `gist.ts` and import everywhere; `.astro` script blocks can `import type` since 2024.
 

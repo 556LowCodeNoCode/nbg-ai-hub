@@ -19,6 +19,23 @@
       ]
     },
     {
+      "slug": "be-brutally-honest",
+      "title": "Claude will agree with you — ask it not to",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "safety"
+      ]
+    },
+    {
+      "slug": "claudemd-needs-a-restart",
+      "title": "Editing CLAUDE.md mid-session does nothing — you have to restart",
+      "audience": "beginner",
+      "topics": [
+        "context"
+      ]
+    },
+    {
       "slug": "claudemd-worked-example",
       "title": "What a real CLAUDE.md looks like (worked example)",
       "audience": "beginner",
@@ -51,8 +68,42 @@
       ]
     },
     {
+      "slug": "dont-switch-models-midstream",
+      "title": "Don't swap models in the middle of a conversation",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "context"
+      ]
+    },
+    {
+      "slug": "drop-the-persona",
+      "title": "Drop the persona — \"You are a senior engineer…\" adds nothing",
+      "audience": "beginner",
+      "topics": [
+        "prompting"
+      ]
+    },
+    {
       "slug": "esc-to-stop",
       "title": "Esc to stop Claude mid-action (the control key)",
+      "audience": "beginner",
+      "topics": [
+        "control"
+      ]
+    },
+    {
+      "slug": "handoff-not-summary",
+      "title": "End a session with a handoff, not a summary",
+      "audience": "both",
+      "topics": [
+        "workflow",
+        "context"
+      ]
+    },
+    {
+      "slug": "keyboard-shortcuts-worth-knowing",
+      "title": "Seven keys that make Claude Code feel like a tool, not a chat box",
       "audience": "beginner",
       "topics": [
         "control"
@@ -82,6 +133,23 @@
       "audience": "beginner",
       "topics": [
         "control",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "permission-rules-not-blanket-trust",
+      "title": "Stop the permission prompts properly — allow rules and deny rules",
+      "audience": "beginner",
+      "topics": [
+        "control",
+        "safety"
+      ]
+    },
+    {
+      "slug": "powerup-first-command",
+      "title": "`/powerup` — the built-in tour nobody tells you about",
+      "audience": "beginner",
+      "topics": [
         "workflow"
       ]
     },
@@ -167,6 +235,64 @@
       ]
     },
     {
+      "slug": "report-and-stop",
+      "title": "\"Report and stop\" — tell Claude where the work ends",
+      "audience": "beginner",
+      "topics": [
+        "prompting",
+        "control"
+      ]
+    },
+    {
+      "slug": "review-in-a-fresh-session",
+      "title": "Never let the session that wrote the code review the code",
+      "audience": "beginner",
+      "topics": [
+        "safety",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "rewind-dont-repair",
+      "title": "When Claude goes wrong, rewind — don't try to talk it out of the hole",
+      "audience": "beginner",
+      "topics": [
+        "control"
+      ]
+    },
+    {
+      "slug": "say-what-you-want",
+      "title": "Say what you want, not what you don't — and stop shouting",
+      "audience": "beginner",
+      "topics": [
+        "prompting"
+      ]
+    },
+    {
+      "slug": "slash-commands-you-are-not-using",
+      "title": "Six slash commands that solve problems you've been living with",
+      "audience": "beginner",
+      "topics": [
+        "workflow"
+      ]
+    },
+    {
+      "slug": "stop-over-revising",
+      "title": "You can revise too many times — keep the version that was working",
+      "audience": "beginner",
+      "topics": [
+        "workflow"
+      ]
+    },
+    {
+      "slug": "the-alt-tab-test",
+      "title": "The alt-tab test — find what Claude is missing in one workday",
+      "audience": "beginner",
+      "topics": [
+        "workflow"
+      ]
+    },
+    {
       "slug": "workflow-1-team-or-gsd",
       "title": "Two skills worth knowing — `/team` for one sitting, `gsd-*` for the long haul",
       "audience": "both",
@@ -245,6 +371,14 @@
       "audience": "advanced",
       "topics": [
         "workflow"
+      ]
+    },
+    {
+      "slug": "write-rules-for-the-agent",
+      "title": "Write CLAUDE.md rules for the agent, not for a human",
+      "audience": "beginner",
+      "topics": [
+        "context"
       ]
     }
   ]

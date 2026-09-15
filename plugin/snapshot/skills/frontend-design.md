@@ -5,15 +5,14 @@ audience: both
 topics: [frontend, design, ui]
 internal: false
 authored: "2026-05-19"
-last_reviewed: "2026-06-02"
-external_link: "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+last_reviewed: "2026-09-15"
+external_link: "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/frontend-design"
 deeper_link: https://claude.com/plugins/frontend-design
 ai_summary: Anthropic's official frontend-design skill — generates production-grade components and pages with distinctive visual choices, avoiding the generic "AI-slop" aesthetic that gives away machine-generated UIs.
 when_to_use: Use this when you want a frontend that looks intentional, not algorithmic — when Claude's default Tailwind-card-and-shadow output would give away that a human didn't sit at the keyboard.
-marketplace_command: "/plugin marketplace add anthropics/skills"
-install_command: "/plugin install frontend-design@skills"
+install_command: "/plugin install frontend-design@claude-plugins-official"
 skill_id: frontend-design
-origin: community
+origin: external
 category: code
 status: active
 maintainer: "@anthropics"
@@ -27,7 +26,7 @@ Use it: when the visual outcome actually matters and you don't want the page to 
 
 ## Access
 
-Public — no access request needed. It's an Anthropic-published skill in the official `anthropics/skills` marketplace.
+Public — no access request needed. It ships as its own plugin in Claude Code's official marketplace, which is configured out of the box — so there is no `marketplace add` step.
 
 ## What this catalog entry does *not* cover
 

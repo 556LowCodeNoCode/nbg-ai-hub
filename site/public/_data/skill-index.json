@@ -24,6 +24,36 @@
       ]
     },
     {
+      "slug": "diagram-design",
+      "title": "diagram-design — real diagrams, not boxes with drop shadows",
+      "audience": "beginner",
+      "topics": [
+        "diagrams",
+        "documents",
+        "design"
+      ]
+    },
+    {
+      "slug": "document-skills",
+      "title": "document-skills — Word, Excel, PowerPoint and PDF files",
+      "audience": "beginner",
+      "topics": [
+        "documents",
+        "office",
+        "reporting"
+      ]
+    },
+    {
+      "slug": "doubt-driven-development",
+      "title": "doubt-driven-development — a second opinion that hasn't seen the first",
+      "audience": "advanced",
+      "topics": [
+        "review",
+        "verification",
+        "quality"
+      ]
+    },
+    {
       "slug": "frontend-design",
       "title": "frontend-design — distinctive UI generation",
       "audience": "both",
@@ -34,6 +64,16 @@
       ]
     },
     {
+      "slug": "grill-me",
+      "title": "/grill-me — get interrogated before anything gets built",
+      "audience": "both",
+      "topics": [
+        "planning",
+        "requirements",
+        "workflow"
+      ]
+    },
+    {
       "slug": "gsd",
       "title": "gsd-* — Get Shit Done framework family",
       "audience": "advanced",
@@ -41,6 +81,56 @@
         "workflow",
         "planning",
         "multi-phase"
+      ]
+    },
+    {
+      "slug": "handoff",
+      "title": "/handoff — end a session so the next one starts sharp",
+      "audience": "both",
+      "topics": [
+        "context",
+        "workflow",
+        "productivity"
+      ]
+    },
+    {
+      "slug": "prototype",
+      "title": "prototype — throwaway code that answers one question",
+      "audience": "both",
+      "topics": [
+        "prototyping",
+        "design",
+        "workflow"
+      ]
+    },
+    {
+      "slug": "skill-creator",
+      "title": "skill-creator — write a skill of your own",
+      "audience": "advanced",
+      "topics": [
+        "authoring",
+        "skills",
+        "productivity"
+      ]
+    },
+    {
+      "slug": "source-driven-development",
+      "title": "source-driven-development — make Claude cite the docs",
+      "audience": "both",
+      "topics": [
+        "verification",
+        "compliance",
+        "quality"
+      ]
+    },
+    {
+      "slug": "teach",
+      "title": "/teach — a tutor that remembers where you got to",
+      "audience": "beginner",
+      "topics": [
+        "learning",
+        "onboarding",
+        "productivity"
       ]
     },
     {

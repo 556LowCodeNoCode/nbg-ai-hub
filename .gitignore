@@ -4,6 +4,8 @@
 # Node / Astro
 node_modules/
 dist/
+# verification build output (produced by the build-check scripts)
+dist-verify/
 .astro/
 .cache/
 

@@ -1,0 +1,314 @@
+---
+/**
+ * ShortcutKey.astro — page-level keyboard-shortcut popover registry.
+ *
+ * Sibling of GlossaryTerm.astro. The remark plugin (and linkShortcuts())
+ * emit inert `<button data-shortcut-slug="…">Ctrl+R</button>` markers; this
+ * component runs once per page and:
+ *   1. Inlines the shortcut lookup as JSON.
+ *   2. Wires every trigger into an HTML `popover` that answers the whole
+ *      question in place: the keys, what the key does, how it behaves, and
+ *      — most importantly — WHEN to press it.
+ *
+ * There is deliberately no /shortcuts/ reference page and no "read more"
+ * link. A beginner who has to navigate away to find out what Ctrl+G does has
+ * already lost the thread. The popover is the complete answer or it is not
+ * doing its job.
+ *
+ * DOM contract (mirrors the glossary one deliberately):
+ *   button[data-shortcut-slug][data-shortcut-display]
+ *     → gains popovertarget, aria-describedby, data-nbg-shortcut-wired
+ *   span[popover='auto'][role='tooltip'].nbg-shortcut-popover inserted after
+ *
+ * `<span popover>` not `<div popover>`: the trigger usually sits inside a
+ * `<p>`, and a block-level child would close the paragraph and corrupt the
+ * tree. `popover` is a global attribute, valid on a span.
+ *
+ * Portability: zero Starlight imports.
+ */
+import { SHORTCUTS, splitKeys } from '../../data/shortcuts';
+
+const lookup = Object.fromEntries(
+  SHORTCUTS.map((s) => [
+    s.slug,
+    {
+      keys: s.keys,
+      // Pre-split at build time so the wiring script never re-implements
+      // splitKeys(): one definition, two surfaces.
+      parts: splitKeys(s.keys).parts,
+      joiner: splitKeys(s.keys).joiner,
+      does: s.does,
+      tldr: s.tldr,
+      when: s.when,
+      // Alternate spellings a reader may know the key by (Alt+T / Option+T).
+      also: s.aliases.length > 0 ? s.aliases.join(' · ') : '',
+    },
+  ]),
+);
+---
+
+<script type="application/json" id="nbg-shortcut-data" set:html={JSON.stringify(lookup)} />
+
+<script>
+  // Idempotent: safe to run again after a view transition.
+  function wireShortcuts(): void {
+    const dataEl = document.getElementById('nbg-shortcut-data');
+    if (!dataEl || !dataEl.textContent) return;
+
+    let data: Record<string, {
+      keys: string; parts: string[]; joiner: '+' | 'then';
+      does: string; tldr: string; when: string; also: string;
+    }>;
+    try {
+      data = JSON.parse(dataEl.textContent);
+    } catch {
+      return; // malformed payload: leave triggers inert rather than throw
+    }
+
+    const triggers = document.querySelectorAll<HTMLButtonElement>(
+      'button[data-shortcut-slug]:not([data-nbg-shortcut-wired])',
+    );
+
+    triggers.forEach((btn, i) => {
+      const slug = btn.getAttribute('data-shortcut-slug');
+      if (!slug) return;
+      const entry = data[slug];
+      if (!entry) return; // unknown slug: stays inert, never throws
+
+      btn.type = 'button';
+      btn.setAttribute('data-nbg-shortcut-wired', 'true');
+
+      const id = `nbg-sc-pop-${slug}-${i}`;
+      const pop = document.createElement('span');
+      pop.id = id;
+      pop.setAttribute('popover', 'auto');
+      pop.setAttribute('role', 'tooltip');
+      pop.className = 'nbg-shortcut-popover';
+
+      // One cap per physical key — [Ctrl] + [T], matching the homepage modal.
+      const keys = document.createElement('span');
+      keys.className = 'nbg-shortcut-popover__combo';
+      (entry.parts ?? [entry.keys]).forEach((part, pi) => {
+        if (pi > 0) {
+          const j = document.createElement('span');
+          j.className = 'nbg-shortcut-popover__join';
+          j.textContent = entry.joiner === '+' ? '+' : 'then';
+          keys.append(j);
+        }
+        const cap = document.createElement('kbd');
+        cap.className = 'nbg-shortcut-popover__cap';
+        cap.textContent = part;
+        keys.append(cap);
+      });
+
+      const does = document.createElement('strong');
+      does.className = 'nbg-shortcut-popover__does';
+      does.textContent = entry.does;
+
+      const tldr = document.createElement('span');
+      tldr.className = 'nbg-shortcut-popover__tldr';
+      tldr.textContent = entry.tldr;
+
+      const when = document.createElement('span');
+      when.className = 'nbg-shortcut-popover__when';
+      when.textContent = entry.when;
+
+      // "When" is the part a beginner actually needs, so it gets a rule
+      // above it and a label — not just another line of grey prose.
+      const whenBlock = document.createElement('span');
+      whenBlock.className = 'nbg-shortcut-popover__whenblock';
+      const whenLabel = document.createElement('span');
+      whenLabel.className = 'nbg-shortcut-popover__when-label';
+      whenLabel.textContent = 'Use it when';
+      whenBlock.append(whenLabel, when);
+
+      const head = document.createElement('span');
+      head.className = 'nbg-shortcut-popover__head';
+      head.append(keys);
+      if (entry.also) {
+        const also = document.createElement('span');
+        also.className = 'nbg-shortcut-popover__also';
+        also.textContent = `also ${entry.also}`;
+        head.append(also);
+      }
+
+      pop.append(head, does, tldr, whenBlock);
+      btn.setAttribute('popovertarget', id);
+      btn.setAttribute('aria-describedby', id);
+      btn.insertAdjacentElement('afterend', pop);
+
+      const place = () => {
+        const r = btn.getBoundingClientRect();
+        pop.style.position = 'fixed';
+        pop.style.left = '0px';
+        pop.style.top = '0px';
+        // Measure first, then clamp to the viewport so a trigger near the
+        // right edge doesn't push the popover off-screen.
+        const pr = pop.getBoundingClientRect();
+        const pad = 8;
+        let left = r.left;
+        if (left + pr.width > window.innerWidth - pad) {
+          left = Math.max(pad, window.innerWidth - pr.width - pad);
+        }
+        let top = r.bottom + 6;
+        if (top + pr.height > window.innerHeight - pad) {
+          top = Math.max(pad, r.top - pr.height - 6);
+        }
+        pop.style.left = `${left}px`;
+        pop.style.top = `${top}px`;
+      };
+
+      const open = () => {
+        if (pop.matches(':popover-open')) return;
+        try {
+          pop.showPopover();
+          place();
+        } catch {
+          /* popover unsupported: trigger simply does nothing */
+        }
+      };
+      const close = () => {
+        if (!pop.matches(':popover-open')) return;
+        try {
+          pop.hidePopover();
+        } catch {
+          /* no-op */
+        }
+      };
+
+      let hideTimer: number | undefined;
+      const scheduleClose = () => {
+        window.clearTimeout(hideTimer);
+        // Grace period so the pointer can travel into the popover itself.
+        hideTimer = window.setTimeout(close, 140);
+      };
+      const cancelClose = () => window.clearTimeout(hideTimer);
+
+      btn.addEventListener('mouseenter', () => { cancelClose(); open(); });
+      btn.addEventListener('mouseleave', scheduleClose);
+      pop.addEventListener('mouseenter', cancelClose);
+      pop.addEventListener('mouseleave', scheduleClose);
+      btn.addEventListener('focus', open);
+      btn.addEventListener('blur', scheduleClose);
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        pop.matches(':popover-open') ? close() : open();
+      });
+      btn.addEventListener('keydown', (e) => {
+        if ((e as KeyboardEvent).key === 'Escape') close();
+      });
+    });
+  }
+
+  wireShortcuts();
+  document.addEventListener('astro:page-load', wireShortcuts);
+</script>
+
+<style is:global>
+  @layer nbg.primitives {
+    .nbg-shortcut-trigger {
+      display: inline;
+      appearance: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      color: inherit;
+      cursor: help;
+      border: 0;
+      border-bottom: 1px dotted var(--nbg-color-border-strong, #b6c2d1);
+      font-family: var(--nbg-type-mono, ui-monospace, monospace);
+      font-size: 0.92em;
+      white-space: nowrap;
+    }
+    .nbg-shortcut-trigger:hover,
+    .nbg-shortcut-trigger:focus-visible {
+      border-bottom-color: var(--nbg-color-accent, #007a8a);
+      color: var(--nbg-color-accent, #007a8a);
+    }
+
+    .nbg-shortcut-popover {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+      max-width: 22rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.75rem 0.85rem;
+      background: var(--nbg-color-bg-raised, #fff);
+      color: var(--nbg-color-fg-primary, #0d1b2a);
+      border: 1px solid var(--nbg-color-border-default, #e2e8f0);
+      border-radius: var(--nbg-r-md, 10px);
+      box-shadow: 0 12px 28px rgb(13 27 42 / 14%);
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      z-index: 90;
+    }
+    .nbg-shortcut-popover:popover-open { display: flex; }
+
+    .nbg-shortcut-popover__combo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.22rem;
+      white-space: nowrap;
+    }
+    .nbg-shortcut-popover__cap {
+      display: inline-block;
+      min-width: 1.35rem;
+      text-align: center;
+      font-family: var(--nbg-type-mono, ui-monospace, monospace);
+      font-size: 0.75rem;
+      line-height: 1.3;
+      padding: 0.14rem 0.38rem;
+      border: 1px solid var(--nbg-color-border-default, #e2e8f0);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      background: var(--nbg-color-bg-page, #f6f8fb);
+    }
+    .nbg-shortcut-popover__join {
+      font-family: var(--nbg-type-mono, ui-monospace, monospace);
+      font-size: 0.6875rem;
+      color: var(--nbg-color-fg-muted, #8392a6);
+    }
+    .nbg-shortcut-popover__head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .nbg-shortcut-popover__also {
+      font-size: 0.6875rem;
+      color: var(--nbg-color-fg-muted, #8392a6);
+      font-family: var(--nbg-type-mono, ui-monospace, monospace);
+    }
+    .nbg-shortcut-popover__does {
+      font-weight: 600;
+      font-size: 0.875rem;
+      line-height: 1.35;
+    }
+    .nbg-shortcut-popover__tldr { color: var(--nbg-color-fg-secondary, #40546b); }
+
+    /* The "when" is the payload for a beginner — ruled off and labelled so
+       the eye lands on it, rather than buried as a third grey sentence. */
+    .nbg-shortcut-popover__whenblock {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      margin-top: 0.15rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--nbg-color-border-default, #e2e8f0);
+    }
+    .nbg-shortcut-popover__when-label {
+      font-family: var(--nbg-type-mono, ui-monospace, monospace);
+      font-size: 0.5625rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--nbg-color-accent, #007a8a);
+    }
+    .nbg-shortcut-popover__when {
+      color: var(--nbg-color-fg-primary, #0d1b2a);
+    }
+  }
+</style>

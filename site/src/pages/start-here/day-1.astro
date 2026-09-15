@@ -18,6 +18,7 @@ import { getEntry } from 'astro:content';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 import MarketingShell from '../../components/MarketingShell.astro';
 import remarkGlossaryLink from '../../plugins/remark-glossary-link.ts';
+import remarkShortcutLink from '../../plugins/remark-shortcut-link.ts';
 import { linkGlossaryTerms } from '../../lib/glossary-link-string';
 
 const entry = await getEntry('journeys', 'day-1');
@@ -81,6 +82,7 @@ const processor = await createMarkdownProcessor({
       remarkGlossaryLink as any,
       { glossaryDir: '../glossary', excludePaths: ['/news/published/'] },
     ],
+    remarkShortcutLink as any,
   ],
 });
 

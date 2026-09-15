@@ -121,6 +121,12 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
           </p>
           <div class="router-card__actions router-card__actions--grid">
             <a class="router-pill" href="/tips/">Tips &amp; Tricks</a>
+            {/* Not a link: opens the Shortcuts modal. Rendered here rather than
+                inside <ShortcutsDialog> so it matches this page's scoped
+                `.router-pill` rule and looks identical to its siblings. */}
+            <button type="button" class="router-pill router-pill--accent" data-shortcuts-open aria-haspopup="dialog">
+              Shortcuts
+            </button>
             <a class="router-pill" href="/skills/">Skills</a>
             <a class="router-pill" href="/glossary/">Glossary</a>
             <a class="router-pill" href={AGENTNEWS_URL} target="_blank" rel="noopener">News ↗</a>
@@ -505,6 +511,31 @@ const DEMO_VIDEO = `${import.meta.env.BASE_URL}demo/claude-session.mp4`.replace(
     color: var(--nbg-ink);
     background: var(--nbg-surface);
     transition: background 120ms ease, border-color 120ms ease;
+    /* One pill in this grid is a <button> (Shortcuts, which opens a modal
+       rather than navigating). Buttons don't inherit typography and ship
+       their own UA chrome, so normalise here and both element types render
+       identically. */
+    font: inherit;
+    font-weight: 500;
+    line-height: inherit;
+    cursor: pointer;
+    appearance: none;
+    width: 100%;
+  }
+
+  /* The Shortcuts pill opens a modal rather than navigating, and is the one
+     thing in this grid people don't know to look for — so it carries the
+     light-teal accent treatment (same pairing as the Foundations card) to
+     separate it from its five navigation siblings. */
+  .router-pill--accent {
+    background: var(--nbg-accent-soft);
+    border-color: var(--nbg-accent);
+    color: var(--nbg-accent-ink);
+    font-weight: 600;
+  }
+  .router-pill--accent:hover {
+    background: color-mix(in srgb, var(--nbg-accent) 18%, transparent);
+    border-color: var(--nbg-accent);
   }
 
   .router-pill:hover {

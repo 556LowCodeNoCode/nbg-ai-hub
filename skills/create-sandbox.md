@@ -6,7 +6,7 @@ topics: [typescript, csharp, postman, api, sandbox]
 internal: true
 authored: "2026-06-02"
 last_reviewed: "2026-06-02"
-external_link: "https://github.com/NBG-AI/claude-tools/tree/main/plugins/create-sandbox"
+external_link: null
 deeper_link: null
 ai_summary: End-to-end pipeline for building a TypeScript sandbox implementation of an existing API. Translate C# types and controllers to TypeScript (or infer types from a Postman collection), design the sandbox architecture, scaffold the multi-sandbox infrastructure, then implement service methods one at a time with integration + contract tests generated and run automatically.
 when_to_use: Use this when you need a working TypeScript sandbox of an existing API — for front-end work against a stable stub, integration testing, or contract validation. Starts from C# source or a Postman collection.
