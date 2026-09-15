@@ -27,7 +27,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 │   ├── rss-sources.json       ← Reddit-only feed list (r/ClaudeAI + r/ClaudeCode, both `enabled: false`); pipeline paused 2026-06-08
 │   └── maintainers.json       ← team_aliases allowlist consumed by the skill-validator tool
 ├── glossary/                  ← terms catalog (count in AUTO block below); auto-linked across content via the remark-glossary-link plugin (see §S.14). Authoring: docs/reference/authoring-glossary-terms.md.
-├── skills/                    ← entries cataloguing 556LowCodeNoCode/Skills marketplace (extended 17-key schema lives in site/src/content.config.ts)
+├── skills/                    ← catalog entries (extended 17-key schema in site/src/content.config.ts). `origin` is a trust signal: internal = NBG, external = Anthropic-maintained, community = other third parties — each needs a group in skills.astro or its rows vanish. Authoring + the verify-before-publish rules: docs/reference/authoring-skills.md.
 ├── tips/                      ← entries (prompting, control keys, context, compliance)
 ├── journeys/                  ← day-1.md (full 6-step walkthrough) + foundations.md (newcomer onboarding); week-1.md + by-role TBD
 ├── usecases/                  ← 15 worked examples across 10 business units (14 beginner + 1 intermediate capstone `complaints-pipeline`). Every page ends with a "make Claude prove it" verification subsection and a "Level up" interactive-HTML step; workspaces standardised under `~/Desktop/claude-lab/<name>`. Same `## Step N — Title` body shape as journeys/. Mac/Windows divergent commands wrapped in `<div data-os="mac">` / `<div data-os="windows">` blocks consumed by the OS toggle on the detail page. Per-OS visibility rules in `site/src/pages/use-cases/[slug].astro` MUST be wrapped in `:global()` because the divs come from `set:html` markdown content and don't carry the Astro scope hash.
@@ -92,7 +92,7 @@ A curated Claude Code knowledge hub for bank colleagues, framed around *"what I 
 |---|---|
 | Glossary | 47 |
 | Tips | 46 |
-| Skills | 6 |
+| Skills | 15 |
 | Use Cases | 15 |
 | Journeys | 2 |
 | Newsletters | 1 |

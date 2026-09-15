@@ -4,6 +4,18 @@ Pending items first (most critical at top). Per CLAUDE.md doc-hygiene: each entr
 
 ## Pending
 
+29. **Four internal skill entries link to repos that 404 for readers, and fail the CI validator** (medium / content + CI, 2026-09-15).
+    `create-sandbox.md`, `deploy.md`, `team.md`, `uat-panel.md` carry `external_link`s to `556LowCodeNoCode/Skills` (**private**) and `NBG-AI/claude-tools` (not visible even to an authenticated org member — 404). The validator's `external_link` HEAD check fails on all four, so CI will fail the moment any of those files is touched in a PR; a colleague clicking through today gets a GitHub 404. Confirmed by running `pipeline/src/validators/cli.ts` over `skills/*.md` and by unauthenticated `curl -I`. **Fix path:** point `external_link` at a page readers can actually open (the hub's own detail page, or the marketplace listing) and keep the repo URL in `access_request`, which already explains how to request access.
+
+28. **Three Skills-pillar candidates dropped as unverifiable or mis-sourced** (low / source-quality, 2026-09-15).
+    From Part 2 of the agent-daily triage: item **85 "Global Agent Guardrails" (davidondrej) — no such repo exists** (listed the account's repos and searched GitHub; not published); item **90 `/write-a-prd` is not a real skill name** (the mattpocock equivalents are `to-spec` / `to-tickets`, both requiring `/setup-matt-pocock-skills` plus a configured issue tracker); item **80 `google/skills` is mischaracterised** as a no-code path — the 17 published plugins are Google *Cloud* database connectors (AlloyDB, Bigtable, Spanner, Looker), wrong cloud and wrong audience for us. **Fix path:** none needed unless a real source surfaces; `to-spec` is a genuine candidate if we ever wire Jira into the flow.
+
+27. **`skills/gsd.md` maintainer `@TÂCHES` fails the CI validator regex** (low / latent, 2026-09-15).
+    `MAINTAINER_HANDLE_RE = /^@[a-zA-Z0-9-]+$/` in `pipeline/src/validators/skill.ts` rejects accented characters, so the entry would fail if that file is ever touched in a PR (the workflow runs on changed `skills/**/*.md` only, which is why it has never fired). **Fix path:** replace with the maintainer's actual GitHub handle, or widen the regex to allow Unicode letters.
+
+26. **Detail page renders a slash command for model-invoked skills that don't have one** (low / template fidelity, 2026-09-15).
+    `splitTitle()` in `site/src/pages/skills/[slug].astro` derives the "Use it" step from the title and always prefixes `/`, so `document-skills` shows `/document-skills` — a command that does not exist (those four skills fire when you mention the file, and the namespaced form is `document-skills:pdf`). Bodies currently state the real invocation, so the page contradicts its own sidebar. **Fix path:** add an optional `invocation` frontmatter key, or render a natural-language line when the skill is model-invoked.
+
 25. **Six Claude Code claims dropped from the tips sweep as unverifiable** (low / needs a live interactive session, 2026-09-15).
     Verified the 2026-09-15 tips batch against the CLI binary (v2.1.235); these could not be confirmed and were omitted per the "omit, don't caveat" call: `Ctrl+S` as cross-project prompt-history search (contradicted — `Ctrl+S` is `chat:stash`), the `/config` → output-style → concise path, the mobile-push setting name, the four telemetry env-var names, `cleanupPeriodDays` exact spelling, and `show clear context on plan accept`. **Fix path:** test each in a live interactive session; add as tips if real. Source claims: `docs/reference/agent-daily-content-review-2026-09-15.md` items 9, 60, 63, 65, 28, 71.
 

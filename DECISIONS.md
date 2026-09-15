@@ -6,6 +6,26 @@ Per CLAUDE.md doc-hygiene: each entry ≤20 lines, structured as Decision (bulle
 
 ---
 
+## 2026-09-15 (skills) — Skills pillar opens to external skills, verified repo-by-repo
+
+**Trigger:** Part 2 of the agent-daily triage was gated on one question — does the Skills pillar catalog external skills? User's answer: **all** — catalog externals broadly, not just the shortlist.
+
+**Decisions:**
+- **External skills are in scope.** 9 new entries, skills 6 → 15: `document-skills`, `skill-creator` (Anthropic); `/teach`, `/handoff`, `/grill-me`, `prototype` (mattpocock); `source-driven-development`, `doubt-driven-development` (addyosmani); `diagram-design` (cathrynlavery).
+- **`origin` now carries a trust signal**: `internal` = NBG, **`external` = Anthropic-maintained**, `community` = other third parties. `external` had no group in `skills.astro`, so an entry using it validated cleanly and then vanished from the page — third group added in the same change, and `originLabel()` renders "Official — from Anthropic" instead of the unhelpful word "External".
+- **Every claim verified against the repo, not the write-up.** All five source repos ship `.claude-plugin/marketplace.json`, so they install via `/plugin marketplace add` and needed no schema change. `mattpocock-skills` is in `claude-plugins-official` (confirmed against the live manifest), so it needs no marketplace-add step at all.
+- **Three candidates dropped:** item 85 "Global Agent Guardrails" — **the repo does not exist**; item 90 `/write-a-prd` — not a real skill name (`to-spec`, and it needs a configured issue tracker); item 80 `google/skills` — mischaracterised as a no-code path, actually 17 Google *Cloud* database connectors. Logged in Issues #28, not hedged into pages.
+- **Fixed a live bug:** `skills/frontend-design.md` shipped `/plugin install frontend-design@skills` — wrong marketplace *and* wrong plugin. Correct form is `/plugin install frontend-design@claude-plugins-official`.
+- **Licence caveat published rather than glossed:** Anthropic's four document skills are source-available, not Apache-2.0 like the rest of that repo, and their `LICENSE.txt` forbids retaining copies outside the Services. It sits in the entry's Access panel.
+- **Skill cards now show the added-date** (DD/MM/YY), matching `/tips/` — the page already sorted newest-first with nothing on screen to explain the order.
+- **`docs/reference/authoring-skills.md` written** — the pillar had no authoring guide while tips and glossary did. Carries the verification table and the `origin` contract.
+
+**Why:** The pillar already catalogued external skills in practice (`frontend-design`, `gsd`) without admitting it. Making that explicit let us name *who maintains what*, which is the thing a bank colleague actually needs before installing a stranger's prompt.
+
+**References:** `skills/` (15 files), `site/src/pages/skills.astro`, `skills/[slug].astro`, `docs/reference/authoring-skills.md`, Issues #26-28. Part 3 (item 101, the 35-concepts glossary piece) still not executed.
+
+---
+
 ## 2026-09-15 (late, corrected) — `meta` is Alt, not the Windows key
 
 **Trigger:** User challenged the "Windows reserves that key" caveat on Meta+J. They were right; I had inferred it rather than verified it. Checked the official reference at <https://code.claude.com/docs/en/keybindings>, which is authoritative and supersedes my binary-string inference.
@@ -1010,28 +1030,3 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Round-2 had moved the time chip to the footer to dodge the pin collision, but the head row read empty at rest with just the eyebrow. Flush-right time + slide-on-hover gives a balanced rest layout AND clean hover affordance — best of both.
 
 **References:** `site/src/pages/use-cases/index.astro` (head row markup + `.usecase-card__head` / `.usecase-card__cta` CSS).
-
-## 2026-08-03 — Contract automation project lands in NbgAiHub
-
-Trigger: procurement contract automation use case starting build; needed a home.
-
-- Project workspace at `contract-automation/` (docs, data-model, templates, src, tests)
-- Source contracts converted to markdown, stored under `docs/source-contracts/`
-- Spec at `contract-automation/docs/project-spec.md`, not inlined here
-
-Why: keeps delivery work alongside the hub rather than in a separate repo.
-
-Refs: `contract-automation/README.md`
-
-## 2026-08-03 — Re-converted source contracts to preserve article numbering
-
-Trigger: first conversion dropped Word's automatic numbering, breaking clause
-cross-references («κατά τα οριζόμενα στο άρθρο 3»).
-
-- Word stores article numbers as formatting, not text, so pandoc loses them
-- convert.py resolves numbering from the document's own XML and writes it in
-  as literal text before pandoc runs
-- Verified: Family Α 31 articles («Άρθρο N.»), Family Β 16-19 (plain «N.»)
-- Note: the two families number differently — assembly must handle both
-
-Why: clause references are load-bearing for parameterisation.

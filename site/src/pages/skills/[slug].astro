@@ -93,7 +93,9 @@ function audienceTooltip(a: string): string {
 function originLabel(o: string): string {
   if (o === 'internal') return 'Built at NBG';
   if (o === 'community') return 'From the community';
-  return 'External';
+  // 2026-09-15 — `external` is reserved for Anthropic-maintained skills, so the
+  // badge names the maintainer rather than saying the unhelpful word "external".
+  return 'Official — from Anthropic';
 }
 
 const { command: skillCommand, explanation: skillExplanation } = splitTitle(
