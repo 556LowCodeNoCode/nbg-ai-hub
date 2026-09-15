@@ -57,7 +57,8 @@ const grouped = SHORTCUT_GROUPS
     against Claude Code itself, not copied off a blog.
   </p>
 
-  <div class="scd__body">
+  <div class="scd__scroll">
+    <div class="scd__body">
     {grouped.map((g) => (
       <section class="scd__group">
         <h3 class="scd__group-title">{g.label}</h3>
@@ -92,6 +93,19 @@ const grouped = SHORTCUT_GROUPS
         </ul>
       </section>
     ))}
+    </div>
+
+    <!-- Scroll affordance. Hidden by the wiring below once the list is at the
+         end, and never shown at all when the content already fits — an arrow
+         that points at nothing is worse than no arrow. -->
+    <div class="scd__more" aria-hidden="true">
+      <svg viewBox="0 0 16 24" width="13" height="19" fill="none"
+           stroke="currentColor" stroke-width="1.5">
+        <rect x="1" y="1" width="14" height="22" rx="7" />
+        <line class="scd__more-wheel" x1="8" y1="6" x2="8" y2="9.5" stroke-linecap="round" />
+      </svg>
+      <span>Scroll</span>
+    </div>
   </div>
 
   <p class="scd__foot">
@@ -153,6 +167,25 @@ const grouped = SHORTCUT_GROUPS
     dlg.querySelectorAll('[data-shortcuts-close]').forEach((b) =>
       b.addEventListener('click', close),
     );
+
+    // Scroll affordance: visible only while there is more to reach.
+    const scroll = dlg.querySelector<HTMLElement>('.scd__scroll');
+    const body = dlg.querySelector<HTMLElement>('.scd__body');
+    if (scroll && body) {
+      const sync = () => {
+        const scrollable = body.scrollHeight - body.clientHeight > 4;
+        const atEnd = body.scrollTop + body.clientHeight >= body.scrollHeight - 4;
+        scroll.dataset.scrollEnd = !scrollable || atEnd ? 'true' : 'false';
+      };
+      body.addEventListener('scroll', sync, { passive: true });
+      // Re-check when the dialog opens and when the viewport changes: the
+      // list can become non-scrollable on a tall window, and the OS toggle
+      // changes row heights.
+      dlg.addEventListener('toggle', sync);
+      window.addEventListener('resize', sync, { passive: true });
+      if ('ResizeObserver' in window) new ResizeObserver(sync).observe(body);
+      sync();
+    }
 
     // Click the backdrop to dismiss. The dialog's own box is the only child
     // that reports a hit, so anything outside its rect is backdrop.
@@ -295,9 +328,67 @@ const grouped = SHORTCUT_GROUPS
     border-bottom: 1px solid var(--nbg-border) !important;
   }
 
+  /* Positioning context for the scroll hint. min-height:0 is what lets a
+     flex child actually scroll instead of growing to fit its content. */
+  .scd__scroll {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+
+  .scd__scroll::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 3rem !important;
+    background: linear-gradient(to top, var(--nbg-surface), transparent) !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
+    transition: opacity 180ms ease !important;
+  }
+  .scd__scroll[data-scroll-end='true']::after { opacity: 0 !important; }
+
+  .scd__more {
+    position: absolute !important;
+    right: 1rem !important;
+    bottom: 0.6rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.3rem !important;
+    padding: 0.2rem 0.5rem !important;
+    border-radius: 999px !important;
+    background: var(--nbg-surface) !important;
+    border: 1px solid var(--nbg-border) !important;
+    box-shadow: 0 2px 8px rgb(13 27 42 / 8%) !important;
+    font-size: 0.625rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: var(--nbg-muted) !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
+    transition: opacity 180ms ease !important;
+  }
+  /* Set by the wiring when the list is at the end, or not scrollable at all. */
+  .scd__scroll[data-scroll-end='true'] .scd__more { opacity: 0 !important; }
+
+  .scd__more-wheel {
+    animation: scd-wheel 1.6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes scd-wheel {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50%      { transform: translateY(5px); opacity: 0.35; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scd__more-wheel { animation: none; }
+  }
+
   .scd__body {
     overflow-y: auto !important;
-    padding: 0.4rem 1.35rem 0.6rem !important;
+    padding: 0.4rem 1.35rem 2.4rem !important;
     display: grid !important;
     gap: 1.15rem !important;
   }
