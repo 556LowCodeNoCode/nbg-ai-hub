@@ -9,8 +9,8 @@ resources:
     - webhook: githubpush
       connection: github-bridge-webhook
       filters:
-        - path: repository.name
-          value: NbgAiHub
+        - path: repository.id
+          value: 1242432389
 
 schedules:
   - cron: "0 * * * *"
@@ -22,7 +22,7 @@ schedules:
 variables:
   - group: bridge-secrets
   - name: GITHUB_REPO
-    value: 556LowCodeNoCode/NbgAiHub
+    value: 556LowCodeNoCode/nbg-ai-hub
 
 jobs:
 - job: sync
@@ -58,6 +58,8 @@ jobs:
   - bash: |
       set -euo pipefail
       git fetch --prune --prune-tags "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPO}.git" '+refs/heads/*:refs/remotes/github/*' '+refs/tags/*:refs/tags/*'
+      # Never mirror a ref named HEAD: git's --prune can't delete it once it exists.
+      git update-ref --no-deref -d refs/remotes/github/HEAD 2>/dev/null || true
       git push --prune origin '+refs/remotes/github/*:refs/heads/*'
       git push --prune origin '+refs/tags/*:refs/tags/*'
     env:

@@ -13,8 +13,8 @@ resources:
       connection: ado-codepush-webhook
 
       filters:
-        - path: resource.repository.name
-          value: nbg-ai-hub
+        - path: resource.repository.id
+          value: f0b2b68a-ab60-4e45-a01d-8631e39af38c
 schedules:
   - cron: "32 * * * *"
     displayName: Hourly backstop
@@ -25,7 +25,7 @@ schedules:
 variables:
   - group: bridge-secrets
   - name: GITHUB_REPO
-    value: 556LowCodeNoCode/NbgAiHub
+    value: 556LowCodeNoCode/nbg-ai-hub
 
 jobs:
 - job: mirror
@@ -68,6 +68,9 @@ jobs:
       set -euo pipefail
       git fetch origin --prune --prune-tags '+refs/heads/*:refs/remotes/origin/*'
       git fetch origin --tags
+      # refs/remotes/origin/HEAD is the checkout's symbolic default-branch pointer;
+      # without this it is pushed as a real branch named HEAD on GitHub.
+      git update-ref --no-deref -d refs/remotes/origin/HEAD 2>/dev/null || true
       git push --prune "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPO}.git" '+refs/remotes/origin/*:refs/heads/*'
       git push --prune "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPO}.git" '+refs/tags/*:refs/tags/*'
     env:
