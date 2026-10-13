@@ -1,5 +1,5 @@
 {
-  "productionUrl": "https://556lowcodenocode.github.io/NbgAiHub",
+  "productionUrl": "https://556lowcodenocode.github.io/nbg-ai-hub",
   "devUrl": "http://localhost:4321",
   "devMode": false,
   "search": {
@@ -12,5 +12,5 @@
   },
   "snapshotPath": "./snapshot",
   "refreshCachePath": "~/.cache/nbg-ai-hub/snapshot",
-  "repoUrl": "https://github.com/556LowCodeNoCode/NbgAiHub.git"
+  "repoUrl": "https://github.com/556LowCodeNoCode/nbg-ai-hub.git"
 }

@@ -2,7 +2,7 @@
 /**
  * Postbuild base-path rewrite for GitHub Pages.
  *
- * Astro's `base: '/NbgAiHub'` config prefixes asset imports, sitemap URLs,
+ * Astro's `base: '/nbg-ai-hub'` config prefixes asset imports, sitemap URLs,
  * and `import.meta.env.BASE_URL` — but it does NOT rewrite hardcoded
  * `<a href="/glossary/">` in .astro JSX or `(/glossary/#cli)` links inside
  * authored markdown. This script walks `dist/` after the build and prepends
@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // Mirrors astro.config.mjs — both read `PUBLIC_BASE`. Unset (local build) =
-// no rewrite; the Pages workflow sets `PUBLIC_BASE=/NbgAiHub` so deployed
+// no rewrite; the Pages workflow sets `PUBLIC_BASE=/nbg-ai-hub` so deployed
 // HTML gets the prefix.
 const BASE = process.env.PUBLIC_BASE;
 if (!BASE) {
@@ -33,7 +33,7 @@ if (!BASE) {
 // here. Skip this and the deployed site will 404 on any `<a href="/xxx/">`
 // link to it from the topnav, sidebar, or other authored content.
 // Symptom: local build works, production deploy 404s at
-// `https://556lowcodenocode.github.io/<route>/` (missing /NbgAiHub/ prefix).
+// `https://556lowcodenocode.github.io/<route>/` (missing /nbg-ai-hub/ prefix).
 const ROUTES = [
   'glossary',
   'skills',

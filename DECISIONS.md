@@ -1047,3 +1047,15 @@ Three rounds of prompt tightening across 2026-05-18 are captured here as the set
 **Why:** Round-2 had moved the time chip to the footer to dodge the pin collision, but the head row read empty at rest with just the eyebrow. Flush-right time + slide-on-hover gives a balanced rest layout AND clean hover affordance — best of both.
 
 **References:** `site/src/pages/use-cases/index.astro` (head row markup + `.usecase-card__head` / `.usecase-card__cta` CSS).
+
+## 2026-10-13 — Repo renamed to `nbg-ai-hub`; base path and URLs follow
+
+**Trigger:** the GitHub repo was renamed `NbgAiHub` → `nbg-ai-hub`; Pages moved to `/nbg-ai-hub/`, the old URL 404s and the live site loaded with every CSS/JS asset 404ing.
+
+- `PUBLIC_BASE` in `deploy-pages.yml` set to `/nbg-ai-hub`; code comments, `plugin/config.json` (`productionUrl`, `repoUrl`), `about.astro` repo link and live docs repointed.
+- Product name stays **NbgAiHub**; only the repo slug and URL changed. `/plugin marketplace add 556LowCodeNoCode/NbgAiHub` keeps working through GitHub's rename redirect.
+- History in DECISIONS and `docs/archive/` left untouched.
+
+**Why:** the base path is baked into the build, so a rename silently breaks the deployed site.
+**References:** Issues #31 (bridge webhook broken by the same rename).
+

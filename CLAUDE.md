@@ -2,7 +2,7 @@
 
 A curated Claude Code knowledge hub for bank colleagues, framed around *"what I wish I knew a year ago."* Skills catalog, tips & tricks, curated news, onboarding journeys, glossary — accessible both as a web UI (host TBD) and as a `/hub-*` skill inside Claude Code.
 
-**Repo:** `github.com/556LowCodeNoCode/NbgAiHub` (**public**, 556LowCodeNoCode org).
+**Repo:** `github.com/556LowCodeNoCode/nbg-ai-hub` (**public**, 556LowCodeNoCode org).
 **Constraint:** repo lives on GitHub.com under the 556LowCodeNoCode org (not on bank-managed infrastructure) — bank-confidential content should still go through compliance review before being stored here.
 
 ## Project state files
@@ -126,7 +126,7 @@ These four files (`SCOPE.md`, `DECISIONS.md`, `Issues - Pending Items.md`, `CLAU
 
 ## Naming
 
-Final name: **NbgAiHub**. Repo: `github.com/556LowCodeNoCode/NbgAiHub`.
+Final name: **NbgAiHub**. Repo: `github.com/556LowCodeNoCode/nbg-ai-hub`.
 
 ## Ports
 
@@ -145,7 +145,7 @@ Per docs/archive/design/project-design.md §S.13 — the UI redesign that landed
 
 ## Starlight cascade gotcha — read before styling any prose page
 
-Starlight (and `agentnews-layout.css`) ship CSS **unlayered** — their rules beat our `@layer nbg.components` rules in production, even though they "win" locally because Vite orders CSS differently in dev. Symptom: visual regressions appear only on the deployed Pages site (https://556lowcodenocode.github.io/NbgAiHub/). Default posture for new components: `!important` on every layout/spacing/typography property that must win, avoid the `.section` and `.wrap` class names (already claimed by agentnews with `!important` rules baked in). Full incident log + fix pattern: `docs/reference/starlight-cascade-gotcha.md`.
+Starlight (and `agentnews-layout.css`) ship CSS **unlayered** — their rules beat our `@layer nbg.components` rules in production, even though they "win" locally because Vite orders CSS differently in dev. Symptom: visual regressions appear only on the deployed Pages site (https://556lowcodenocode.github.io/nbg-ai-hub/). Default posture for new components: `!important` on every layout/spacing/typography property that must win, avoid the `.section` and `.wrap` class names (already claimed by agentnews with `!important` rules baked in). Full incident log + fix pattern: `docs/reference/starlight-cascade-gotcha.md`.
 
 ## Key-combo tooltips (no shortcuts page — by design)
 

@@ -2,9 +2,9 @@
 
 A curated **Claude Code knowledge hub for bank colleagues**, framed around *"what I wish I knew a year ago."*
 
-**Live site:** <https://556lowcodenocode.github.io/NbgAiHub/>
+**Live site:** <https://556lowcodenocode.github.io/nbg-ai-hub/>
 
-> Forks publish at `https://<your-org>.github.io/NbgAiHub/` — the GitHub Pages workflow reads the org name from the deploy context, so a fork just needs Pages enabled (Settings → Pages → Source: *GitHub Actions*).
+> Forks publish at `https://<your-org>.github.io/nbg-ai-hub/` — the GitHub Pages workflow reads the org name from the deploy context, so a fork just needs Pages enabled (Settings → Pages → Source: *GitHub Actions*).
 
 ---
 
